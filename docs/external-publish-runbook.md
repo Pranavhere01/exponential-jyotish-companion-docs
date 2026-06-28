@@ -5,13 +5,11 @@ Date: 2026-06-29
 
 ## Current local state
 
-The local repository is committed on `main`.
+The local repository is committed on `main`. Use this command to see the latest local commits:
 
-Latest commits:
-
-- `12677d9 Add external publish runbook and verification scripts`
-- `996f407 Add Drive export package and completion audit`
-- `38b5221 Initialize Jyotish Companion docs base`
+```bash
+git log --oneline --max-count=5
+```
 
 ## Verify local artifacts
 

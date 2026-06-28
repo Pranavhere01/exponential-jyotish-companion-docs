@@ -27,6 +27,8 @@ This repository is the canonical documentation home from day 1. Google Drive, PD
 - [Google Drive export package](exports/google-drive/README.md)
 - [Context/versioning SOP](docs/sop/context-versioning-sop.md)
 - [Schema v0.2 base](db/schema_v0_2_base.sql)
+- [Prompt artifacts](prompts/README.md)
+- [Evaluation artifacts](evals/README.md)
 - [ADR 0001: Provider-neutral embeddings](docs/adr/0001-provider-neutral-embeddings.md)
 - [ADR 0002: Safe Jyotish knowledge retrieval](docs/adr/0002-safe-knowledge-rag.md)
 - [ADR 0003: Extension-ready analysis model](docs/adr/0003-extension-ready-analysis-model.md)

@@ -14,6 +14,8 @@ Evidence:
 - PRD v0.2 defines `R-MODEL-01` through `R-MODEL-07` in `docs/prd_jyotish_companion_v0_2.md`.
 - Schema includes `model_catalog`, `model_routes`, `model_eval_runs`, and `model_invocations` in `db/schema_v0_2_base.sql`.
 - ADR 0004 records the model-router decision in `docs/adr/0004-model-router-and-open-model-strategy.md`.
+- Versioned prompt artifacts exist under `prompts/`.
+- Versioned eval artifacts exist under `evals/`.
 
 ### 2. Move Manual memory questions to end-of-chat / CSAT
 
@@ -36,6 +38,7 @@ Evidence:
 - ADR 0005 records the two-layer approach: astrologer prompt plus evaluator.
 - Schema includes `prediction_evaluations` and delivery policy labels.
 - PM guide answers "Evaluator agent or system prompt?" with "Use both."
+- `prompts/astrologer_persona/v0.2.md` and `prompts/prediction_evaluator/v0.2.md` make this behavior version-controlled.
 
 ### 4. Keep knowledge reviewed but not positive-only
 
@@ -55,6 +58,7 @@ Evidence:
 
 - PRD v0.2 includes the open-source/open-weight Chinese model validation plan and candidate families: Qwen, DeepSeek, Kimi, GLM.
 - ADR 0004 records that these models are candidates behind the router, not a hard-coded product dependency.
+- `evals/rubrics/model_router_validation_v0.1.md` and `evals/fixtures/model_router_cases_v0.1.jsonl` seed the validation harness.
 
 ### 6. Make marriage matching an example of generic future extensibility
 
@@ -109,6 +113,7 @@ Evidence:
 - Local Drive-style export package exists under `exports/google-drive/Exponential/Astrology/Documents/`.
 - HTML export exists in `exports/google-drive/Exponential/Astrology/Documents/Html/`.
 - Text exports exist in `exports/google-drive/Exponential/Astrology/Documents/Text/`.
+- Prompt and eval artifacts have flattened text exports in the same `Text` package.
 
 Blocker:
 
