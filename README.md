@@ -22,6 +22,8 @@ This repository is the canonical documentation home from day 1. Google Drive, PD
 - [Way forward](docs/01-way-forward.md)
 - [PRD v0.2](docs/prd_jyotish_companion_v0_2.md)
 - [PM first-principles guide](docs/pm_first_principles_guide.html)
+- [Completion audit](docs/completion-audit.md)
+- [Google Drive export package](exports/google-drive/README.md)
 - [Context/versioning SOP](docs/sop/context-versioning-sop.md)
 - [Schema v0.2 base](db/schema_v0_2_base.sql)
 - [ADR 0001: Provider-neutral embeddings](docs/adr/0001-provider-neutral-embeddings.md)
