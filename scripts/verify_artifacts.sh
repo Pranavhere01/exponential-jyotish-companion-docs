@@ -25,8 +25,16 @@ test -f exports/google-drive/Exponential/Astrology/Documents/Text/version-manife
 test -f exports/google-drive/Exponential/Astrology/Documents/Text/schema_v0_2_base.sql
 test -f exports/google-drive/Exponential/Astrology/Documents/Text/schema-v0.3-change-spec.md
 test -f exports/google-drive/Exponential/Astrology/Documents/Text/schema-v0.3-discovery-and-plan.md
+test -f exports/google-drive/Exponential/Astrology/Documents/Text/completion-audit.md
+test -f exports/google-drive/Exponential/Astrology/Documents/Text/github-setup.md
+test -f exports/google-drive/Exponential/Astrology/Documents/Text/external-publish-runbook.md
 test -f exports/google-drive/Exponential/Astrology/Documents/Text/prompts_astrologer_persona_v0_2.md
 test -f exports/google-drive/Exponential/Astrology/Documents/Text/evals_model_router_cases_v0_1.jsonl
+
+cmp -s docs/version-manifest.md exports/google-drive/Exponential/Astrology/Documents/Text/version-manifest.md
+cmp -s docs/completion-audit.md exports/google-drive/Exponential/Astrology/Documents/Text/completion-audit.md
+cmp -s docs/schema-v0.3-change-spec.md exports/google-drive/Exponential/Astrology/Documents/Text/schema-v0.3-change-spec.md
+cmp -s docs/schema-v0.3-discovery-and-plan.md exports/google-drive/Exponential/Astrology/Documents/Text/schema-v0.3-discovery-and-plan.md
 
 python3 - <<'PY'
 import json
@@ -50,8 +58,10 @@ rg -n "model_router_validation|responsible_prediction" evals >/dev/null
 rg -n "Model Router|Provider-Neutral Embeddings|Responsible Prediction Delivery|Future Analyses" docs/system_design_jyotish_companion_v0_2.md >/dev/null
 rg -n "PRD|System Design|Schema Base|Astrologer Persona Prompt|Model Router Eval Rubric" docs/version-manifest.md >/dev/null
 rg -n "Schema v0.3 Change Spec|Schema v0.3 Discovery and Plan" docs/version-manifest.md >/dev/null
+rg -n "Completion Audit|GitHub Setup|External Publish Runbook" docs/version-manifest.md >/dev/null
 rg -n "async_tasks|Embedding lifecycle|Hybrid retrieval|Chart reproducibility" docs/schema-v0.3-change-spec.md >/dev/null
 rg -n "blocked for direct migration|memory_facts|text_embeddings|Draft PR description" docs/schema-v0.3-discovery-and-plan.md >/dev/null
+rg -n "schema v0.3|runnable application repo|feat/schema-v0.3" docs/completion-audit.md >/dev/null
 rg -n "scripts/verify_artifacts.sh" .github/workflows/verify-artifacts.yml >/dev/null
 
 echo "Artifacts verified."
