@@ -67,7 +67,10 @@ fi
 git push origin main:main
 git push -u origin dev:dev
 
-gh repo edit "$repo" --visibility private --default-branch main
+gh repo edit "$repo" \
+  --visibility private \
+  --accept-visibility-change-consequences \
+  --default-branch main
 
 if [[ -n "$collaborator" ]]; then
   gh api \
