@@ -45,7 +45,7 @@ Evidence:
 
 - ADR 0002 was revised from "safe chunks only" to "reviewed Jyotish knowledge retrieval."
 - PRD v0.2 defines `R-KNOW-01` through `R-KNOW-08`, including that approved/reviewed does not mean positive-only.
-- Schema replaces `approved_for_user_retrieval` with `reviewed_for_user_retrieval` and `delivery_policy`.
+- Schema replaces the old approval-only retrieval flag with `reviewed_for_user_retrieval` and `delivery_policy`.
 
 ### 5. Validate open-source Chinese model plan
 
@@ -120,4 +120,3 @@ Required external action:
 ## Current conclusion
 
 The local source-of-truth repo is ready and committed. The remaining unfinished pieces are external publishing tasks: GitHub remote/auth and Google Drive connector access.
-

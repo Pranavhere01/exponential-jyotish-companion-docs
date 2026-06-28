@@ -23,6 +23,7 @@ This repository is the canonical documentation home from day 1. Google Drive, PD
 - [PRD v0.2](docs/prd_jyotish_companion_v0_2.md)
 - [PM first-principles guide](docs/pm_first_principles_guide.html)
 - [Completion audit](docs/completion-audit.md)
+- [External publish runbook](docs/external-publish-runbook.md)
 - [Google Drive export package](exports/google-drive/README.md)
 - [Context/versioning SOP](docs/sop/context-versioning-sop.md)
 - [Schema v0.2 base](db/schema_v0_2_base.sql)
