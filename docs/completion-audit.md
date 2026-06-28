@@ -12,6 +12,7 @@ Status: complete locally.
 Evidence:
 
 - PRD v0.2 defines `R-MODEL-01` through `R-MODEL-07` in `docs/prd_jyotish_companion_v0_2.md`.
+- System Design v0.2 defines the model-router architecture in `docs/system_design_jyotish_companion_v0_2.md`.
 - Schema includes `model_catalog`, `model_routes`, `model_eval_runs`, and `model_invocations` in `db/schema_v0_2_base.sql`.
 - ADR 0004 records the model-router decision in `docs/adr/0004-model-router-and-open-model-strategy.md`.
 - Versioned prompt artifacts exist under `prompts/`.
@@ -24,6 +25,7 @@ Status: complete locally.
 Evidence:
 
 - PRD v0.2 defines end-of-chat memory review in `R-MEM-04` through `R-MEM-06`.
+- System Design v0.2 defines the Manual memory flow through `memory_candidates` and CSAT/session review.
 - Schema includes `memory_candidates`.
 - ADR 0006 records end-of-chat memory review.
 - PM guide explains the flow in the Manual memory section.
@@ -35,6 +37,7 @@ Status: complete locally.
 Evidence:
 
 - PRD v0.2 defines `R-PRED-01` through `R-PRED-09`.
+- System Design v0.2 defines the prompt plus evaluator prediction-delivery path.
 - ADR 0005 records the two-layer approach: astrologer prompt plus evaluator.
 - Schema includes `prediction_evaluations` and delivery policy labels.
 - PM guide answers "Evaluator agent or system prompt?" with "Use both."
@@ -47,6 +50,7 @@ Status: complete locally.
 Evidence:
 
 - ADR 0002 was revised from "safe chunks only" to "reviewed Jyotish knowledge retrieval."
+- System Design v0.2 defines reviewed/labeled Jyotish retrieval and `delivery_policy`.
 - PRD v0.2 defines `R-KNOW-01` through `R-KNOW-08`, including that approved/reviewed does not mean positive-only.
 - Schema replaces the old approval-only retrieval flag with `reviewed_for_user_retrieval` and `delivery_policy`.
 
@@ -67,6 +71,7 @@ Status: complete locally.
 Evidence:
 
 - PRD v0.2 includes `R-ANALYSIS-*` and `R-MATCH-*`.
+- System Design v0.2 defines the generic `analysis_types` / `analysis_runs` / `analysis_run_subjects` architecture.
 - Schema uses `analysis_types`, `analysis_runs`, and `analysis_run_subjects`.
 - ADR 0003 records the extension-ready analysis model.
 
@@ -77,6 +82,7 @@ Status: complete locally.
 Evidence:
 
 - `docs/prd_jyotish_companion_v0_2.md` is the enhanced PRD source.
+- `docs/system_design_jyotish_companion_v0_2.md` is the companion system-design source for the same decisions.
 - `exports/google-drive/Exponential/Astrology/Documents/Text/prd_jyotish_companion_v0_2.md` is the Drive-ready text export.
 
 ### 8. Set up on GitHub

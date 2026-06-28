@@ -21,6 +21,7 @@ This repository is the canonical documentation home from day 1. Google Drive, PD
 
 - [Way forward](docs/01-way-forward.md)
 - [PRD v0.2](docs/prd_jyotish_companion_v0_2.md)
+- [System Design v0.2](docs/system_design_jyotish_companion_v0_2.md)
 - [PM first-principles guide](docs/pm_first_principles_guide.html)
 - [Completion audit](docs/completion-audit.md)
 - [External publish runbook](docs/external-publish-runbook.md)

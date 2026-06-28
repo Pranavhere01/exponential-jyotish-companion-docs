@@ -26,6 +26,7 @@ HTML:
 Text:
 
 - `Exponential/Astrology/Documents/Text/prd_jyotish_companion_v0_2.md`
+- `Exponential/Astrology/Documents/Text/system_design_jyotish_companion_v0_2.md`
 - `Exponential/Astrology/Documents/Text/01-way-forward.md`
 - `Exponential/Astrology/Documents/Text/context-versioning-sop.md`
 - `Exponential/Astrology/Documents/Text/schema_v0_2_base.sql`
