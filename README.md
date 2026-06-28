@@ -27,6 +27,7 @@ This repository is the canonical documentation home from day 1. Google Drive, PD
 - [External publish runbook](docs/external-publish-runbook.md)
 - [Google Drive export package](exports/google-drive/README.md)
 - [Context/versioning SOP](docs/sop/context-versioning-sop.md)
+- [Version manifest](docs/version-manifest.md)
 - [Schema v0.2 base](db/schema_v0_2_base.sql)
 - [Prompt artifacts](prompts/README.md)
 - [Evaluation artifacts](evals/README.md)

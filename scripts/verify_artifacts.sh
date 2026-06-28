@@ -8,6 +8,8 @@ test -f docs/prd_jyotish_companion_v0_2.md
 test -f docs/system_design_jyotish_companion_v0_2.md
 test -f db/schema_v0_2_base.sql
 test -f docs/completion-audit.md
+test -f docs/version-manifest.md
+test -f .github/workflows/verify-artifacts.yml
 test -f prompts/astrologer_persona/v0.2.md
 test -f prompts/profile_synthesizer/v0.2.md
 test -f prompts/memory_extractor/v0.2.md
@@ -17,6 +19,7 @@ test -f evals/rubrics/responsible_prediction_v0.1.md
 test -f evals/fixtures/model_router_cases_v0.1.jsonl
 test -f exports/google-drive/Exponential/Astrology/Documents/Text/prd_jyotish_companion_v0_2.md
 test -f exports/google-drive/Exponential/Astrology/Documents/Text/system_design_jyotish_companion_v0_2.md
+test -f exports/google-drive/Exponential/Astrology/Documents/Text/version-manifest.md
 test -f exports/google-drive/Exponential/Astrology/Documents/Text/schema_v0_2_base.sql
 test -f exports/google-drive/Exponential/Astrology/Documents/Text/prompts_astrologer_persona_v0_2.md
 test -f exports/google-drive/Exponential/Astrology/Documents/Text/evals_model_router_cases_v0_1.jsonl
@@ -41,5 +44,7 @@ rg -n "model_routes|memory_candidates|prediction_evaluations|delivery_policy" db
 rg -n "prompt_key|prompt_version|model_route" prompts >/dev/null
 rg -n "model_router_validation|responsible_prediction" evals >/dev/null
 rg -n "Model Router|Provider-Neutral Embeddings|Responsible Prediction Delivery|Future Analyses" docs/system_design_jyotish_companion_v0_2.md >/dev/null
+rg -n "PRD|System Design|Schema Base|Astrologer Persona Prompt|Model Router Eval Rubric" docs/version-manifest.md >/dev/null
+rg -n "scripts/verify_artifacts.sh" .github/workflows/verify-artifacts.yml >/dev/null
 
 echo "Artifacts verified."

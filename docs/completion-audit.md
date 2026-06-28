@@ -93,8 +93,10 @@ Evidence:
 
 - Repository has an initial commit: `38b5221 Initialize Jyotish Companion docs base`.
 - `.github/pull_request_template.md` exists.
+- `.github/workflows/verify-artifacts.yml` exists and runs `scripts/verify_artifacts.sh`.
 - `.gitignore` exists.
 - `docs/github-setup.md` documents the publish commands.
+- `docs/version-manifest.md` records current source and export artifact versions.
 
 Blocker:
 

@@ -29,6 +29,7 @@ Text:
 - `Exponential/Astrology/Documents/Text/system_design_jyotish_companion_v0_2.md`
 - `Exponential/Astrology/Documents/Text/01-way-forward.md`
 - `Exponential/Astrology/Documents/Text/context-versioning-sop.md`
+- `Exponential/Astrology/Documents/Text/version-manifest.md`
 - `Exponential/Astrology/Documents/Text/schema_v0_2_base.sql`
 - `Exponential/Astrology/Documents/Text/prompts_README.md`
 - `Exponential/Astrology/Documents/Text/prompts_astrologer_persona_v0_2.md`

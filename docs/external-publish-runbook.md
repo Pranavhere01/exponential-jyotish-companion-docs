@@ -17,6 +17,8 @@ git log --oneline --max-count=5
 scripts/verify_artifacts.sh
 ```
 
+After the repository is pushed, GitHub Actions will run the same check through `.github/workflows/verify-artifacts.yml`.
+
 ## Publish to GitHub
 
 The current blocker is GitHub auth: `gh auth status` reports an invalid token for `Pranavhere01`.
