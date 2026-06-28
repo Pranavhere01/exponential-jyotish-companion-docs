@@ -29,6 +29,8 @@ This repository is the canonical documentation home from day 1. Google Drive, PD
 - [Context/versioning SOP](docs/sop/context-versioning-sop.md)
 - [Version manifest](docs/version-manifest.md)
 - [Schema v0.2 base](db/schema_v0_2_base.sql)
+- [Schema v0.3 change spec](docs/schema-v0.3-change-spec.md)
+- [Schema v0.3 discovery and plan](docs/schema-v0.3-discovery-and-plan.md)
 - [Prompt artifacts](prompts/README.md)
 - [Evaluation artifacts](evals/README.md)
 - [ADR 0001: Provider-neutral embeddings](docs/adr/0001-provider-neutral-embeddings.md)

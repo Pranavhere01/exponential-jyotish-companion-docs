@@ -14,6 +14,8 @@ Update it whenever a durable document, prompt, schema, eval, or export version c
 | System Design | v0.2 | `docs/system_design_jyotish_companion_v0_2.md` | `exports/google-drive/Exponential/Astrology/Documents/Text/system_design_jyotish_companion_v0_2.md` |
 | PM First-Principles Guide | v0.2 | `docs/pm_first_principles_guide.html` | `exports/google-drive/Exponential/Astrology/Documents/Html/pm_first_principles_guide.html` |
 | Schema Base | v0.2 | `db/schema_v0_2_base.sql` | `exports/google-drive/Exponential/Astrology/Documents/Text/schema_v0_2_base.sql` |
+| Schema v0.3 Change Spec | v0.1 | `docs/schema-v0.3-change-spec.md` | `exports/google-drive/Exponential/Astrology/Documents/Text/schema-v0.3-change-spec.md` |
+| Schema v0.3 Discovery and Plan | v0.1 | `docs/schema-v0.3-discovery-and-plan.md` | `exports/google-drive/Exponential/Astrology/Documents/Text/schema-v0.3-discovery-and-plan.md` |
 | Context SOP | v0.2 | `docs/sop/context-versioning-sop.md` | `exports/google-drive/Exponential/Astrology/Documents/Text/context-versioning-sop.md` |
 | Way Forward | v0.2 | `docs/01-way-forward.md` | `exports/google-drive/Exponential/Astrology/Documents/Text/01-way-forward.md` |
 | Astrologer Persona Prompt | v0.2 | `prompts/astrologer_persona/v0.2.md` | `exports/google-drive/Exponential/Astrology/Documents/Text/prompts_astrologer_persona_v0_2.md` |

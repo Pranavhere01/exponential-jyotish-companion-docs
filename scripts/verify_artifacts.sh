@@ -7,6 +7,8 @@ python3 -m html.parser exports/google-drive/Exponential/Astrology/Documents/Html
 test -f docs/prd_jyotish_companion_v0_2.md
 test -f docs/system_design_jyotish_companion_v0_2.md
 test -f db/schema_v0_2_base.sql
+test -f docs/schema-v0.3-change-spec.md
+test -f docs/schema-v0.3-discovery-and-plan.md
 test -f docs/completion-audit.md
 test -f docs/version-manifest.md
 test -f .github/workflows/verify-artifacts.yml
@@ -21,6 +23,8 @@ test -f exports/google-drive/Exponential/Astrology/Documents/Text/prd_jyotish_co
 test -f exports/google-drive/Exponential/Astrology/Documents/Text/system_design_jyotish_companion_v0_2.md
 test -f exports/google-drive/Exponential/Astrology/Documents/Text/version-manifest.md
 test -f exports/google-drive/Exponential/Astrology/Documents/Text/schema_v0_2_base.sql
+test -f exports/google-drive/Exponential/Astrology/Documents/Text/schema-v0.3-change-spec.md
+test -f exports/google-drive/Exponential/Astrology/Documents/Text/schema-v0.3-discovery-and-plan.md
 test -f exports/google-drive/Exponential/Astrology/Documents/Text/prompts_astrologer_persona_v0_2.md
 test -f exports/google-drive/Exponential/Astrology/Documents/Text/evals_model_router_cases_v0_1.jsonl
 
@@ -45,6 +49,9 @@ rg -n "prompt_key|prompt_version|model_route" prompts >/dev/null
 rg -n "model_router_validation|responsible_prediction" evals >/dev/null
 rg -n "Model Router|Provider-Neutral Embeddings|Responsible Prediction Delivery|Future Analyses" docs/system_design_jyotish_companion_v0_2.md >/dev/null
 rg -n "PRD|System Design|Schema Base|Astrologer Persona Prompt|Model Router Eval Rubric" docs/version-manifest.md >/dev/null
+rg -n "Schema v0.3 Change Spec|Schema v0.3 Discovery and Plan" docs/version-manifest.md >/dev/null
+rg -n "async_tasks|Embedding lifecycle|Hybrid retrieval|Chart reproducibility" docs/schema-v0.3-change-spec.md >/dev/null
+rg -n "blocked for direct migration|memory_facts|text_embeddings|Draft PR description" docs/schema-v0.3-discovery-and-plan.md >/dev/null
 rg -n "scripts/verify_artifacts.sh" .github/workflows/verify-artifacts.yml >/dev/null
 
 echo "Artifacts verified."
