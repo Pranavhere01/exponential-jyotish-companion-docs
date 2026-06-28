@@ -9,6 +9,7 @@ The local repository is committed on `main`.
 
 Latest commits:
 
+- `12677d9 Add external publish runbook and verification scripts`
 - `996f407 Add Drive export package and completion audit`
 - `38b5221 Initialize Jyotish Companion docs base`
 
@@ -63,5 +64,12 @@ Upload after the connector can see the shared Drive folder:
 - `exports/google-drive/Exponential/Astrology/Documents/Html/pm_first_principles_guide.html` to `Html`
 - all files in `exports/google-drive/Exponential/Astrology/Documents/Text/` to `Text`
 
-Current Drive blocker: the connector cannot see the screenshot folder IDs and returns `404` for the `Exponential` folder ID.
+Current Drive blocker:
 
+- The connector cannot see the screenshot folder IDs.
+- `Exponential` folder ID `1WwsQmCiCqZxCctNEfqdnGwKJjtC2ChWf` returns `404`.
+- `Astrology` folder ID `1by8WT9dQ_jgxEd5irK5vy3A4fwYyZBzI` returns `404`.
+- `Documents` folder ID `1uLn5DvIVTMw2yWJ83xM8TEx_a68wqwwb` returns `400`.
+- Drive search for accessible folders named `Exponential`, `Astrology`, and `Documents` returned no matching folders.
+- The connector can see the individual doc `System Design & Technical Architecture — Personal AI Astrologer`, but its parent folder is not exposed.
+- The Google Doc URL from the objective resolves to `Fundamentals - ML and MLops`, so do not treat that URL as the Jyotish PRD without user confirmation.

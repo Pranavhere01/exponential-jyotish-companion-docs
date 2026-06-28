@@ -90,6 +90,7 @@ Blocker:
 
 - No GitHub remote is configured.
 - `gh auth status` reports the current GitHub token is invalid.
+- Current account shown by `gh auth status`: `Pranavhere01`.
 
 Required external action:
 
@@ -112,6 +113,9 @@ Evidence:
 Blocker:
 
 - The Google Drive connector cannot see the screenshot folder IDs from this session. Metadata/list calls for the visible folder IDs returned `404`, `400`, or empty listings.
+- Live re-check on 2026-06-29: Drive search for accessible folders named `Exponential`, `Astrology`, and `Documents` returned no matching folders.
+- The connector can see the individual Google Doc `System Design & Technical Architecture — Personal AI Astrologer`, but its parent IDs are not exposed.
+- The Google Doc URL in the objective resolves to `Fundamentals - ML and MLops`, not the Jyotish PRD. It should not be edited as the PRD without explicit confirmation.
 
 Required external action:
 
