@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Personal AI Astrologer — System Design &amp; Technical Architecture</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --night:#0D1023; --night-2:#141937; --night-3:#1E2547;
+  --paper:#ECEDF3; --card:#FFFFFF; --card-2:#F7F8FC;
+  --ink:#181C2E; --ink-soft:#494F69; --ink-faint:#878DA6;
+  --line:#DEDFEA; --line-2:#CFD1E0; --line-strong:#B7BAcc;
+  --line-night:#2B3260;
+  --gold:#C29333; --gold-ink:#9A7320; --gold-soft:#EBDCB0; --gold-glow:#D9B25E;
+  --amethyst:#6E54C8; --amethyst-ink:#5B43B4; --amethyst-soft:#D8CEF3;
+  --star:#F2E4B6;
+  --maxdoc:820px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:"Hanken Grotesk",system-ui,sans-serif;
+  font-size:16.5px; line-height:1.72; -webkit-font-smoothing:antialiased;
+  font-feature-settings:"ss01";
+}
+@media (prefers-reduced-motion: reduce){
+  html{scroll-behavior:auto}
+  *{animation:none!important;transition:none!important}
+}
+a{color:inherit}
+h1,h2,h3{font-family:"Fraunces",Georgia,serif;font-optical-sizing:auto;font-weight:600;line-height:1.12;margin:0}
+p{margin:0 0 1.05em}
+strong{font-weight:600;color:var(--ink)}
+em{font-style:italic}
+
+/* ---------- HERO ---------- */
+.hero{position:relative;overflow:hidden;background:var(--night);color:#EAEAF4;
+  padding:84px 32px 70px;border-bottom:1px solid var(--line-night)}
+.hero-bg{position:absolute;inset:0;pointer-events:none}
+.hero-glow{position:absolute;right:-12%;top:-30%;width:780px;height:780px;
+  background:radial-gradient(closest-side, rgba(194,147,51,.18), rgba(110,84,200,.06) 55%, transparent 72%);}
+.kundali{position:absolute;right:-90px;top:50%;transform:translateY(-50%);width:560px;height:560px;opacity:.16}
+.kundali line,.kundali polygon,.kundali rect{stroke:var(--gold-glow);fill:none;stroke-width:1}
+.hero-inner{position:relative;max-width:1160px;margin:0 auto}
+.eyebrow{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.34em;
+  text-transform:uppercase;color:var(--gold-glow);margin:0 0 22px}
+.hero h1{font-size:clamp(42px,7.4vw,78px);font-weight:600;letter-spacing:-.018em;color:#fff;max-width:14ch}
+.hero h1 .thin{font-weight:400;font-style:italic;color:#D8D6EC}
+.hero-sub{max-width:54ch;margin:24px 0 0;color:#B9BBD6;font-size:18px;line-height:1.62}
+.hero-meta{display:flex;flex-wrap:wrap;gap:10px 14px;margin-top:30px}
+.tag{font-family:"JetBrains Mono",monospace;font-size:11.5px;letter-spacing:.06em;
+  text-transform:uppercase;color:#C9CBE6;border:1px solid var(--line-night);
+  padding:6px 11px;border-radius:999px;background:rgba(255,255,255,.02)}
+.tag b{color:var(--gold-glow);font-weight:500}
+.legend{display:flex;flex-wrap:wrap;gap:18px;margin-top:34px;padding-top:24px;border-top:1px solid var(--line-night)}
+.legend .lg{display:flex;align-items:center;gap:9px;font-family:"JetBrains Mono",monospace;
+  font-size:11.5px;letter-spacing:.05em;text-transform:uppercase;color:#C4C6E0}
+.legend .lg b{color:#fff;font-weight:600}
+.dot{width:10px;height:10px;border-radius:50%;flex:none;display:inline-block}
+.dot.det{background:var(--gold)}
+.dot.llm{background:var(--amethyst)}
+.dot.mix{background:conic-gradient(var(--gold) 0 50%, var(--amethyst) 0 100%)}
+.dot.infra{background:var(--ink-faint)}
+
+/* ---------- SHELL / NAV ---------- */
+.shell{max-width:1160px;margin:0 auto;display:grid;grid-template-columns:228px minmax(0,1fr);gap:60px;padding:0 32px}
+.toc{position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;padding:54px 8px 40px;
+  scrollbar-width:thin}
+.toc::-webkit-scrollbar{width:6px}
+.toc::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:3px}
+.toc-h{font-family:"JetBrains Mono",monospace;font-size:10.5px;letter-spacing:.22em;
+  text-transform:uppercase;color:var(--ink-faint);margin:0 0 16px;padding-left:10px}
+.toc a{display:flex;gap:10px;align-items:baseline;text-decoration:none;color:var(--ink-soft);
+  font-size:13.5px;line-height:1.3;padding:6px 10px;border-radius:7px;border-left:2px solid transparent;
+  transition:color .15s,background .15s,border-color .15s}
+.toc a:hover{color:var(--ink);background:var(--card)}
+.toc a.active{color:var(--gold-ink);border-left-color:var(--gold);background:var(--card);font-weight:600}
+.toc a .n{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--ink-faint);flex:none;width:18px}
+.toc a.active .n{color:var(--gold-ink)}
+
+.doc{padding:64px 0 110px;max-width:var(--maxdoc);min-width:0}
+
+/* ---------- SECTIONS ---------- */
+.sec{padding:42px 0;border-top:1px solid var(--line);scroll-margin-top:24px}
+.sec:first-of-type{border-top:none;padding-top:8px}
+.sec-head{display:flex;align-items:baseline;gap:16px;margin-bottom:26px;flex-wrap:wrap}
+.sec-num{font-family:"JetBrains Mono",monospace;font-size:13px;font-weight:500;color:var(--gold-ink);
+  letter-spacing:.02em;padding-top:7px}
+.sec-title{font-size:30px;letter-spacing:-.012em;flex:1 1 auto;min-width:0}
+.sec-tag{font-family:"JetBrains Mono",monospace;font-size:11.5px;letter-spacing:.04em;
+  text-transform:lowercase;color:var(--ink-faint);font-style:italic}
+.sec-body :where(p,ul,ol){max-width:72ch}
+
+h3{font-size:18px;font-weight:600;letter-spacing:-.005em;margin:34px 0 12px;color:var(--ink)}
+.subnum{font-family:"JetBrains Mono",monospace;font-size:13px;color:var(--amethyst-ink);margin-right:8px;font-weight:500}
+
+/* lists */
+ul.clean{list-style:none;padding:0;margin:0 0 1.1em}
+ul.clean>li{position:relative;padding:0 0 0 22px;margin:0 0 .7em;line-height:1.62}
+ul.clean>li::before{content:"";position:absolute;left:2px;top:.62em;width:7px;height:7px;
+  border-radius:50%;background:var(--gold)}
+ul.clean ul{list-style:none;padding:0;margin:.45em 0 .2em}
+ul.clean ul>li{position:relative;padding:0 0 0 20px;margin:0 0 .4em;color:var(--ink-soft);font-size:15.5px}
+ul.clean ul>li::before{content:"";position:absolute;left:3px;top:.62em;width:5px;height:5px;
+  border-radius:1px;background:var(--line-strong)}
+
+/* capability pills */
+.pills{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 18px}
+.pill{font-size:13px;line-height:1.3;padding:7px 12px;border-radius:8px;background:var(--card);
+  border:1px solid var(--line);color:var(--ink-soft)}
+.pill b{color:var(--ink);font-weight:600}
+
+/* chips (LLM markers) */
+.chip{display:inline-flex;align-items:center;gap:7px;font-family:"JetBrains Mono",monospace;
+  font-size:10.5px;font-weight:500;letter-spacing:.05em;text-transform:uppercase;
+  padding:4px 9px;border-radius:999px;border:1px solid var(--line);color:var(--ink-soft);white-space:nowrap;background:var(--card)}
+.chip.det{border-color:var(--gold-soft);color:var(--gold-ink)}
+.chip.llm{border-color:var(--amethyst-soft);color:var(--amethyst-ink)}
+.chip.mix{border-color:var(--line-2)}
+
+/* callouts */
+.callout{position:relative;margin:24px 0;padding:22px 24px 22px 26px;background:var(--card);
+  border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:0 12px 12px 0}
+.callout .ck{font-family:"JetBrains Mono",monospace;font-size:10.5px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--gold-ink);margin:0 0 9px;display:block}
+.callout p:last-child{margin-bottom:0}
+.callout.amth{border-left-color:var(--amethyst)}
+.callout.amth .ck{color:var(--amethyst-ink)}
+
+.goldrule{margin:30px 0;padding:30px 32px;border-radius:16px;color:#EDEDF6;
+  background:linear-gradient(135deg,var(--night) 0%, var(--night-2) 100%);
+  border:1px solid var(--line-night);position:relative;overflow:hidden}
+.goldrule::before{content:"";position:absolute;right:-40px;top:-40px;width:240px;height:240px;
+  background:radial-gradient(closest-side,rgba(194,147,51,.22),transparent 70%)}
+.goldrule .ck{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--gold-glow);position:relative}
+.goldrule h3{color:#fff;font-size:24px;margin:12px 0 0;position:relative;font-weight:500;line-height:1.28}
+.goldrule p{position:relative;color:#C5C7E0;margin:14px 0 0;max-width:64ch}
+.goldrule em{color:var(--gold-glow);font-style:italic}
+
+/* code blocks */
+.code{margin:22px 0;border-radius:12px;overflow:hidden;border:1px solid var(--line-night);
+  background:var(--night);box-shadow:0 18px 40px -28px rgba(13,16,35,.6)}
+.code-bar{display:flex;align-items:center;gap:9px;padding:11px 16px;border-bottom:1px solid var(--line-night);
+  background:rgba(255,255,255,.018)}
+.code-bar .d{width:9px;height:9px;border-radius:50%;background:var(--gold)}
+.code-label{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.05em;
+  text-transform:uppercase;color:#9396B8}
+.code pre{margin:0;padding:18px 20px;overflow-x:auto;color:#CDD0EC}
+.code code{font-family:"JetBrains Mono",monospace;font-size:13px;line-height:1.62;white-space:pre}
+.code pre::-webkit-scrollbar{height:8px}
+.code pre::-webkit-scrollbar-thumb{background:#2c335f;border-radius:4px}
+
+/* tables */
+.tw{margin:24px 0;overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--card)}
+table{border-collapse:collapse;width:100%;min-width:540px}
+th,td{text-align:left;padding:13px 16px;border-bottom:1px solid var(--line);vertical-align:top;font-size:14.5px;line-height:1.5}
+th{font-family:"JetBrains Mono",monospace;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--ink-faint);font-weight:500;background:var(--card-2)}
+tr:last-child td{border-bottom:none}
+td.k{font-weight:600;color:var(--ink);white-space:nowrap}
+td.center{text-align:center;white-space:nowrap}
+.fig-cap,.tbl-cap{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.03em;
+  color:var(--ink-faint);margin:-8px 0 24px;padding-left:2px}
+
+/* ---------- DIAGRAMS ---------- */
+.figure{margin:26px 0}
+.diagram{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:26px 22px;
+  box-shadow:0 1px 0 rgba(0,0,0,.01)}
+.tier{display:flex;flex-wrap:wrap;justify-content:center;gap:12px}
+.tier.cols-3{align-items:stretch}
+.node{flex:1 1 220px;min-width:0;background:var(--card-2);border:1px solid var(--line);
+  border-radius:10px;border-left:3px solid var(--line-strong);padding:13px 15px}
+.node.det{border-left-color:var(--gold)}
+.node.llm{border-left-color:var(--amethyst)}
+.node.mix{border-left-color:transparent;background-image:linear-gradient(var(--card-2),var(--card-2)),linear-gradient(180deg,var(--gold),var(--amethyst));background-origin:border-box;background-clip:padding-box,border-box;border-left:3px solid transparent}
+.node.infra{border-left-color:var(--ink-faint)}
+.node.span{flex-basis:100%}
+.node-t{display:flex;align-items:center;gap:9px;font-weight:600;font-size:14.5px;color:var(--ink);margin-bottom:5px}
+.node-t .dot{width:8px;height:8px}
+.node-d{font-size:12.5px;line-height:1.5;color:var(--ink-soft)}
+.node-d .mono{font-family:"JetBrains Mono",monospace;font-size:11.5px;color:var(--ink-faint)}
+.sub-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.sub{font-family:"JetBrains Mono",monospace;font-size:11px;padding:4px 8px;border-radius:6px;
+  background:var(--card);border:1px solid var(--line);color:var(--ink-soft)}
+
+.flow{display:flex;flex-direction:column;align-items:center;gap:6px;margin:6px 0}
+.flow-line{width:2px;height:18px;background:var(--line-strong)}
+.flow-lab{font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--ink-faint);background:var(--card);padding:2px 8px;border:1px solid var(--line);border-radius:999px}
+.arrow{width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;
+  border-top:6px solid var(--line-strong)}
+.bracket{font-family:"JetBrains Mono",monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink-faint);text-align:center;margin:14px 0 8px}
+
+/* layered stack (prompt assembly / intelligence) */
+.stack{display:flex;flex-direction:column;gap:9px}
+.grp-lab{display:flex;align-items:center;gap:10px;font-family:"JetBrains Mono",monospace;font-size:10.5px;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);margin:6px 0 2px}
+.grp-lab.cache{color:var(--gold-ink)} .grp-lab.dyn{color:var(--amethyst-ink)}
+.grp-lab .ln{flex:1;height:1px;background:var(--line)}
+.layer{display:flex;gap:14px;align-items:flex-start;background:var(--card-2);border:1px solid var(--line);
+  border-radius:9px;padding:12px 15px}
+.layer.cache{border-left:3px solid var(--gold)} .layer.dyn{border-left:3px solid var(--amethyst)}
+.layer .lx{font-family:"JetBrains Mono",monospace;font-size:12px;font-weight:500;color:var(--ink-faint);flex:none;width:22px;text-align:center}
+.layer.cache .lx{color:var(--gold-ink)} .layer.dyn .lx{color:var(--amethyst-ink)}
+.layer-b{min-width:0}
+.layer-t{font-weight:600;font-size:14px;color:var(--ink)}
+.layer-d{font-size:12.5px;color:var(--ink-soft);margin-top:2px;line-height:1.5}
+
+/* L-ladder */
+.ladder{display:flex;flex-direction:column;gap:0}
+.rung{display:grid;grid-template-columns:54px 1fr auto;gap:16px;align-items:center;
+  padding:15px 4px;border-bottom:1px solid var(--line)}
+.rung:last-child{border-bottom:none}
+.rung .lvl{font-family:"Fraunces",serif;font-weight:600;font-size:22px;color:var(--amethyst-ink)}
+.rung.det .lvl{color:var(--gold-ink)}
+.rung-b .rt{font-weight:600;font-size:15px}
+.rung-b .rt .nm{color:var(--ink-faint);font-weight:500;font-family:"JetBrains Mono",monospace;font-size:11px;
+  letter-spacing:.05em;text-transform:uppercase;margin-left:0;display:block;margin-bottom:2px}
+.rung-b .rd{font-size:13px;color:var(--ink-soft);margin-top:3px;line-height:1.5}
+.rung .when{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--ink-faint);text-align:right;max-width:150px}
+
+/* turn flow numbered */
+.turn{counter-reset:step;display:flex;flex-direction:column;gap:0;position:relative}
+.step{display:grid;grid-template-columns:38px 1fr;gap:16px;padding:10px 0;position:relative}
+.step::before{counter-increment:step;content:counter(step);font-family:"JetBrains Mono",monospace;
+  font-size:12px;font-weight:500;color:var(--gold-ink);width:30px;height:30px;border-radius:50%;
+  border:1px solid var(--gold-soft);background:var(--card);display:flex;align-items:center;justify-content:center;z-index:1}
+.step:not(:last-child)::after{content:"";position:absolute;left:14px;top:38px;bottom:-2px;width:2px;background:var(--line)}
+.step-b{padding-top:4px}
+.step-t{font-weight:600;font-size:14.5px}
+.step-d{font-size:13px;color:var(--ink-soft);margin-top:2px;line-height:1.55}
+.step-d code{font-family:"JetBrains Mono",monospace;font-size:11.5px;background:var(--card-2);
+  padding:1px 5px;border-radius:4px;border:1px solid var(--line);color:var(--ink)}
+.step.safe::before{color:var(--amethyst-ink);border-color:var(--amethyst-soft)}
+
+/* phases roadmap */
+.phases{display:flex;flex-direction:column;gap:14px}
+.phase{display:grid;grid-template-columns:96px 1fr;gap:20px;align-items:start;
+  background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 20px}
+.phase .pp{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--gold-ink)}
+.phase .pn{font-family:"Fraunces",serif;font-size:30px;font-weight:600;color:var(--ink);line-height:1}
+.phase .pt{font-weight:600;font-size:15.5px;margin-bottom:5px}
+.phase .pd{font-size:13.5px;color:var(--ink-soft);line-height:1.55}
+.phase .pd .l{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--amethyst-ink)}
+
+/* voice pipeline */
+.pipe{display:flex;flex-wrap:wrap;align-items:stretch;gap:10px;justify-content:center}
+.pstage{flex:1 1 130px;background:var(--card-2);border:1px solid var(--line);border-radius:10px;
+  padding:14px;text-align:center;min-width:0}
+.pstage.brain{border:1px solid var(--amethyst-soft);background:linear-gradient(180deg,#fff,#FBFAFF)}
+.pstage .pt2{font-weight:600;font-size:13.5px}
+.pstage .ps2{font-family:"JetBrains Mono",monospace;font-size:10.5px;color:var(--ink-faint);margin-top:3px;text-transform:uppercase;letter-spacing:.04em}
+.pchev{display:flex;align-items:center;color:var(--line-strong);font-size:18px}
+
+/* summary */
+.summary{background:linear-gradient(135deg,var(--night),var(--night-2));color:#EAEAF6;border-radius:18px;
+  padding:38px 36px;position:relative;overflow:hidden;border:1px solid var(--line-night)}
+.summary::after{content:"";position:absolute;left:-60px;bottom:-60px;width:300px;height:300px;
+  background:radial-gradient(closest-side,rgba(110,84,200,.22),transparent 70%)}
+.summary p{position:relative;color:#C8CAE3;max-width:none;font-size:16.5px;line-height:1.78}
+.summary b{color:#fff}
+.summary .kick{position:relative;font-family:"Fraunces",serif;font-style:italic;font-size:22px;color:var(--gold-glow);
+  margin-top:20px;line-height:1.3}
+
+/* footer */
+.foot{border-top:1px solid var(--line);margin-top:40px;padding:40px 0 0;color:var(--ink-faint);
+  font-size:13px;display:flex;flex-wrap:wrap;gap:8px 18px;justify-content:space-between;font-family:"JetBrains Mono",monospace}
+
+/* mobile nav */
+.navbtn{display:none}
+@media (max-width:1000px){
+  .shell{grid-template-columns:1fr;gap:0;padding:0 22px}
+  .toc{position:fixed;inset:0 0 0 auto;width:min(300px,82vw);height:100vh;background:var(--card);
+    border-left:1px solid var(--line);z-index:60;transform:translateX(100%);transition:transform .25s ease;
+    padding:72px 14px 30px;box-shadow:-20px 0 50px -30px rgba(0,0,0,.4)}
+  .toc.open{transform:translateX(0)}
+  .doc{padding:36px 0 80px;max-width:none}
+  .navbtn{display:inline-flex;position:fixed;top:14px;right:14px;z-index:70;align-items:center;gap:8px;
+    background:var(--night);color:#fff;border:none;border-radius:999px;padding:10px 16px;cursor:pointer;
+    font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+    box-shadow:0 10px 30px -12px rgba(13,16,35,.6)}
+  .scrim{position:fixed;inset:0;background:rgba(13,16,35,.45);z-index:55;opacity:0;pointer-events:none;transition:opacity .25s}
+  .scrim.open{opacity:1;pointer-events:auto}
+  .hero{padding:64px 22px 52px}
+  .sec-title{font-size:25px}
+  .rung{grid-template-columns:44px 1fr;gap:12px}
+  .rung .when{display:none}
+  .phase{grid-template-columns:1fr;gap:6px}
+}
+@media (max-width:560px){
+  body{font-size:16px}
+  .hero h1{font-size:38px}
+  .legend{gap:12px}
+  .step-d code{word-break:break-word}
+}
+@media print{
+  .toc,.navbtn,.scrim{display:none!important}
+  .shell{grid-template-columns:1fr}
+  .hero,.goldrule,.summary{color:#000;background:#fff!important;border:1px solid #ccc}
+  .code{background:#f4f4f4} .code code,.code pre{color:#111}
+}
+</style>
+</head>
+<body>
+
+<button class="navbtn" id="navbtn" aria-label="Toggle contents"><span class="dot det"></span>Contents</button>
+<div class="scrim" id="scrim"></div>
+
+<!-- ===================== HERO ===================== -->
+<header class="hero">
+  <div class="hero-bg" aria-hidden="true">
+    <div class="hero-glow"></div>
+    <svg class="kundali" viewBox="0 0 200 200" preserveAspectRatio="xMidYMid meet">
+      <rect x="1" y="1" width="198" height="198"/>
+      <line x1="1" y1="1" x2="199" y2="199"/>
+      <line x1="199" y1="1" x2="1" y2="199"/>
+      <polygon points="100,1 199,100 100,199 1,100"/>
+      <circle cx="40" cy="30" r="1.4" fill="var(--star)" stroke="none"/>
+      <circle cx="165" cy="48" r="1.1" fill="var(--star)" stroke="none"/>
+      <circle cx="150" cy="150" r="1.5" fill="var(--star)" stroke="none"/>
+      <circle cx="30" cy="160" r="1.1" fill="var(--star)" stroke="none"/>
+      <circle cx="100" cy="58" r="1.2" fill="var(--star)" stroke="none"/>
+    </svg>
+  </div>
+  <div class="hero-inner">
+    <p class="eyebrow">System Design &amp; Technical Architecture</p>
+    <h1>Personal <span class="thin">AI</span> Astrologer</h1>
+    <p class="hero-sub">This is the <strong style="color:#fff">“how.”</strong> It covers the whole system, the intelligence layers, every agent and sub-agent, the concrete system prompts, the data contracts, and the LLMOps, security, and scaling practices — written so a novice can follow the moving parts and an engineer can build from it.</p>
+    <div class="hero-meta">
+      <span class="tag">Status <b>Draft v0.1</b></span>
+      <span class="tag">Companion <b>01_PRD_Personal_AI_Astrologer.md</b></span>
+      <span class="tag">The “what / why”</span>
+    </div>
+    <div class="legend" aria-label="Colour legend">
+      <span class="lg"><span class="dot det"></span><b>Deterministic</b>&nbsp;— math, ground truth</span>
+      <span class="lg"><span class="dot llm"></span><b>Generative</b>&nbsp;— the LLM</span>
+      <span class="lg"><span class="dot mix"></span><b>Orchestrated</b>&nbsp;— LLM + tools</span>
+    </div>
+  </div>
+</header>
+
+<div class="shell">
+  <!-- ===================== TOC ===================== -->
+  <nav class="toc" id="toc" aria-label="Table of contents">
+    <p class="toc-h">Contents</p>
+    <a href="#s0"><span class="n">00</span><span>The single most important idea</span></a>
+    <a href="#s1"><span class="n">01</span><span>High-level architecture</span></a>
+    <a href="#s2"><span class="n">02</span><span>Component responsibilities</span></a>
+    <a href="#s3"><span class="n">03</span><span>The Astrology Engine</span></a>
+    <a href="#s4"><span class="n">04</span><span>The Chart object</span></a>
+    <a href="#s5"><span class="n">05</span><span>Chart rendering</span></a>
+    <a href="#s6"><span class="n">06</span><span>The intelligence layers</span></a>
+    <a href="#s7"><span class="n">07</span><span>Personalization pipeline</span></a>
+    <a href="#s8"><span class="n">08</span><span>Agents &amp; sub-agents</span></a>
+    <a href="#s9"><span class="n">09</span><span>Example system prompts</span></a>
+    <a href="#s10"><span class="n">10</span><span>Memory system design</span></a>
+    <a href="#s11"><span class="n">11</span><span>Safety &amp; guardrails</span></a>
+    <a href="#s12"><span class="n">12</span><span>LLM Gateway &amp; models</span></a>
+    <a href="#s13"><span class="n">13</span><span>LLMOps &amp; quality</span></a>
+    <a href="#s14"><span class="n">14</span><span>Security &amp; privacy</span></a>
+    <a href="#s15"><span class="n">15</span><span>Scalability &amp; reliability</span></a>
+    <a href="#s16"><span class="n">16</span><span>Recommended tech stack</span></a>
+    <a href="#s17"><span class="n">17</span><span>Phased build plan</span></a>
+    <a href="#s18"><span class="n">18</span><span>Voice agent (future)</span></a>
+    <a href="#s19"><span class="n">19</span><span>Summary</span></a>
+  </nav>
+
+  <!-- ===================== DOC ===================== -->
+  <main class="doc">
+
+  <!-- 0 -->
+  <section class="sec" id="s0">
+    <div class="sec-head"><span class="sec-num">00</span><h2 class="sec-title">The single most important idea</h2><span class="sec-tag">read this first</span></div>
+    <div class="sec-body">
+      <p>There are <strong>two kinds of intelligence</strong> in this product, and keeping them separate is what makes it work.</p>
+
+      <div class="tier cols-3" style="margin:20px 0 6px">
+        <div class="node det">
+          <div class="node-t"><span class="dot det"></span>Deterministic intelligence <span class="mono" style="margin-left:auto">math</span></div>
+          <div class="node-d">Computing the chart, the planetary positions, the dashas, the divisional charts, the doshas — this is <em>solved astronomy + classical rules</em>. It must be <strong>exact and never hallucinated</strong>. We compute it with code, store it as structured data, and treat it as <strong>ground truth</strong>.</div>
+        </div>
+        <div class="node llm">
+          <div class="node-t"><span class="dot llm"></span>Generative intelligence <span class="mono" style="margin-left:auto">the LLM</span></div>
+          <div class="node-d">Interpreting that chart in conversation, remembering the user, giving empathetic guidance. This is where the LLM lives — and the only place it should.</div>
+        </div>
+      </div>
+
+      <div class="goldrule">
+        <span class="ck">The golden rule</span>
+        <h3>The LLM reasons <em>from</em> the computed facts; it never invents them.</h3>
+        <p>When the astrologer says “your Jupiter is exalted in your 1st house,” that fact came from the deterministic engine and was handed to the model — the model did not guess it. This is the difference between a trustworthy product and a confident-sounding random-fact generator.</p>
+      </div>
+
+      <div class="callout amth">
+        <span class="ck">Corollary</span>
+        <p><strong>Don't use an LLM where math or a lookup will do.</strong> Computing the current dasha is arithmetic, not a prompt. Fetching the D9 chart is a database read, not a prompt. We use LLMs only for synthesis, conversation, and extraction.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 1 -->
+  <section class="sec" id="s1">
+    <div class="sec-head"><span class="sec-num">01</span><h2 class="sec-title">High-level architecture</h2></div>
+    <div class="sec-body">
+      <div class="figure">
+        <div class="diagram">
+          <div class="tier"><div class="node infra span"><div class="node-t">Clients</div><div class="node-d">Web (browser) · Android app · iOS app — sharing one design system and one chart renderer.</div></div></div>
+          <div class="flow"><span class="flow-lab">HTTPS / WSS · streaming</span><div class="arrow"></div></div>
+          <div class="tier"><div class="node infra span"><div class="node-t">API Gateway / BFF</div><div class="node-d">Auth, rate-limit, routing, request shaping per client, entitlements.</div></div></div>
+          <div class="flow"><div class="flow-line"></div><div class="arrow"></div></div>
+          <div class="tier cols-3">
+            <div class="node det"><div class="node-t"><span class="dot det"></span>Auth &amp; User / Profile</div><div class="node-d">Accounts · birth data · settings · memory mode · chart references.</div></div>
+            <div class="node det"><div class="node-t"><span class="dot det"></span>Astrology Engine</div><div class="node-d">Deterministic math: chart from birth · dashas / transits · divisional charts · doshas, strengths.</div></div>
+            <div class="node mix"><div class="node-t"><span class="dot mix"></span>Conversation Orchestrator</div><div class="node-d">“The Astrologer” runtime: assembles context · calls tools · calls the LLM Gateway · streams the reply.</div></div>
+          </div>
+          <div class="flow"><div class="flow-line"></div><div class="arrow"></div></div>
+          <div class="tier cols-3">
+            <div class="node llm"><div class="node-t"><span class="dot llm"></span>Profile / Prompt Synthesizer</div><div class="node-d">One-shot, async. Chart → Facts Sheet + Interpretive Profile.</div></div>
+            <div class="node llm"><div class="node-t"><span class="dot llm"></span>Memory svc</div><div class="node-d">Extract · store · retrieve life facts.</div></div>
+            <div class="node mix"><div class="node-t"><span class="dot mix"></span>LLM Gateway</div><div class="node-d">Routing · prompt assembly · caching · guardrails · fallbacks → model providers.</div></div>
+          </div>
+          <div class="tier" style="margin-top:8px"><div class="node infra span"><div class="node-t">Chart Renderer</div><div class="node-d">Chart object → SVG (North / South Indian, divisional) + downloadable PDF.</div></div></div>
+          <div class="flow"><div class="flow-line"></div><div class="arrow"></div></div>
+          <div class="tier"><div class="node infra span"><div class="node-t">Data stores</div><div class="node-d">Relational (users, chats, feedback) · Vector (memories, knowledge) · Object (rendered charts, PDFs) · Cache / Redis (sessions, hot chart).</div></div></div>
+          <div class="flow"><div class="flow-line"></div><div class="arrow"></div></div>
+          <div class="tier"><div class="node infra span"><div class="node-t">Observability / LLMOps</div><div class="node-d">Tracing · eval · cost · feature flags · feedback loop · dashboards.</div></div></div>
+        </div>
+        <p class="fig-cap">Fig. 1 — Everything stateless and horizontally scalable.</p>
+      </div>
+      <p>Heavy or slow work — profile generation, memory extraction, PDF rendering — runs <strong>async via a job queue</strong>, never in the user's request path.</p>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section class="sec" id="s2">
+    <div class="sec-head"><span class="sec-num">02</span><h2 class="sec-title">Component responsibilities</h2><span class="sec-tag">the moving parts</span></div>
+    <div class="sec-body">
+      <div class="tw">
+        <table>
+          <thead><tr><th>Component</th><th>Responsibility</th><th>LLM?</th></tr></thead>
+          <tbody>
+            <tr><td class="k">API Gateway / BFF</td><td>Single entry point. Auth check, rate limiting, routing, request/response shaping per client, entitlement (free/paid) checks.</td><td class="center"><span class="chip det"><span class="dot det"></span>No</span></td></tr>
+            <tr><td class="k">Auth &amp; User / Profile</td><td>Accounts, social login, birth data, settings, memory mode, references to the user's chart.</td><td class="center"><span class="chip det"><span class="dot det"></span>No</span></td></tr>
+            <tr><td class="k">Astrology Engine</td><td>Pure deterministic computation: chart from birth data, dashas, divisional charts, doshas, strengths, yogas, and on-demand current dasha/transits for a given datetime.</td><td class="center"><span class="chip det"><span class="dot det"></span>No</span></td></tr>
+            <tr><td class="k">Profile / Prompt Synthesizer</td><td>Runs once after chart creation. Turns the Chart object into (a) a deterministic Chart Facts Sheet and (b) an LLM-generated Interpretive Profile. Produces the per-user system-prompt material.</td><td class="center"><span class="chip llm"><span class="dot llm"></span>Yes · one-shot</span></td></tr>
+            <tr><td class="k">Chart Renderer</td><td>Turns the Chart object into SVG charts (North/South Indian, divisional) and a downloadable PDF report.</td><td class="center"><span class="chip det"><span class="dot det"></span>No</span></td></tr>
+            <tr><td class="k">Conversation Orchestrator</td><td>The runtime “brain wiring.” For each turn: builds context (natal core + temporal snapshot + retrieved memories), calls tools, invokes the LLM via the Gateway, streams the answer, triggers memory extraction.</td><td class="center"><span class="chip mix"><span class="dot mix"></span>Orchestrates</span></td></tr>
+            <tr><td class="k">Memory svc</td><td>Extracts salient life facts (LLM), stores them (vector + structured), retrieves relevant ones at conversation time, enforces mode (Off/Manual/Auto), powers the memory-management UI.</td><td class="center"><span class="chip llm"><span class="dot llm"></span>Yes · extract</span></td></tr>
+            <tr><td class="k">LLM Gateway</td><td>One choke point for all model calls: provider routing, prompt assembly, prompt caching, streaming, retries/fallbacks, token &amp; cost accounting, and the guardrail wrapper.</td><td class="center"><span class="chip mix"><span class="dot mix"></span>Access layer</span></td></tr>
+            <tr><td class="k">Data stores</td><td>Relational (users, chats, feedback, entitlements), vector (memories, optional Jyotish knowledge), object (rendered charts/PDFs), cache (sessions, hot chart data).</td><td class="center"><span class="chip det"><span class="dot det"></span>No</span></td></tr>
+            <tr><td class="k">Observability / LLMOps</td><td>Tracing of every turn, evaluation harness, cost dashboards, feature flags, feedback pipeline.</td><td class="center"><span class="chip det"><span class="dot det"></span>No</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section class="sec" id="s3">
+    <div class="sec-head"><span class="sec-num">03</span><h2 class="sec-title">The Astrology Engine</h2><span class="sec-tag">foundation</span></div>
+    <div class="sec-body">
+      <h3><span class="subnum">3.1</span>Build vs buy <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ink-faint);font-weight:400">— Decision D1</span></h3>
+      <div class="tw">
+        <table>
+          <thead><tr><th>Option</th><th>Pros</th><th>Cons</th></tr></thead>
+          <tbody>
+            <tr><td class="k">In-house<br>(Swiss Ephemeris)</td><td>Full control, exact, no per-call cost at scale, no third-party dependency or uptime risk, can compute everything (dashas, vargas, ashtakavarga…).</td><td>More engineering. <strong>Licensing:</strong> Swiss Ephemeris is dual-licensed <strong>AGPL-3.0 or commercial</strong> — a closed-source product needs the commercial license or full AGPL compliance. Budget/legal must clear this.</td></tr>
+            <tr><td class="k">3rd-party API</td><td>Fast to ship; offloads the math.</td><td>Per-call cost grows with scale; dependency on their uptime/accuracy/terms; less control; sending birth data to a third party (privacy).</td></tr>
+            <tr><td class="k">Hybrid<br>(recommended)</td><td>Ship MVP on an API to validate the product, then <strong>migrate to in-house</strong> Swiss Ephemeris before scale to control cost and data.</td><td>Two integrations over time.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout">
+        <span class="ck">Recommendation</span>
+        <p>Architect the engine behind a <strong>clean internal interface</strong> — <code style="font-family:'JetBrains Mono',monospace;font-size:13px">AstrologyEngine.computeChart(birthData) → ChartObject</code> — so the implementation (API vs in-house) is swappable without touching anything downstream. Everything else depends only on the <strong>Chart object</strong>, not on how it was produced.</p>
+      </div>
+
+      <h3><span class="subnum">3.2</span>What it computes <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ink-faint);font-weight:400">— per R-CHART-02</span></h3>
+      <div class="pills">
+        <span class="pill"><b>Ascendant</b> + lord</span>
+        <span class="pill">Moon &amp; Sun sign</span>
+        <span class="pill"><b>Nakshatra</b> + Pada + lord</span>
+        <span class="pill">All grahas (Sun→Saturn, Rahu, Ketu) with sign / degree / nakshatra / retro / combust / dignity + <b>house</b></span>
+        <span class="pill">Full <b>Vimshottari</b> (Maha→Antar→Pratyantar) + balance at birth</span>
+        <span class="pill"><b>Divisional</b> charts (D1, D9 min; D2–D60 Shodashvarga)</span>
+        <span class="pill"><b>Doshas</b> (Mangal, Kalsarpa, Sade Sati phase)</span>
+        <span class="pill"><b>Strengths</b> (Ashtakavarga, Shadbala, Bhavabala)</span>
+        <span class="pill"><b>Yogas</b> detected</span>
+        <span class="pill">Ayanamsa (Lahiri) + house system recorded</span>
+      </div>
+
+      <h3><span class="subnum">3.3</span>Temporal endpoint <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ink-faint);font-weight:400">— R-CHART-05</span></h3>
+      <p>A separate method <code style="font-family:'JetBrains Mono',monospace;font-size:13px">computeTemporalContext(chart, datetime=now)</code> returns the <strong>currently active</strong> Maha / Antar / Pratyantar dasha, current Sade Sati phase, and key current transits. This is pure arithmetic over the natal chart and the date, <strong>called at conversation time</strong> so guidance is time-relevant. The natal chart is immutable; this snapshot moves.</p>
+
+      <h3><span class="subnum">3.4</span>Validation</h3>
+      <p>The uploaded reference chart (and any others) become <strong>golden fixtures</strong>. CI compares engine output — positions, dasha dates, dosha flags — to references within tolerance. This is both correctness QA and a guard against regressions when we swap implementations.</p>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section class="sec" id="s4">
+    <div class="sec-head"><span class="sec-num">04</span><h2 class="sec-title">The Chart object</h2><span class="sec-tag">the central data contract</span></div>
+    <div class="sec-body">
+      <p>Everything downstream consumes this. Compute once, store immutably, cache. The shape below is illustrative, not a final schema.</p>
+      <div class="code">
+        <div class="code-bar"><span class="d"></span><span class="code-label">ChartObject · illustrative shape</span></div>
+<pre><code>{
+  "chartId": "uuid",
+  "meta": {
+    "ayanamsa": "Lahiri",
+    "ayanamsaValue": "23-53-57",
+    "houseSystem": "WholeSign",     // document the choice
+    "computedAt": "ISO-8601",
+    "engineVersion": "1.4.0",
+    "birthTimeKnown": true          // drives time-sensitivity caveats
+  },
+  "birth": { "name": "...", "datetime": "...", "tz": "+5.5",
+             "place": "...", "lat": 26.21, "lon": 78.18 },
+
+  "ascendant": { "sign": "Cancer", "degree": "23-40-25",
+                 "nakshatra": "Ashlesha", "pada": 3, "lord": "Moon" },
+  "moonSign": "Virgo", "sunSign": "Capricorn",
+  "nakshatra": { "name": "Chitra", "pada": 2, "lord": "Mars" },
+
+  "planets": [
+    { "graha": "Jupiter", "sign": "Cancer", "house": 1,
+      "degree": "20-21-41", "nakshatra": "Ashlesha", "pada": 2,
+      "retrograde": true, "combust": false,
+      "dignity": "Exalted", "lordOfHouses": [6, 9] }
+    // ... all grahas
+  ],
+
+  "divisional": {
+    "D1":  { /* sign → planets, house map */ },
+    "D9":  { /* Navamsa */ },
+    "D10": { /* ... */ }   // up to D60 when computed
+  },
+
+  "vimshottari": {
+    "balanceAtBirth": { "lord": "Mars", "y": 3, "m": 7, "d": 17 },
+    "mahadashas": [
+      { "lord": "Mars", "start": "2003-01-24", "end": "2006-09-12",
+        "antardashas": [ /* Antar → Pratyantar nested */ ] }
+      // ...
+    ]
+  },
+
+  "doshas": {
+    "mangal":   { "present": false, "fromLagna": 5, "fromMoon": 3 },
+    "kalsarpa": { "present": false },
+    "sadeSati": { "currentPhase": null, "timeline": [ /* phases */ ] }
+  },
+
+  "strengths": {
+    "ashtakavarga": { "perSign": [/* 12 */], "perPlanet": { /* ... */ } },
+    "shadbala":     { /* per planet, rupas, rank */ },
+    "bhavabala":    { /* per house */ }
+  },
+
+  "yogas": [ { "name": "...", "planets": ["..."], "houses": [/* .. */] } ]
+}</code></pre>
+      </div>
+      <div class="callout">
+        <span class="ck">Why this matters</span>
+        <p>The renderer, the synthesizer, the runtime tools, and the LLM grounding all read this one object. It is the spine of the system.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section class="sec" id="s5">
+    <div class="sec-head"><span class="sec-num">05</span><h2 class="sec-title">Chart rendering</h2><span class="sec-tag">visual kundali</span></div>
+    <div class="sec-body">
+      <ul class="clean">
+        <li><strong>Input:</strong> the Chart object. <strong>Output:</strong> SVG (interactive-capable) + a PDF report.</li>
+        <li><strong>Shared renderer:</strong> implement chart drawing as a <strong>pure function of the Chart object → SVG</strong>, packaged so web and mobile use the <em>same</em> logic (a shared TS rendering lib; React renders SVG natively, React Native via an SVG lib). This avoids three divergent chart implementations.</li>
+        <li><strong>Styles:</strong> North-Indian (diamond) default; South-Indian (square) toggle. Divisional charts reuse the same renderer with different data slices.</li>
+        <li><strong>Static vs interactive:</strong> charts are static once computed, so server-side SVG (cached in object store) is cheap; client-side SVG enables tap-to-inspect (R-VIZ-07). Recommend client-side SVG components fed by the Chart object, with a server-rendered PDF for download/sharing.</li>
+        <li><strong>PDF report:</strong> generated <strong>async</strong> (job queue) and stored in object storage; the user downloads a link. Mirrors the depth users expect from traditional reports.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section class="sec" id="s6">
+    <div class="sec-head"><span class="sec-num">06</span><h2 class="sec-title">The intelligence layers</h2><span class="sec-tag">mental model</span></div>
+    <div class="sec-body">
+      <p>A clean way to think about <em>where the intelligence lives</em>:</p>
+      <div class="figure">
+        <div class="diagram" style="padding:8px 22px">
+          <div class="ladder">
+            <div class="rung det"><div class="lvl">L0</div><div class="rung-b"><div class="rt"><span class="nm">Computation</span></div><div class="rd">Ephemeris + classical rules → Chart object.</div></div><div class="when">Once at onboarding · cached</div></div>
+            <div class="rung det"><div class="lvl">L1</div><div class="rung-b"><div class="rt"><span class="nm">Grounding</span></div><div class="rd"><strong>Chart Facts Sheet</strong> — authoritative, compact, machine-generated text/data of the chart.</div></div><div class="when">Once · derived from L0</div></div>
+            <div class="rung"><div class="lvl">L2</div><div class="rung-b"><div class="rt"><span class="nm">Synthesis</span></div><div class="rd"><strong>Interpretive Profile</strong> — rich natal narrative generated by an LLM from L0 / L1.</div></div><div class="when">Once at onboarding · async</div></div>
+            <div class="rung"><div class="lvl">L3</div><div class="rung-b"><div class="rt"><span class="nm">Conversation</span></div><div class="rd">The runtime <strong>Astrologer</strong> answering questions.</div></div><div class="when">Every user turn</div></div>
+            <div class="rung"><div class="lvl">L4</div><div class="rung-b"><div class="rt"><span class="nm">Personalization</span></div><div class="rd"><strong>Memory</strong> — longitudinal user model of life facts.</div></div><div class="when">Async after turns / on demand</div></div>
+            <div class="rung"><div class="lvl">L5</div><div class="rung-b"><div class="rt"><span class="nm">Safety</span></div><div class="rd"><strong>Guardrails</strong> on input + output.</div></div><div class="when">Every turn</div></div>
+            <div class="rung det"><div class="lvl">L6</div><div class="rung-b"><div class="rt"><span class="nm">Learning</span></div><div class="rd">Feedback → eval → prompt / model improvement.</div></div><div class="when">Continuous</div></div>
+          </div>
+        </div>
+      </div>
+      <p>The runtime astrologer (L3) is <strong>grounded</strong> by L1, <strong>enriched</strong> by L2, <strong>personalized</strong> by L4, <strong>protected</strong> by L5, and <strong>improved</strong> by L6.</p>
+    </div>
+  </section>
+
+  <!-- 7 -->
+  <section class="sec" id="s7">
+    <div class="sec-head"><span class="sec-num">07</span><h2 class="sec-title">The personalization pipeline</h2><span class="sec-tag">chart → system prompt</span></div>
+    <div class="sec-body">
+      <p>This is the “permanent system instructions per user” the product promises. It has three stages.</p>
+
+      <h3><span class="subnum">7.1</span>Stage A — Chart Facts Sheet <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--gold-ink);font-weight:400">L1 · deterministic</span></h3>
+      <p>A <strong>template-generated</strong>, compact, authoritative rendering of the chart in a form the LLM can reason over without ambiguity. No LLM, no hallucination risk.</p>
+      <div class="code">
+        <div class="code-bar"><span class="d"></span><span class="code-label">Chart Facts Sheet · example fragment</span></div>
+<pre><code>ASCENDANT: Cancer (Ashlesha pada 3), lord Moon.
+MOON SIGN: Virgo.  SUN SIGN: Capricorn.  BIRTH NAKSHATRA: Chitra pada 2 (lord Mars).
+PLANETS:
+  Jupiter — Cancer, House 1, Exalted, Retrograde, lord of 6 &amp; 9.
+  Mars    — Scorpio, House 5, Own sign, lord of 5 &amp; 10.
+  ... (all grahas)
+DOSHAS: Manglik — No.  Kalsarpa — No.
+KEY YOGAS: &lt;detected&gt;.</code></pre>
+      </div>
+      <p>This is the <strong>non-negotiable ground truth</strong> injected into the astrologer's context.</p>
+
+      <h3><span class="subnum">7.2</span>Stage B — Interpretive Profile <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--amethyst-ink);font-weight:400">L2 · LLM · one-shot · stored</span></h3>
+      <p>An LLM (using the expert-astrologer persona — the uploaded astrologer prompt is an excellent base) reads the Chart object + Facts Sheet and produces a <strong>rich natal profile</strong>: personality, strengths/challenges, career/relationship/health themes, dasha narrative, dosha interpretation, remedies framing. Generated <strong>once</strong>, <strong>async</strong>, <strong>cached</strong>. This gives the astrologer depth and a consistent “reading” of the user without re-deriving it every message.</p>
+      <div class="callout amth">
+        <span class="ck">Optional sub-agents · depth</span>
+        <p>The synthesizer can be decomposed into specialists — Personality, Career, Relationships, Health, Dasha-narrative, Yogas/Doshas — each analyzing one slice, then a <strong>Composer</strong> merges them into the profile. This improves quality and parallelizes, at higher one-time cost. Start monolithic; split if quality demands.</p>
+      </div>
+
+      <h3><span class="subnum">7.3</span>Stage C — Runtime prompt assembly <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ink-faint);font-weight:400">L3</span></h3>
+      <p>For each conversation, the Orchestrator assembles the astrologer's context as <strong>layers</strong>, ordered so the static part is cacheable:</p>
+      <div class="figure">
+        <div class="diagram" style="padding:18px 20px">
+          <div class="stack">
+            <div class="grp-lab cache"><span class="dot det"></span>Static · cached per user<span class="ln"></span></div>
+            <div class="layer cache"><div class="lx">1</div><div class="layer-b"><div class="layer-t">Persona + behavioral rules + safety guardrails</div><div class="layer-d">Mostly identical across users.</div></div></div>
+            <div class="layer cache"><div class="lx">2</div><div class="layer-b"><div class="layer-t">Chart Facts Sheet (L1)</div><div class="layer-d">Static per user.</div></div></div>
+            <div class="layer cache"><div class="lx">3</div><div class="layer-b"><div class="layer-t">Interpretive Profile summary (L2)</div><div class="layer-d">Static per user.</div></div></div>
+            <div class="grp-lab dyn"><span class="dot llm"></span>Dynamic · per request<span class="ln"></span></div>
+            <div class="layer dyn"><div class="lx">4</div><div class="layer-b"><div class="layer-t">Temporal context</div><div class="layer-d">Current Maha / Antar / Pratyantar dasha, current transits, Sade Sati phase.</div></div></div>
+            <div class="layer dyn"><div class="lx">5</div><div class="layer-b"><div class="layer-t">Retrieved memories (L4)</div><div class="layer-d">Clearly labelled “user-asserted, not chart fact.”</div></div></div>
+            <div class="layer dyn"><div class="lx">6</div><div class="layer-b"><div class="layer-t">Recent conversation history</div><div class="layer-d">Windowed / summarized.</div></div></div>
+            <div class="layer dyn"><div class="lx">7</div><div class="layer-b"><div class="layer-t">The user's new message</div></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="callout">
+        <span class="ck">Critical optimization</span>
+        <p>Sections 1–3 are <strong>static per user and identical across all their messages</strong>, so we exploit provider <strong>prompt caching</strong> — the large static prefix is cached and not re-billed or re-processed each turn. This is the single biggest cost/latency lever in the system (see §12).</p>
+      </div>
+      <div class="callout amth">
+        <span class="ck">Avoid context bloat</span>
+        <p>We do <strong>not</strong> stuff all 16 divisional charts, full dasha tables, and ashtakavarga into every prompt. The compact natal core covers ~90% of questions. For depth, the astrologer <strong>calls a tool</strong> to fetch exactly the slice it needs (e.g., D9 for marriage). This keeps prompts small, cheap, and focused.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8 -->
+  <section class="sec" id="s8">
+    <div class="sec-head"><span class="sec-num">08</span><h2 class="sec-title">The agents &amp; sub-agents</h2><span class="sec-tag">detailed</span></div>
+    <div class="sec-body">
+      <p>We distinguish <strong>LLM agents</strong> (reason / generate) from <strong>deterministic tools/services</strong> (compute / lookup). Don't burn an LLM on arithmetic.</p>
+
+      <h3><span class="subnum">8.1</span>Agent map</h3>
+      <div class="figure">
+        <div class="diagram">
+          <div class="bracket">one-shot · onboarding · async</div>
+          <div class="tier"><div class="node llm span">
+            <div class="node-t"><span class="dot llm"></span>Profile Synthesizer</div>
+            <div class="node-d">Optional sub-agents: Personality · Career · Relationships · Health · Dasha · Yogas/Doshas · Composer.</div>
+            <div class="sub-row"><span class="sub">writes → Interpretive Profile</span></div>
+          </div></div>
+          <div class="flow"><div class="flow-line"></div><div class="arrow"></div></div>
+          <div class="bracket">runtime · every turn</div>
+          <div class="tier"><div class="node mix span">
+            <div class="node-t"><span class="dot mix"></span>Astrologer <span class="mono" style="margin-left:auto">the main agent</span></div>
+            <div class="node-d">Conversational agent, grounded in chart + temporal context + memory.</div>
+            <div class="sub-row">
+              <span class="sub">Chart Query · D9/D10/varga, dasha, yoga</span>
+              <span class="sub">Temporal Context · dasha/transit</span>
+              <span class="sub">Memory Retrieve · vector + rank</span>
+            </div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold-ink);margin-top:8px">↑ tools are deterministic — not LLMs</div>
+          </div></div>
+          <div class="flow"><div class="flow-line"></div><div class="arrow"></div></div>
+          <div class="bracket">async · after turns</div>
+          <div class="tier"><div class="node llm span"><div class="node-t"><span class="dot llm"></span>Memory Extractor <span class="mono" style="margin-left:auto">cheap model</span></div></div></div>
+          <div class="flow"><div class="flow-line"></div><div class="arrow"></div></div>
+          <div class="bracket">wraps every LLM call</div>
+          <div class="tier"><div class="node mix span"><div class="node-t"><span class="dot mix"></span>Guardrail / Safety <span class="mono" style="margin-left:auto">classifier + LLM + rules</span></div></div></div>
+        </div>
+      </div>
+
+      <h3><span class="subnum">8.2</span>The Astrologer — the main brain</h3>
+      <ul class="clean">
+        <li><strong>Role:</strong> answer the user's questions as a warm, knowledgeable Vedic astrologer, grounded in their chart + temporal context + memory.</li>
+        <li><strong>Grounding:</strong> Chart Facts Sheet (authoritative) + Interpretive Profile (depth). <strong>Never invents chart facts.</strong></li>
+        <li><strong>Tools it can call</strong> (function calling):
+          <ul>
+            <li><code style="font-family:'JetBrains Mono',monospace;font-size:12.5px">getDivisionalChart(divisor)</code> — D9 for marriage, D10 for career. <em>(deterministic)</em></li>
+            <li><code style="font-family:'JetBrains Mono',monospace;font-size:12.5px">getDashaContext(datetime)</code> — current / upcoming periods. <em>(deterministic)</em></li>
+            <li><code style="font-family:'JetBrains Mono',monospace;font-size:12.5px">getYogasDoshas()</code> / <code style="font-family:'JetBrains Mono',monospace;font-size:12.5px">getStrength(planet|house)</code> — ashtakavarga / shadbala slices.</li>
+            <li><code style="font-family:'JetBrains Mono',monospace;font-size:12.5px">searchMemory(query)</code> — relevant user-asserted facts.</li>
+            <li><code style="font-family:'JetBrains Mono',monospace;font-size:12.5px">saveMemory(fact, category)</code> — propose / store a memory (mode-gated).</li>
+            <li><em>(optional)</em> <code style="font-family:'JetBrains Mono',monospace;font-size:12.5px">searchJyotishKnowledge(query)</code> — retrieve classical-rule references (RAG, §13).</li>
+          </ul>
+        </li>
+        <li><strong>Output:</strong> streamed, empathetic, balanced, non-fatalistic, safety-compliant.</li>
+      </ul>
+
+      <h3><span class="subnum">8.4</span>Memory Extractor <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--amethyst-ink);font-weight:400">async agent</span></h3>
+      <ul class="clean">
+        <li><strong>Role:</strong> read a conversation (or the latest turn) and extract <strong>salient, durable life facts</strong> — occupation, marital status, family, health context, finances, stated goals/worries. Categorize, assign confidence, <strong>dedupe/update</strong> against existing memory.</li>
+        <li><strong>Model:</strong> a <strong>cheaper/faster</strong> model — extraction is simpler than the main conversation.</li>
+        <li><strong>Mode gating:</strong> Off → don't run. Manual → produce candidates, surface for confirmation, persist only on Save/Edit. Auto → persist directly (user can edit/delete later).</li>
+      </ul>
+
+      <h3><span class="subnum">8.5</span>Deterministic tools <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--gold-ink);font-weight:400">not agents</span></h3>
+      <p>Chart Query, Temporal Context, and Memory Retrieve are <strong>plain functions/services</strong>. Treating them as “agents” would add latency, cost, and hallucination risk for zero benefit. Most “what does my chart say about X” requests resolve to: <em>(a)</em> the LLM decides which data slice is relevant via a tool call → <em>(b)</em> fetch it deterministically → <em>(c)</em> the LLM interprets.</p>
+
+      <h3><span class="subnum">8.7</span>End-to-end — one user message</h3>
+      <div class="figure">
+        <div class="diagram">
+          <div class="turn">
+            <div class="step"><div class="step-b"><div class="step-t">User sends message → API Gateway</div><div class="step-d">Auth, rate-limit, entitlement.</div></div></div>
+            <div class="step"><div class="step-b"><div class="step-t">→ Conversation Orchestrator</div></div></div>
+            <div class="step safe"><div class="step-b"><div class="step-t">Guardrail (input)</div><div class="step-d">Crisis / abuse / harm check. If crisis → <strong>SAFE path, stop.</strong></div></div></div>
+            <div class="step"><div class="step-b"><div class="step-t">Build context</div><div class="step-d">Load cached static prefix <code>[prompt-cache hit]</code> · Temporal Context tool (now) · Memory Retrieve (if mode ≠ Off) · window/summarize history.</div></div></div>
+            <div class="step"><div class="step-b"><div class="step-t">Call LLM via Gateway</div><div class="step-d">Tools enabled, streaming on.</div></div></div>
+            <div class="step"><div class="step-b"><div class="step-t">If the model requests a tool</div><div class="step-d">e.g. <code>getDivisionalChart("D9")</code> → execute deterministically → return data → model continues.</div></div></div>
+            <div class="step"><div class="step-b"><div class="step-t">Stream tokens to client</div><div class="step-d">As they arrive.</div></div></div>
+            <div class="step safe"><div class="step-b"><div class="step-t">Guardrail (output)</div><div class="step-d">Scan final answer for medical / financial / legal / fatalism / safety. On violation → rewrite / redirect before surfacing.</div></div></div>
+            <div class="step"><div class="step-b"><div class="step-t">Persist turn + emit trace</div><div class="step-d">Prompt version, tools, tokens, latency, cost.</div></div></div>
+            <div class="step"><div class="step-b"><div class="step-t">Async: Memory Extractor runs</div><div class="step-d">Mode-gated. CSAT / thumbs hooks attached.</div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9 -->
+  <section class="sec" id="s9">
+    <div class="sec-head"><span class="sec-num">09</span><h2 class="sec-title">Concrete example system prompts</h2></div>
+    <div class="sec-body">
+      <p>These are <strong>representative and adaptable</strong> — version them as code (§13). The uploaded “expert Vedic Astrologer” prompt is an excellent foundation for the persona; below shows how to operationalize it with grounding, tools, temporal context, memory, and safety.</p>
+
+      <h3><span class="subnum">9.1</span>The Astrologer <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ink-faint);font-weight:400">runtime · system prompt skeleton</span></h3>
+      <div class="code">
+        <div class="code-bar"><span class="d"></span><span class="code-label">astrologer.system.txt</span></div>
+<pre><code>ROLE
+You are {AstrologerName}, a warm, wise Vedic astrologer (Jyotish). You give
+personalized guidance grounded ONLY in the user's computed chart provided below.
+
+ABSOLUTE RULES (override everything else)
+- NEVER invent or alter chart facts. Every planetary position, dignity, house,
+  dasha, yoga, or dosha you mention MUST come from the CHART FACTS or from a tool
+  result. If you don't have a fact, fetch it with a tool or say you'll need to look.
+- SAFETY: If the user expresses distress, hopelessness, or self-harm, STOP the
+  astrology and respond with genuine care and crisis support. Never give methods.
+- NO FATALISM: Never predict death, terminal illness, or catastrophe. Frame
+  challenges as tendencies and growth, always preserving the user's agency.
+- NO professional overreach: no medical diagnoses, no specific financial/trading
+  directives, no legal advice. Gently redirect to qualified professionals.
+- Treat MEMORIES as things the USER told you ("you mentioned…"), never as chart
+  fact, and never let a memory override the chart.
+
+STYLE
+Empathetic, specific, balanced (≈60% strengths/opportunity, ≈30% challenges as
+growth, ≈10% practical guidance/remedies framed as optional and low-cost).
+Reference the actual chart ("As a Cancer ascendant with exalted Jupiter in the
+1st…") so it feels personal, not generic.
+
+TOOLS
+- getDivisionalChart(divisor): D9 for marriage/spouse, D10 for career, etc.
+- getDashaContext(datetime): for any timing question.
+- getStrength(target), getYogasDoshas(): for depth.
+- searchMemory(query): to recall the user's life context.
+- saveMemory(fact, category): propose remembering a salient life fact.
+
+=== CHART FACTS (authoritative ground truth) ===
+{chart_facts_sheet}
+
+=== INTERPRETIVE PROFILE (your prior reading of this chart) ===
+{interpretive_profile_summary}
+
+=== CURRENT TIME CONTEXT ===
+{temporal_context}     // current Maha/Antar/Pratyantar dasha, transits, Sade Sati
+
+=== WHAT YOU REMEMBER ABOUT THIS USER (user-asserted, not chart fact) ===
+{retrieved_memories}</code></pre>
+      </div>
+
+      <h3><span class="subnum">9.2</span>Profile Synthesizer <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ink-faint);font-weight:400">system prompt skeleton</span></h3>
+      <div class="code">
+        <div class="code-bar"><span class="d"></span><span class="code-label">synthesizer.system.txt</span></div>
+<pre><code>ROLE
+You are a master Vedic astrologer producing a structured natal profile for a user,
+to be reused as the foundation for future conversations.
+
+RULES
+- Use ONLY the chart data provided. Do not invent positions or periods.
+- Be comprehensive but organized: Personality; Strengths; Challenges (as growth);
+  Career; Relationships; Health (gentle, non-alarming, no diagnoses); Wealth;
+  Dasha narrative (what each major period emphasizes); Doshas (balanced, with
+  optional low-cost remedies); Notable Yogas.
+- Non-fatalistic throughout. No death/catastrophe predictions.
+- Show the reasoning briefly ("Because Mars is 5th &amp; 10th lord in the 5th…").
+
+INPUT
+{chart_object}
+{chart_facts_sheet}
+
+OUTPUT
+A structured profile (sections above), concise enough to summarize into a runtime
+system prompt, faithful to the chart.</code></pre>
+      </div>
+
+      <h3><span class="subnum">9.3</span>Memory Extractor <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ink-faint);font-weight:400">system prompt skeleton</span></h3>
+      <div class="code">
+        <div class="code-bar"><span class="d"></span><span class="code-label">extractor.system.txt</span></div>
+<pre><code>ROLE
+Extract durable, salient facts about the USER's life from the conversation. These
+are data points the user revealed, NOT astrological facts.
+
+EXTRACT (when clearly stated/strongly implied):
+occupation, marital/relationship status, family details, location/relocation,
+health context, financial context, major life events, explicit goals/worries.
+
+DO NOT extract: transient mood, hypotheticals, the astrologer's own statements,
+or chart facts.
+
+For each fact output JSON ONLY:
+[{ "fact": "...", "category": "occupation|relationships|family|health|finance|
+   goals|location|event|other", "confidence": 0-1, "supersedes": "&lt;id|null&gt;" }]
+If nothing salient: return [].
+
+CONVERSATION:
+{recent_turns}</code></pre>
+      </div>
+
+      <h3><span class="subnum">9.4</span>Guardrail <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ink-faint);font-weight:400">classification prompt · output check</span></h3>
+      <div class="code">
+        <div class="code-bar"><span class="d"></span><span class="code-label">guardrail.output.txt</span></div>
+<pre><code>You are a safety reviewer. Given the astrologer's draft reply, flag if it:
+- gives a medical diagnosis or treatment directive,
+- gives specific financial/investment directives that risk loss,
+- gives legal advice,
+- predicts death/terminal illness/catastrophe or uses fatalistic doom framing,
+- mishandles a user in crisis (should have provided support instead),
+- contains other harmful content.
+Return JSON: { "violation": bool, "categories": [...], "action":
+"allow|rewrite|redirect", "note": "..." }.
+DRAFT: {draft_reply}</code></pre>
+      </div>
+      <p style="color:var(--ink-soft);font-size:15px"><em>Pair the LLM check with fast deterministic classifiers / keywords + a dedicated crisis classifier on input, so the cheap checks run first.</em></p>
+    </div>
+  </section>
+
+  <!-- 10 -->
+  <section class="sec" id="s10">
+    <div class="sec-head"><span class="sec-num">10</span><h2 class="sec-title">Memory system design</h2><span class="sec-tag">L4</span></div>
+    <div class="sec-body">
+      <h3><span class="subnum">10.1</span>Storage model — hybrid</h3>
+      <ul class="clean">
+        <li><strong>Structured store</strong> (relational): known categories with a current value (occupation, marital status, location) — easy to display, update, and reason over.</li>
+        <li><strong>Vector store:</strong> free-form memories embedded for <strong>semantic retrieval</strong> (“user worried about a job change” surfaces when they ask about career).</li>
+        <li>Each record: <code style="font-family:'JetBrains Mono',monospace;font-size:12.5px">id, userId, fact, category, embedding, source, confidence, status, createdAt, updatedAt</code>.</li>
+      </ul>
+      <h3><span class="subnum">10.2</span>Lifecycle</h3>
+      <p>Extract (LLM, mode-gated) → Confirm (Manual only) → Store (structured + vector) → Retrieve (per turn) → Review / Edit / Delete (UI) → Erase (on account deletion or mode → Off).</p>
+      <h3><span class="subnum">10.3</span>Retrieval at conversation time</h3>
+      <p>Combine <strong>semantic similarity</strong> to the user's message + <strong>recency</strong> + <strong>category relevance</strong>; inject the top-K, <strong>clearly labelled as user-asserted</strong>. Cap the count to control context size.</p>
+      <h3><span class="subnum">10.4</span>Modes <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ink-faint);font-weight:400">enforced server-side</span></h3>
+      <ul class="clean">
+        <li><strong>Off:</strong> extractor never runs; retrieval returns nothing; optionally purge existing on opt-out.</li>
+        <li><strong>Manual:</strong> extractor proposes; UI asks Save / Edit / Discard; persist only on user action.</li>
+        <li><strong>Auto:</strong> extractor persists directly; user manages later.</li>
+      </ul>
+      <h3><span class="subnum">10.5</span>Privacy <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ink-faint);font-weight:400">see §14</span></h3>
+      <p>Memories are sensitive PII — encrypted, user-controllable (view / edit / delete / export), and included in erasure across <strong>both</strong> structured and vector stores and backups per policy.</p>
+    </div>
+  </section>
+
+  <!-- 11 -->
+  <section class="sec" id="s11">
+    <div class="sec-head"><span class="sec-num">11</span><h2 class="sec-title">Safety &amp; guardrail layer</h2><span class="sec-tag">L5 · non-negotiable</span></div>
+    <div class="sec-body">
+      <ul class="clean">
+        <li><strong>Placement:</strong> in the <strong>LLM Gateway</strong>, wrapping every model call, so no persona prompt can disable it. Defense-in-depth: prompt-level rules <strong>and</strong> an independent output check.</li>
+        <li><strong>Input checks (fast first):</strong> a dedicated <strong>crisis / self-harm classifier</strong> + abuse/harm checks <strong>before</strong> generation. Crisis → immediate supportive response with resources, persona suspended.</li>
+        <li><strong>Output checks:</strong> scan drafts for medical / financial / legal overreach and fatalism / doom; <strong>rewrite or redirect</strong> before the user sees harm. (Stream-friendly: validate as it completes; hold/repair on violation.)</li>
+        <li><strong>Categories enforced:</strong> self-harm / mental-health crisis, medical, financial, legal, fatalism / doom, exploitation / fear-selling, child safety, general harm (mapped to PRD §8 R-SAFE-*).</li>
+        <li><strong>Logging:</strong> every safety event traced + flaggable by users (R-FB-05) for review and eval.</li>
+      </ul>
+      <div class="callout">
+        <span class="ck">Why it matters here specifically</span>
+        <p>Classical sources contain alarming fatalistic text — death of relatives, disease, “suicide,” and the like appear verbatim in standard reports. The product must <strong>systematically refuse to reproduce that</strong> and reframe constructively.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 12 -->
+  <section class="sec" id="s12">
+    <div class="sec-head"><span class="sec-num">12</span><h2 class="sec-title">LLM Gateway &amp; model strategy</h2></div>
+    <div class="sec-body">
+      <h3><span class="subnum">12.1</span>One choke point</h3>
+      <p>All model calls go through the Gateway: routing, prompt assembly, caching, streaming, retries, fallbacks, token/cost accounting, guardrails, tracing. This makes models <strong>swappable</strong> and behavior <strong>observable</strong>.</p>
+
+      <h3><span class="subnum">12.2</span>Model tiering <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ink-faint);font-weight:400">cost ↔ quality</span></h3>
+      <div class="tw">
+        <table>
+          <thead><tr><th>Job</th><th>Tier</th></tr></thead>
+          <tbody>
+            <tr><td class="k">Runtime Astrologer <span style="font-weight:400;color:var(--ink-soft)">— nuanced persona + reasoning</span></td><td><span class="chip llm"><span class="dot llm"></span>Strong model</span></td></tr>
+            <tr><td class="k">Profile Synthesizer <span style="font-weight:400;color:var(--ink-soft)">— one-shot, infrequent</span></td><td><span class="chip llm"><span class="dot llm"></span>Strong model</span></td></tr>
+            <tr><td class="k">Memory Extractor <span style="font-weight:400;color:var(--ink-soft)">— simple, frequent</span></td><td><span class="chip mix">Cheaper / faster</span></td></tr>
+            <tr><td class="k">Guardrail output check</td><td><span class="chip mix">Cheaper + deterministic classifiers</span></td></tr>
+            <tr><td class="k">Embeddings <span style="font-weight:400;color:var(--ink-soft)">— memory + knowledge retrieval</span></td><td><span class="chip det"><span class="dot det"></span>Embeddings model</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3><span class="subnum">12.3</span>Prompt caching <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--gold-ink);font-weight:400">the big lever</span></h3>
+      <p>The per-user static prefix (persona + Chart Facts + Interpretive Profile) is <strong>identical across all of that user's turns</strong>. Use provider <strong>prompt caching</strong> so it's processed and billed once, not every message. With a large grounding prompt and chatty users, this is a major cost and latency win. Order the prompt so the static, cacheable part is the prefix and only the small dynamic tail changes.</p>
+
+      <h3><span class="subnum">12.4</span>Reliability</h3>
+      <ul class="clean">
+        <li><strong>Fallbacks:</strong> secondary provider / model on error or timeout.</li>
+        <li><strong>Graceful degradation:</strong> memory/retrieval failure → still answer from the chart; tool failure → astrologer proceeds with the natal core and caveats.</li>
+        <li><strong>Streaming + timeouts + retries</strong> with idempotency.</li>
+      </ul>
+      <h3><span class="subnum">12.5</span>Data handling</h3>
+      <p>Prefer providers/terms with <strong>no-training / zero-retention</strong> options for PII; minimize PII in prompts where feasible (R-PRIV-06).</p>
+    </div>
+  </section>
+
+  <!-- 13 -->
+  <section class="sec" id="s13">
+    <div class="sec-head"><span class="sec-num">13</span><h2 class="sec-title">LLMOps &amp; quality</h2><span class="sec-tag">L6</span></div>
+    <div class="sec-body">
+      <p>Treat the AI like software: versioned, tested, observed, improved.</p>
+      <ul class="clean">
+        <li><strong>Prompt versioning:</strong> all system prompts (astrologer, synthesizer, extractor, guardrail) are <strong>versioned artifacts in source control</strong>. Per-user generated profiles record which <strong>generator version</strong> produced them, so we can regenerate on upgrades.</li>
+        <li><strong>Tracing / observability:</strong> every turn emits a trace — assembled prompt (version), tools called + results, model + version, tokens in/out, latency (first-token + full), cost, guardrail outcome. (Langfuse, LangSmith, Arize Phoenix, Helicone, or equivalent.)</li>
+        <li><strong>Evaluation harness:</strong>
+          <ul>
+            <li><strong>Golden chart fixtures</strong> validate the deterministic engine (exact match within tolerance).</li>
+            <li><strong>LLM-as-judge</strong> + curated rubrics score conversation quality (groundedness — did it stick to chart facts?; helpfulness; tone; safety).</li>
+            <li><strong>Regression suite</strong> runs before any prompt/model change; block releases that regress groundedness or safety.</li>
+            <li><strong>Red-team set</strong> for safety (crisis, medical/financial/legal bait, fatalism bait) — must pass.</li>
+          </ul>
+        </li>
+        <li><strong>Feedback loop:</strong> per-message thumbs + session CSAT + safety flags feed dashboards, surface bad turns, and build eval sets / fine-tuning candidates over time.</li>
+        <li><strong>A/B + flags:</strong> test prompt/model variants behind flags; ramp gradually; instant rollback.</li>
+        <li><strong>Cost dashboards:</strong> per-feature token/cost, cache-hit rate, tier mix.</li>
+        <li><strong>Optional Jyotish knowledge base (RAG):</strong> a curated corpus of classical rules the astrologer can retrieve from, to deepen authenticity and <strong>reduce hallucinated interpretation</strong>. Grounds <em>interpretation</em> the way the Facts Sheet grounds <em>facts</em>. Build after MVP if quality needs it.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 14 -->
+  <section class="sec" id="s14">
+    <div class="sec-head"><span class="sec-num">14</span><h2 class="sec-title">Security &amp; privacy</h2><span class="sec-tag">engineering view</span></div>
+    <div class="sec-body">
+      <ul class="clean">
+        <li><strong>Encryption:</strong> TLS in transit; encryption at rest for DBs, vector store, object store, backups. Consider field-level encryption for the most sensitive PII (birth data, memories).</li>
+        <li><strong>Secrets / keys:</strong> managed secrets store; no provider keys client-side.</li>
+        <li><strong>AuthN/Z:</strong> token-based sessions; per-user authorization on every data access — a user can only ever reach their own chart / memory / chats.</li>
+        <li><strong>PII minimization:</strong> send the minimum necessary to providers; prefer no-retention terms.</li>
+        <li><strong>Consent &amp; control:</strong> explicit consent for memory; in-app export and <strong>full erasure</strong> that propagates to structured + vector + object stores + backups per retention policy.</li>
+        <li><strong>Compliance:</strong> GDPR-style rights; <strong>India DPDP Act</strong> given the market; documented data flows and retention policy; data-residency awareness.</li>
+        <li><strong>Abuse / rate limiting:</strong> at the Gateway, per user / IP, to protect cost and availability.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 15 -->
+  <section class="sec" id="s15">
+    <div class="sec-head"><span class="sec-num">15</span><h2 class="sec-title">Scalability &amp; reliability</h2><span class="sec-tag">engineering view</span></div>
+    <div class="sec-body">
+      <ul class="clean">
+        <li><strong>Stateless services</strong> behind load balancers; <strong>horizontal autoscaling</strong>.</li>
+        <li><strong>Async job queue</strong> for slow/heavy work: profile synthesis, memory extraction, PDF rendering, batch evals. Keeps user-facing latency low.</li>
+        <li><strong>Caching:</strong> Chart object (immutable) cached aggressively; Interpretive Profile cached; <strong>prompt caching</strong> at the model layer; Redis for sessions + hot chart data.</li>
+        <li><strong>Queues + workers</strong> decouple spikes (mass onboarding) from compute.</li>
+        <li><strong>Backpressure &amp; rate limits</strong> at the Gateway; provider-failover for LLMs.</li>
+        <li><strong>Observability:</strong> metrics / logs / traces across services; alerting on latency, error rate, cost spikes, safety-flag spikes.</li>
+        <li><strong>Cost at scale:</strong> the dominant cost is LLM tokens — controlled by tiering + prompt caching + small focused prompts (tools for depth, not giant contexts).</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 16 -->
+  <section class="sec" id="s16">
+    <div class="sec-head"><span class="sec-num">16</span><h2 class="sec-title">Recommended tech stack</h2><span class="sec-tag">guidance, not gospel</span></div>
+    <div class="sec-body">
+      <div class="tw">
+        <table>
+          <thead><tr><th>Concern</th><th>Recommended</th><th>Alternatives</th></tr></thead>
+          <tbody>
+            <tr><td class="k">Astrology engine</td><td>In-house on <strong>Swiss Ephemeris</strong> (mind the license) behind a clean interface; MVP may start on a 3rd-party API.</td><td>Pure 3rd-party API</td></tr>
+            <tr><td class="k">Backend services</td><td>A typed, scalable stack — <strong>Python</strong> for engine / ML-adjacent work; <strong>Node/TypeScript</strong> or <strong>Go</strong> for API / orchestration.</td><td>Single-language monolith to start</td></tr>
+            <tr><td class="k">API layer</td><td>REST/JSON + <strong>WebSocket/SSE</strong> for streaming.</td><td>gRPC internally</td></tr>
+            <tr><td class="k">Web</td><td><strong>React / Next.js</strong> + shared design system.</td><td>—</td></tr>
+            <tr><td class="k">Mobile</td><td><strong>React Native</strong> (or Flutter) for one Android+iOS codebase; share the SVG chart renderer.</td><td>Native Swift / Kotlin for max polish</td></tr>
+            <tr><td class="k">Auth</td><td>Managed (Firebase Auth / Auth0 / Clerk / Cognito) for Google / Apple / email fast.</td><td>Build in-house</td></tr>
+            <tr><td class="k">Relational DB</td><td><strong>PostgreSQL</strong></td><td>—</td></tr>
+            <tr><td class="k">Vector DB</td><td>Managed vector store (pgvector to start, dedicated DB at scale).</td><td>—</td></tr>
+            <tr><td class="k">Object storage</td><td>Cloud object store (charts / PDFs).</td><td>—</td></tr>
+            <tr><td class="k">Cache / queue</td><td><strong>Redis</strong> + a job queue / message broker.</td><td>—</td></tr>
+            <tr><td class="k">LLM Gateway</td><td>Thin internal service over provider SDKs (routing, caching, guardrails, tracing).</td><td>A managed gateway / router</td></tr>
+            <tr><td class="k">LLMOps / tracing</td><td>Langfuse / LangSmith / Arize Phoenix / Helicone.</td><td>—</td></tr>
+            <tr><td class="k">Infra</td><td>Containers + autoscaling (managed Kubernetes or serverless) + IaC + CI/CD.</td><td>—</td></tr>
+            <tr><td class="k">Feature flags</td><td>A flag service for staged rollout + kill switches.</td><td>—</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="color:var(--ink-soft);font-size:15px"><em>Stay provider-agnostic at the boundaries — engine, LLM, vector DB, and auth are all swappable behind interfaces.</em></p>
+    </div>
+  </section>
+
+  <!-- 17 -->
+  <section class="sec" id="s17">
+    <div class="sec-head"><span class="sec-num">17</span><h2 class="sec-title">Phased build plan</h2><span class="sec-tag">PRD scope → architecture</span></div>
+    <div class="sec-body">
+      <div class="phases">
+        <div class="phase"><div><div class="pp">Phase</div><div class="pn">0</div></div><div><div class="pt">Foundations</div><div class="pd">Auth + accounts; birth-data form + geocoding; Astrology Engine (MVP, validated against reference fixtures); Chart object; basic North-Indian renderer. <span class="l">L0 / L1, partial VIZ.</span></div></div></div>
+        <div class="phase"><div><div class="pp">Phase</div><div class="pn">1</div></div><div><div class="pt">Grounded astrologer (MVP)</div><div class="pd">Chart Facts Sheet (L1) + Interpretive Profile (L2, async); Conversation Orchestrator + LLM Gateway + runtime Astrologer (L3) grounded in the chart, streaming; <strong>Guardrail layer (L5)</strong>; per-message thumbs. <span class="l">Core promise: “talk to your chart” — safely.</span></div></div></div>
+        <div class="phase"><div><div class="pp">Phase</div><div class="pn">2</div></div><div><div class="pt">Memory &amp; feedback</div><div class="pd">Memory svc (Off/Manual/Auto), extraction + retrieval + management UI (L4); session CSAT + full feedback pipeline; LLMOps tracing + eval harness (L6). <span class="l">Core promise: “it remembers you.”</span></div></div></div>
+        <div class="phase"><div><div class="pp">Phase</div><div class="pn">3</div></div><div><div class="pt">Depth &amp; polish</div><div class="pd">Full Shodashvarga + strength tables + South-Indian style + <strong>PDF report</strong>; tool-based on-demand chart depth; suggested prompts; performance + cost hardening (prompt caching, tiering); accessibility + i18n.</div></div></div>
+        <div class="phase"><div><div class="pp">Phase</div><div class="pn">4</div></div><div><div class="pt">Scale &amp; rollout</div><div class="pd">Staged GA via flags; autoscaling + reliability; monetization hooks; red-team + safety sign-off; mass launch.</div></div></div>
+        <div class="phase"><div><div class="pp">Phase</div><div class="pn" style="font-size:24px">5+</div></div><div><div class="pt">Roadmap</div><div class="pd"><strong>Voice</strong> (§18); compatibility / matchmaking; proactive dasha / transit notifications; expert escalation; deeper personalization.</div></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 18 -->
+  <section class="sec" id="s18">
+    <div class="sec-head"><span class="sec-num">18</span><h2 class="sec-title">Voice agent</h2><span class="sec-tag">future · architecture sketch</span></div>
+    <div class="sec-body">
+      <p>The brain stays the same; we add a voice I/O shell and optimize latency.</p>
+      <div class="figure">
+        <div class="diagram">
+          <div class="pipe">
+            <div class="pstage"><div class="pt2">Mic</div></div>
+            <div class="pchev">→</div>
+            <div class="pstage"><div class="pt2">STT</div><div class="ps2">streaming</div></div>
+            <div class="pchev">→</div>
+            <div class="pstage brain"><div class="pt2">Orchestrator</div><div class="ps2">same astrologer · tools · memory · guardrails</div></div>
+            <div class="pchev">→</div>
+            <div class="pstage"><div class="pt2">TTS</div><div class="ps2">streaming</div></div>
+            <div class="pchev">→</div>
+            <div class="pstage"><div class="pt2">Speaker</div></div>
+          </div>
+        </div>
+      </div>
+      <ul class="clean">
+        <li><strong>Reuse everything:</strong> same grounding, same memory, same safety — voice is a new <strong>interface</strong>, not a new brain.</li>
+        <li><strong>Latency is the challenge:</strong> streaming STT, partial-response TTS, smaller / faster models or speculative responses, and tighter prompt caching matter even more.</li>
+        <li><strong>Safety in voice:</strong> crisis detection on the transcript with the <strong>same</strong> override behavior; spoken responses obey the same non-fatalism / medical / financial rules.</li>
+        <li>Designing the orchestrator as <strong>interface-agnostic now</strong> (text in/out as the contract) makes voice a clean add later.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 19 -->
+  <section class="sec" id="s19">
+    <div class="sec-head"><span class="sec-num">19</span><h2 class="sec-title">Summary</h2><span class="sec-tag">the moving parts in one breath</span></div>
+    <div class="sec-body">
+      <div class="summary">
+        <p>We compute each user's chart <b>deterministically</b> (L0) and freeze it as a <b>Chart object</b>. From it we derive an authoritative <b>Facts Sheet</b> (L1) and an LLM-written <b>Interpretive Profile</b> (L2). At runtime, the <b>Astrologer agent</b> (L3) answers questions grounded in those facts, enriched by a live <b>temporal / dasha snapshot</b> and the user's <b>memories</b> (L4), protected by a <b>guardrail layer</b> (L5), with everything traced and improved via <b>feedback + eval</b> (L6). Deterministic <b>tools</b> fetch chart depth and memories on demand; a cheap <b>Memory Extractor</b> quietly builds the user model; the <b>LLM Gateway</b> makes models swappable and exploits <b>prompt caching</b> for cost. The same brain powers <b>voice</b> later.</p>
+        <p class="kick">Two intelligences — math for truth, LLM for conversation — kept cleanly apart. That separation is the whole trick.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <span>Personal AI Astrologer · System Design &amp; Technical Architecture</span>
+    <span>Draft v0.1 · the “how”</span>
+  </footer>
+
+  </main>
+</div>
+
+<script>
+(function(){
+  // mobile nav toggle
+  var btn=document.getElementById('navbtn'),toc=document.getElementById('toc'),scrim=document.getElementById('scrim');
+  function close(){toc.classList.remove('open');scrim.classList.remove('open');}
+  btn.addEventListener('click',function(){var o=toc.classList.toggle('open');scrim.classList.toggle('open',o);});
+  scrim.addEventListener('click',close);
+  toc.addEventListener('click',function(e){if(e.target.closest('a'))close();});
+
+  // scrollspy
+  var links=Array.prototype.slice.call(toc.querySelectorAll('a'));
+  var map={};links.forEach(function(a){map[a.getAttribute('href').slice(1)]=a;});
+  var sections=Array.prototype.slice.call(document.querySelectorAll('.sec'));
+  if('IntersectionObserver' in window){
+    var io=new IntersectionObserver(function(entries){
+      entries.forEach(function(en){
+        if(en.isIntersecting){
+          links.forEach(function(l){l.classList.remove('active');});
+          var a=map[en.target.id];if(a)a.classList.add('active');
+        }
+      });
+    },{rootMargin:'-12% 0px -78% 0px',threshold:0});
+    sections.forEach(function(s){io.observe(s);});
+  }
+})();
+</script>
+</body>
+</html>

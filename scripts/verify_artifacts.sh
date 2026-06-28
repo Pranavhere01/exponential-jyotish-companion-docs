@@ -3,6 +3,9 @@ set -euo pipefail
 
 python3 -m html.parser docs/pm_first_principles_guide.html
 python3 -m html.parser exports/google-drive/Exponential/Astrology/Documents/Html/pm_first_principles_guide.html
+python3 -m html.parser docs/source-materials/original-html/jyotish_companion_data_architecture.html
+python3 -m html.parser docs/source-materials/original-html/jyotish_companion_prd.html
+python3 -m html.parser docs/source-materials/original-html/personal-ai-astrologer-architecture.html
 
 test -f docs/prd_jyotish_companion_v0_2.md
 test -f docs/system_design_jyotish_companion_v0_2.md
@@ -11,6 +14,14 @@ test -f mkdocs.yml
 test -f docs/index.md
 test -f docs/docs-site-guide.md
 test -f docs/repo-split-execution-plan.md
+test -f docs/source-materials/index.md
+test -f docs/source-materials/original-html/jyotish_companion_data_architecture.html
+test -f docs/source-materials/original-html/jyotish_companion_prd.html
+test -f docs/source-materials/original-html/personal-ai-astrologer-architecture.html
+test -f docs/source-materials/codex-attachments/goal-objective.md
+test -f docs/source-materials/codex-attachments/prd-v0.1-pasted-text.txt
+test -f docs/source-materials/codex-attachments/system-design-v0.1-pasted-text.txt
+test -f docs/source-materials/codex-attachments/schema-v0.3-change-spec-pasted-text.txt
 test -f docs/schema-v0.3-change-spec.md
 test -f docs/schema-v0.3-discovery-and-plan.md
 test -f docs/completion-audit.md
@@ -58,7 +69,7 @@ with path.open() as handle:
             json.loads(line)
 PY
 
-if rg -n "Only safe chunks|Only approved chunks|approved_for_user_retrieval" README.md docs db prompts evals exports; then
+if rg -n "Only safe chunks|Only approved chunks|approved_for_user_retrieval" README.md docs db prompts evals exports --glob '!docs/source-materials/**'; then
   echo "Found retired safe-chunks-only wording." >&2
   exit 1
 fi
@@ -75,6 +86,7 @@ rg -n "blocked for direct migration|memory_facts|text_embeddings|Draft PR descri
 rg -n "schema v0.3|runnable application repo|main.*stable baseline|dev.*working branch" docs/completion-audit.md >/dev/null
 rg -n "exponential-jyotish-companion-docs|exponential-jyotish-companion-platform" README.md docs/index.md docs/github-setup.md docs/external-publish-runbook.md docs/completion-audit.md >/dev/null
 rg -n "Stage 1 - Set Up Documentation Repository|Stage 3 - Empty Main Platform Repository|Stage 5 - Build Platform Structure Plan" docs/repo-split-execution-plan.md >/dev/null
+rg -n "Original HTML Exports|Codex Attachment Inputs|goal-objective.md" docs/source-materials/index.md >/dev/null
 rg -n "mkdocs-material|deploy-pages|mkdocs build --strict" .github/workflows/deploy-docs-pages.yml >/dev/null
 rg -n "site_name: Exponential Jyotish Companion Docs|docs_dir: docs" mkdocs.yml >/dev/null
 rg -n "How to add a new document|GitHub Pages|Markdown-first" docs/docs-site-guide.md >/dev/null

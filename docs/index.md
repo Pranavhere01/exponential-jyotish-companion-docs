@@ -15,6 +15,7 @@ Git is the source of truth. Google Drive, exported HTML, and hosted pages are re
 - [Context and Version Control SOP](sop/context-versioning-sop.md)
 - [How To Add Docs](docs-site-guide.md)
 - [Repository Split Execution Plan](repo-split-execution-plan.md)
+- [Source Materials Archive](source-materials/index.md)
 
 ## Durable Decisions
 

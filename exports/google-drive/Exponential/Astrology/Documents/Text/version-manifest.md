@@ -20,6 +20,7 @@ Update it whenever a durable document, prompt, schema, eval, or export version c
 | Way Forward | v0.2 | `docs/01-way-forward.md` | `exports/google-drive/Exponential/Astrology/Documents/Text/01-way-forward.md` |
 | Docs Site Guide | v0.1 | `docs/docs-site-guide.md` | `exports/google-drive/Exponential/Astrology/Documents/Text/docs-site-guide.md` |
 | Repository Split Execution Plan | v0.1 | `docs/repo-split-execution-plan.md` | `exports/google-drive/Exponential/Astrology/Documents/Text/repo-split-execution-plan.md` |
+| Source Materials Archive | v0.1 | `docs/source-materials/index.md` | n/a |
 | Completion Audit | v0.1 | `docs/completion-audit.md` | `exports/google-drive/Exponential/Astrology/Documents/Text/completion-audit.md` |
 | GitHub Setup | v0.1 | `docs/github-setup.md` | `exports/google-drive/Exponential/Astrology/Documents/Text/github-setup.md` |
 | External Publish Runbook | v0.1 | `docs/external-publish-runbook.md` | `exports/google-drive/Exponential/Astrology/Documents/Text/external-publish-runbook.md` |

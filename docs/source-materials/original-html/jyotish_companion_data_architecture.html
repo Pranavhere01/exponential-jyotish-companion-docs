@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Database Schema &amp; Data Architecture — Jyotish Companion</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --night:#0D1023; --night-2:#151A39; --night-3:#1F2650;
+  --paper:#EDEEF4; --card:#FFFFFF; --card-2:#F6F7FB;
+  --ink:#191D2E; --ink-soft:#4F5570; --ink-faint:#888EA8;
+  --line:#E1E2EC; --line-2:#D0D2E0; --line-night:#2A3059;
+  --gold:#C2933A; --gold-ink:#8C681D; --gold-soft:#EFE2B6; --gold-glow:#D9B25E;
+  --amethyst:#6E54C8; --amethyst-ink:#5240A6; --amethyst-soft:#DBD2F4;
+  --star:#F0E4B6;
+  --maxcol:840px;
+  --radius:10px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto} *{animation:none!important;transition:none!important} }
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:"Hanken Grotesk",system-ui,-apple-system,sans-serif;
+  font-size:16.5px; line-height:1.72; -webkit-font-smoothing:antialiased;
+  font-feature-settings:"ss01";
+}
+a{color:inherit; text-decoration:none}
+h1,h2,h3,h4{font-family:"Fraunces",Georgia,serif; font-optical-sizing:auto; line-height:1.14; margin:0; font-weight:600}
+p{margin:0 0 1.05em}
+strong{font-weight:600; color:var(--ink)}
+code,.mono{font-family:"JetBrains Mono",ui-monospace,monospace}
+:focus-visible{outline:2px solid var(--amethyst); outline-offset:3px; border-radius:4px}
+
+/* ---------- HERO ---------- */
+.hero{position:relative; overflow:hidden; background:var(--night); color:#E9EAF5;
+  padding:78px 32px 60px; border-bottom:1px solid var(--line-night)}
+.hero-glow{position:absolute; right:-10%; top:-34%; width:760px; height:760px; pointer-events:none;
+  background:radial-gradient(closest-side, rgba(194,147,58,.17), rgba(110,84,200,.07) 55%, transparent 72%)}
+.kundali{position:absolute; right:-70px; top:50%; transform:translateY(-50%); width:520px; height:520px; opacity:.15; pointer-events:none}
+.kundali line, .kundali polygon, .kundali rect{stroke:var(--gold-glow); fill:none; stroke-width:1}
+.hero-inner{position:relative; max-width:1140px; margin:0 auto}
+.eyebrow{font-family:"JetBrains Mono",monospace; font-size:12px; letter-spacing:.32em;
+  text-transform:uppercase; color:var(--gold-glow); margin:0 0 20px}
+.hero h1{font-size:clamp(40px,6.6vw,70px); font-weight:600; letter-spacing:-.018em; color:#fff; max-width:15ch}
+.hero h1 .thin{font-weight:400; font-style:italic; color:#D7D5EC}
+.hero-sub{max-width:56ch; margin:22px 0 0; color:#B6B8D5; font-size:18px; line-height:1.6}
+.hero-meta{display:flex; flex-wrap:wrap; gap:9px 12px; margin-top:30px}
+.tag{font-family:"JetBrains Mono",monospace; font-size:11.5px; letter-spacing:.05em;
+  text-transform:uppercase; color:#C8CAE5; border:1px solid var(--line-night);
+  padding:6px 11px; border-radius:999px; background:rgba(255,255,255,.02)}
+.tag b{color:var(--gold-glow); font-weight:500}
+.legend{display:flex; flex-wrap:wrap; gap:20px; margin-top:32px; padding-top:22px; border-top:1px solid var(--line-night)}
+.legend .lg{display:flex; align-items:center; gap:9px; font-family:"JetBrains Mono",monospace;
+  font-size:11.5px; letter-spacing:.04em; text-transform:uppercase; color:#C3C5DF}
+.legend .lg b{color:#fff; font-weight:600}
+.dot{width:11px; height:11px; border-radius:50%; flex:none; display:inline-block}
+.dot.det{background:var(--gold)}
+.dot.gen{background:var(--amethyst)}
+.dot.neu{background:#7E84A0}
+
+/* ---------- SHELL / TOC ---------- */
+.shell{max-width:1140px; margin:0 auto; display:grid; grid-template-columns:222px minmax(0,1fr); gap:56px; padding:0 32px}
+.toc{position:sticky; top:0; align-self:start; height:100vh; overflow-y:auto; padding:52px 8px 40px; scrollbar-width:thin}
+.toc-h{font-family:"JetBrains Mono",monospace; font-size:10.5px; letter-spacing:.2em;
+  text-transform:uppercase; color:var(--ink-faint); margin:0 0 14px; padding-left:10px}
+.toc a{display:flex; gap:10px; align-items:baseline; color:var(--ink-soft);
+  font-size:13.5px; line-height:1.3; padding:6px 10px; border-radius:7px; border-left:2px solid transparent;
+  transition:color .15s, background .15s, border-color .15s}
+.toc a:hover{color:var(--ink); background:var(--card)}
+.toc a.active{color:var(--gold-ink); border-left-color:var(--gold); background:var(--card); font-weight:600}
+.toc a .n{font-family:"JetBrains Mono",monospace; font-size:11px; color:var(--ink-faint); flex:none; width:18px}
+.toc a.active .n{color:var(--gold-ink)}
+
+/* ---------- CONTENT ---------- */
+main{padding:54px 0 120px; min-width:0}
+section{max-width:var(--maxcol); margin:0 0 64px; scroll-margin-top:28px}
+.sec-eyebrow{font-family:"JetBrains Mono",monospace; font-size:11.5px; letter-spacing:.22em;
+  text-transform:uppercase; color:var(--gold-ink); margin:0 0 12px; display:flex; align-items:center; gap:10px}
+.sec-eyebrow .num{color:var(--ink-faint)}
+section h2{font-size:clamp(27px,3.4vw,33px); letter-spacing:-.01em; margin:0 0 18px}
+section h3{font-size:19px; margin:34px 0 10px; letter-spacing:-.005em}
+.lead{font-size:18.5px; color:var(--ink-soft); line-height:1.62}
+
+/* callout */
+.note{border:1px solid var(--line); border-left:3px solid var(--gold); background:var(--card);
+  border-radius:0 var(--radius) var(--radius) 0; padding:16px 20px; margin:22px 0; font-size:15.5px; color:var(--ink-soft)}
+.note.gen{border-left-color:var(--amethyst)}
+.note b{color:var(--ink)}
+
+/* two-intelligences key band */
+.key{display:grid; grid-template-columns:1fr 1fr; gap:16px; margin:26px 0 8px}
+.key .kcard{border:1px solid var(--line); border-radius:var(--radius); background:var(--card); padding:18px 20px; position:relative}
+.key .kcard:before{content:""; position:absolute; left:0; top:18px; bottom:18px; width:3px; border-radius:3px}
+.key .det:before{background:var(--gold)}
+.key .gen:before{background:var(--amethyst)}
+.key .kcard h4{font-size:16px; margin:0 0 6px; padding-left:12px}
+.key .kcard p{margin:0; padding-left:12px; font-size:14.5px; color:var(--ink-soft); line-height:1.55}
+.key .kcard .pill{font-family:"JetBrains Mono",monospace; font-size:10.5px; letter-spacing:.06em; text-transform:uppercase;
+  margin-left:12px; padding:3px 8px; border-radius:999px; display:inline-block; margin-bottom:8px}
+.key .det .pill{background:var(--gold-soft); color:var(--gold-ink)}
+.key .gen .pill{background:var(--amethyst-soft); color:var(--amethyst-ink)}
+
+/* domain grid */
+.domains{display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin:24px 0}
+.domain{border:1px solid var(--line); border-radius:var(--radius); background:var(--card); padding:15px 17px}
+.domain .dh{display:flex; align-items:center; gap:9px; font-weight:600; font-size:15px; margin-bottom:5px}
+.domain .dh .mono{font-family:"JetBrains Mono",monospace; font-size:11px; color:var(--ink-faint); font-weight:500; margin-left:auto}
+.domain p{margin:0; font-size:13.5px; color:var(--ink-soft); line-height:1.5}
+
+/* entity blocks */
+.entity{border:1px solid var(--line); border-radius:var(--radius); background:var(--card); margin:14px 0; overflow:hidden}
+.entity > summary{list-style:none; cursor:pointer; padding:15px 18px; display:flex; align-items:center; gap:11px}
+.entity > summary::-webkit-details-marker{display:none}
+.entity > summary .tname{font-family:"JetBrains Mono",monospace; font-weight:600; font-size:14.5px; color:var(--ink)}
+.entity > summary .tpurpose{color:var(--ink-soft); font-size:14px; flex:1; min-width:0}
+.entity > summary .chev{color:var(--ink-faint); font-size:13px; transition:transform .18s}
+.entity[open] > summary .chev{transform:rotate(90deg)}
+.entity > summary:hover{background:var(--card-2)}
+.ebody{padding:2px 18px 16px; border-top:1px solid var(--line)}
+.cols{margin:12px 0 0; font-size:14px}
+.cols .col{display:grid; grid-template-columns:200px 1fr; gap:14px; padding:7px 0; border-bottom:1px dashed var(--line)}
+.cols .col:last-child{border-bottom:none}
+.cols .col .cn{font-family:"JetBrains Mono",monospace; font-size:12.5px; color:var(--amethyst-ink); font-weight:500}
+.cols .col .cd{color:var(--ink-soft); line-height:1.5}
+@media(max-width:560px){ .cols .col{grid-template-columns:1fr; gap:2px} }
+
+/* code block */
+pre{background:var(--night); color:#D7DAEC; border-radius:var(--radius); padding:20px 22px; overflow:auto;
+  font-family:"JetBrains Mono",monospace; font-size:13px; line-height:1.62; margin:20px 0; border:1px solid var(--line-night)}
+pre .c{color:#7B82A8} pre .k{color:var(--gold-glow)} pre .s{color:#9FE1CB} pre .p{color:#C9A8F2}
+
+/* mapping table */
+.map{width:100%; border-collapse:collapse; margin:20px 0; font-size:14.5px}
+.map th,.map td{text-align:left; padding:11px 14px; border-bottom:1px solid var(--line); vertical-align:top}
+.map th{font-family:"JetBrains Mono",monospace; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-faint); font-weight:500}
+.map td .lyr{font-family:"JetBrains Mono",monospace; font-weight:600; color:var(--gold-ink); font-size:13px}
+.map td .mono{font-family:"JetBrains Mono",monospace; font-size:12.5px; color:var(--amethyst-ink)}
+.map tr:hover td{background:var(--card)}
+
+/* decisions */
+.decision{border:1px solid var(--line); border-radius:var(--radius); background:var(--card); padding:16px 18px; margin:12px 0; display:flex; gap:14px}
+.decision .did{font-family:"JetBrains Mono",monospace; font-weight:600; color:var(--gold-ink); font-size:13px; flex:none; padding-top:2px}
+.decision .dtext{font-size:14.5px; color:var(--ink-soft); line-height:1.55}
+.decision .dtext b{color:var(--ink)}
+
+footer{border-top:1px solid var(--line); padding:34px 32px 60px; max-width:1140px; margin:0 auto; color:var(--ink-faint); font-size:13.5px}
+footer .mono{font-family:"JetBrains Mono",monospace}
+
+/* responsive */
+@media(max-width:880px){
+  .shell{grid-template-columns:1fr; gap:0}
+  .toc{position:static; height:auto; overflow:visible; padding:24px 0 0; display:flex; gap:6px; overflow-x:auto; border-bottom:1px solid var(--line)}
+  .toc-h{display:none}
+  .toc a{white-space:nowrap; border-left:none; border-bottom:2px solid transparent; border-radius:7px 7px 0 0}
+  .toc a.active{border-left:none; border-bottom-color:var(--gold)}
+  .key,.domains{grid-template-columns:1fr}
+  main{padding:34px 0 80px}
+  .hero{padding:60px 24px 48px}
+}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-glow" aria-hidden="true"></div>
+  <svg class="kundali" viewBox="0 0 200 200" aria-hidden="true">
+    <rect x="2" y="2" width="196" height="196"/>
+    <line x1="2" y1="2" x2="198" y2="198"/><line x1="198" y1="2" x2="2" y2="198"/>
+    <polygon points="100,2 198,100 100,198 2,100"/>
+  </svg>
+  <div class="hero-inner">
+    <p class="eyebrow">Project Exponential · Data layer · Draft v0.1</p>
+    <h1>Database schema <span class="thin">&amp;</span> data architecture</h1>
+    <p class="hero-sub">The data spine for a personal AI astrologer — a system built on two kinds of intelligence: deterministic chart math that is never guessed, and a generative model that only ever interprets it.</p>
+    <div class="hero-meta">
+      <span class="tag"><b>21</b> tables</span>
+      <span class="tag">PostgreSQL <b>15+</b></span>
+      <span class="tag"><b>pgvector</b> memory + RAG</span>
+      <span class="tag">B2C · user-scoped</span>
+      <span class="tag">V1 scope</span>
+    </div>
+    <div class="legend">
+      <span class="lg"><span class="dot det"></span><b>Gold</b> — deterministic ground truth</span>
+      <span class="lg"><span class="dot gen"></span><b>Amethyst</b> — generative / LLM artifact</span>
+      <span class="lg"><span class="dot neu"></span><b>Neutral</b> — plumbing &amp; access</span>
+    </div>
+  </div>
+</header>
+
+<div class="shell">
+  <nav class="toc" aria-label="Contents">
+    <p class="toc-h">Contents</p>
+    <a href="#orientation"><span class="n">00</span> Orientation</a>
+    <a href="#principles"><span class="n">01</span> Design principles</a>
+    <a href="#domains"><span class="n">02</span> The domains</a>
+    <a href="#reference"><span class="n">03</span> Entity reference</a>
+    <a href="#chart-object"><span class="n">04</span> The Chart object</a>
+    <a href="#layers"><span class="n">05</span> Layer mapping</a>
+    <a href="#decisions"><span class="n">06</span> Open decisions</a>
+  </nav>
+
+  <main>
+    <!-- 00 -->
+    <section id="orientation">
+      <p class="sec-eyebrow"><span class="num">00</span> Orientation</p>
+      <h2>The schema mirrors the system's two intelligences</h2>
+      <p class="lead">Everything in this database falls on one side of a single line. On one side is <strong>deterministic ground truth</strong> — the computed Vedic chart, which must be exact and is never produced by a language model. On the other is <strong>generative output</strong> — the model's interpretations, conversations, and the longitudinal memory of the user. Keeping these apart in the data layer is what keeps the product trustworthy rather than a confident-sounding guess generator.</p>
+
+      <div class="key">
+        <div class="kcard det">
+          <span class="pill">Gold · ground truth</span>
+          <h4>Deterministic</h4>
+          <p>Computed once by the astrology engine, stored immutably. The chart, planetary positions, dashas, divisional charts, doshas, strengths. The model reads these; it never writes them.</p>
+        </div>
+        <div class="kcard gen">
+          <span class="pill">Amethyst · generated</span>
+          <h4>Generative</h4>
+          <p>The interpretive profile, the astrologer's messages, and extracted memories. Versioned by the prompt and model that produced them, so every claim is traceable back to its source.</p>
+        </div>
+      </div>
+
+      <div class="note">
+        <b>The one structural difference from the reference schema.</b> The platform this is modelled against is B2B and multi-tenant — every table carries a <code>workspace_id</code>. This product is B2C, so <b>the tenant is the user</b>. <code>user_id</code> is the universal scoping key, there are no workspaces, and a user can only ever reach their own rows.
+      </div>
+    </section>
+
+    <!-- 01 -->
+    <section id="principles">
+      <p class="sec-eyebrow"><span class="num">01</span> Design principles</p>
+      <h2>Six decisions that shape every table</h2>
+
+      <h3>User-scoped tenancy</h3>
+      <p><code>user_id</code> is denormalized onto every user-owned table. This makes Postgres Row-Level Security a one-line policy per table — the database itself enforces that a request can only ever touch its own user's data, exactly as the security model requires.</p>
+
+      <h3>The chart is one immutable object</h3>
+      <p>The computed chart is the central data contract: everything downstream — the facts sheet, the renderer, the runtime tools — reads it. It is stored once as <code>charts.chart_object</code> (JSONB), with only the natal-core scalars (ascendant, moon sign, nakshatra…) lifted out as columns for cheap display. Editing birth data does not mutate a chart; it computes a new one and supersedes the old, so any earlier grounded conversation stays coherent. We deliberately avoid pre-normalizing planets and dashas into separate tables — the deep slices are fetched by tools out of the JSON.</p>
+
+      <h3>Memory is a hybrid in a single table</h3>
+      <p>The <code>memories</code> table unifies two access patterns with pgvector: structured columns (<code>category</code>, <code>status</code>, <code>supersedes_id</code>) give the "current value" view, while the <code>embedding</code> column powers semantic recall. Memory modes — Off / Manual / Auto — are enforced server-side; a <code>proposed</code> row is a candidate awaiting the user's Save / Edit / Discard.</p>
+
+      <h3>Right-to-erasure by construction</h3>
+      <p>Every user-owned table cascades from <code>users</code> with <code>ON DELETE CASCADE</code>, so account deletion wipes all relational data in one operation. Vector-store, object-store, and backup erasure are handled out of band per the retention policy. Sensitive PII — birth data, memories, transcripts — is flagged for field-level (envelope) encryption at the app layer.</p>
+
+      <h3>Enums for stable sets, text for churn</h3>
+      <p>Native <code>ENUM</code> types model the stable domain sets (memory categories, message roles, safety categories, chart styles) for readability and integrity. Sets expected to evolve — feedback reason tags, plan codes — stay as <code>text</code> so they need no migration to change.</p>
+
+      <h3>Heavy traces live outside Postgres</h3>
+      <p>Per-turn observability detail belongs in an external tracer (Langfuse / LangSmith / Phoenix). The schema stores only the correlation keys on each message — <code>trace_id</code>, <code>model_version</code>, <code>prompt_version</code> — so feedback and the evaluation loop can tie any answer back to exactly what produced it, without a bloated traces table in the operational database.</p>
+    </section>
+
+    <!-- 02 -->
+    <section id="domains">
+      <p class="sec-eyebrow"><span class="num">02</span> The domains</p>
+      <h2>Twenty-one tables, ten domains</h2>
+      <p class="lead">The schema decomposes into clean functional groups. Each domain below maps to a phase of the product — from a user signing up, through casting and grounding their chart, to conversing, remembering, and staying safe.</p>
+
+      <div class="domains">
+        <div class="domain">
+          <div class="dh"><span class="dot neu"></span>Identity &amp; access <span class="mono">4 tables</span></div>
+          <p>users · auth_identities · sessions · verification_tokens. Works with self-hosted or managed auth.</p>
+        </div>
+        <div class="domain">
+          <div class="dh"><span class="dot neu"></span>Birth data <span class="mono">1 table</span></div>
+          <p>birth_profiles. Name, date, exact time, resolved place — the only input the chart depends on.</p>
+        </div>
+        <div class="domain">
+          <div class="dh"><span class="dot det"></span>The chart <span class="mono">3 tables</span></div>
+          <p>charts · interpretive_profiles · chart_artifacts. Immutable ground truth plus its derived readings and renders.</p>
+        </div>
+        <div class="domain">
+          <div class="dh"><span class="dot gen"></span>Conversation <span class="mono">2 tables</span></div>
+          <p>conversations · messages. One primary thread in V1; every turn records its versioning for feedback.</p>
+        </div>
+        <div class="domain">
+          <div class="dh"><span class="dot gen"></span>Memory <span class="mono">1 table</span></div>
+          <p>memories. Hybrid structured + vector store, mode-gated, with a de-dup supersede chain.</p>
+        </div>
+        <div class="domain">
+          <div class="dh"><span class="dot neu"></span>Feedback &amp; safety <span class="mono">4 tables</span></div>
+          <p>message_feedback · session_csat · safety_events · safety_reports. Quality signal and the guardrail log.</p>
+        </div>
+        <div class="domain">
+          <div class="dh"><span class="dot neu"></span>Settings <span class="mono">1 table</span></div>
+          <p>user_settings. Memory mode, chart style, language, notification and privacy preferences.</p>
+        </div>
+        <div class="domain">
+          <div class="dh"><span class="dot neu"></span>Monetization <span class="mono">3 tables</span></div>
+          <p>plans · subscriptions · usage_counters. Metering and entitlement hooks; storefront ships later.</p>
+        </div>
+        <div class="domain">
+          <div class="dh"><span class="dot gen"></span>Knowledge (optional) <span class="mono">1 table</span></div>
+          <p>jyotish_knowledge. Curated classical-rules corpus for RAG; built post-MVP if quality needs it.</p>
+        </div>
+        <div class="domain">
+          <div class="dh"><span class="dot neu"></span>Analytics (optional) <span class="mono">1 table</span></div>
+          <p>analytics_events. Onboarding funnel and engagement; often offloaded to a product-analytics tool.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 03 -->
+    <section id="reference">
+      <p class="sec-eyebrow"><span class="num">03</span> Entity reference</p>
+      <h2>The tables, up close</h2>
+      <p class="lead">The most important tables and their load-bearing columns. The full DDL — indexes, constraints, triggers, RLS — lives in the companion <code>.sql</code> file; this is the readable map. Expand any table for its key fields.</p>
+
+      <h3><span class="dot neu" style="display:inline-block;margin-right:8px"></span>Identity &amp; access</h3>
+
+      <details class="entity">
+        <summary><span class="tname">users</span><span class="tpurpose">Account identity — works with managed or self-hosted auth.</span><span class="chev">▶</span></summary>
+        <div class="ebody"><div class="cols">
+          <div class="col"><span class="cn">id</span><span class="cd">UUID primary key. The universal scoping key referenced by every owned table.</span></div>
+          <div class="col"><span class="cn">email · phone</span><span class="cd">Case-insensitive email (citext) and optional phone for OTP login; both nullable to allow either signup path.</span></div>
+          <div class="col"><span class="cn">auth_subject</span><span class="cd">External IdP subject (e.g. Firebase uid) when using managed auth; otherwise null.</span></div>
+          <div class="col"><span class="cn">status</span><span class="cd">active / suspended / deleted — supports soft suspension distinct from hard erasure.</span></div>
+        </div></div>
+      </details>
+
+      <details class="entity">
+        <summary><span class="tname">auth_identities</span><span class="tpurpose">One row per linked login method (password, Google, Apple, phone).</span><span class="chev">▶</span></summary>
+        <div class="ebody"><div class="cols">
+          <div class="col"><span class="cn">provider</span><span class="cd">Enum: password / google / apple / phone. A user may have several.</span></div>
+          <div class="col"><span class="cn">provider_account_id</span><span class="cd">The provider's subject; unique per (provider, account).</span></div>
+          <div class="col"><span class="cn">password_hash · tokens</span><span class="cd">Only for the password provider / stored OAuth tokens — encrypt at rest.</span></div>
+        </div></div>
+      </details>
+
+      <p style="font-size:14px;color:var(--ink-soft);margin:6px 0 0"><code>sessions</code> and <code>verification_tokens</code> round out the self-hosted auth path (token hashes only, never raw tokens). Drop both if you adopt a managed provider.</p>
+
+      <h3><span class="dot neu" style="display:inline-block;margin-right:8px"></span>Birth data</h3>
+      <details class="entity">
+        <summary><span class="tname">birth_profiles</span><span class="tpurpose">The birth details — the sole input the chart is computed from.</span><span class="chev">▶</span></summary>
+        <div class="ebody"><div class="cols">
+          <div class="col"><span class="cn">birth_date · birth_time</span><span class="cd">Captured to the minute. Time is nullable for the "don't know my birth time" path.</span></div>
+          <div class="col"><span class="cn">birth_time_known</span><span class="cd">Drives time-sensitivity caveats — the astrologer is told when to hedge time-dependent claims.</span></div>
+          <div class="col"><span class="cn">latitude · longitude · timezone</span><span class="cd">Resolved from place autocomplete; chart accuracy depends on these.</span></div>
+          <div class="col"><span class="cn">birth_input_hash</span><span class="cd">Hash of the normalized inputs — identical input reuses the identical immutable chart.</span></div>
+          <div class="col"><span class="cn">is_active</span><span class="cd">A partial unique index enforces exactly one active profile per user in V1; multi-profile drops in for free.</span></div>
+        </div></div>
+      </details>
+
+      <h3><span class="dot det" style="display:inline-block;margin-right:8px"></span>The chart — deterministic ground truth</h3>
+      <details class="entity" open>
+        <summary><span class="tname">charts</span><span class="tpurpose">The immutable computed chart — the central data contract.</span><span class="chev">▶</span></summary>
+        <div class="ebody"><div class="cols">
+          <div class="col"><span class="cn">chart_object</span><span class="cd">JSONB. The full contract — planets, divisional charts D1–D60, Vimshottari dasha tree, doshas, strengths, yogas. Everything downstream reads this one object.</span></div>
+          <div class="col"><span class="cn">ascendant_* · moon_sign · …</span><span class="cd">Natal-core scalars lifted out for cheap chart-view highlights and the facts sheet.</span></div>
+          <div class="col"><span class="cn">facts_sheet_text</span><span class="cd">L1 — the deterministic, template-generated authoritative text injected into the astrologer's cached prompt prefix.</span></div>
+          <div class="col"><span class="cn">ayanamsa · house_system · engine_version</span><span class="cd">Recorded for reproducibility (default Lahiri / Whole Sign).</span></div>
+          <div class="col"><span class="cn">status</span><span class="cd">active / superseded. A partial unique index allows one active chart per birth profile.</span></div>
+        </div></div>
+      </details>
+
+      <details class="entity">
+        <summary><span class="tname">interpretive_profiles</span><span class="tpurpose">L2 — the LLM-written natal reading, generated once, cached.</span><span class="chev">▶</span></summary>
+        <div class="ebody"><div class="cols">
+          <div class="col"><span class="cn">content · summary</span><span class="cd">The rich reading, plus a compact version that feeds the runtime prompt prefix.</span></div>
+          <div class="col"><span class="cn">generator_version</span><span class="cd">Which prompt/generator produced it — so profiles can be regenerated on an upgrade.</span></div>
+          <div class="col"><span class="cn">status</span><span class="cd">pending / ready / failed / stale. Generated async after the chart is cast.</span></div>
+        </div></div>
+      </details>
+
+      <details class="entity">
+        <summary><span class="tname">chart_artifacts</span><span class="tpurpose">Rendered SVG charts and the downloadable PDF report.</span><span class="chev">▶</span></summary>
+        <div class="ebody"><div class="cols">
+          <div class="col"><span class="cn">kind · style · varga</span><span class="cd">svg_chart / pdf_report; North or South Indian; D1, D9, D10… for divisional renders.</span></div>
+          <div class="col"><span class="cn">object_key · url</span><span class="cd">Bytes live in object storage; the row holds the pointer. PDF is rendered async via the job queue.</span></div>
+          <div class="col"><span class="cn">status</span><span class="cd">pending / ready / failed.</span></div>
+        </div></div>
+      </details>
+
+      <h3><span class="dot gen" style="display:inline-block;margin-right:8px"></span>Conversation</h3>
+      <details class="entity">
+        <summary><span class="tname">conversations</span><span class="tpurpose">A chat thread — one primary continuous thread per user in V1.</span><span class="chev">▶</span></summary>
+        <div class="ebody"><div class="cols">
+          <div class="col"><span class="cn">is_primary</span><span class="cd">A partial unique index enforces the single V1 thread; multi-thread is a fast-follow.</span></div>
+          <div class="col"><span class="cn">running_summary</span><span class="cd">Windowed / summarized history that keeps the per-turn prompt small.</span></div>
+          <div class="col"><span class="cn">message_count · last_message_at</span><span class="cd">Denormalized counters for cheap list rendering.</span></div>
+        </div></div>
+      </details>
+
+      <details class="entity" open>
+        <summary><span class="tname">messages</span><span class="tpurpose">Every turn — content plus the observability the eval loop needs.</span><span class="chev">▶</span></summary>
+        <div class="ebody"><div class="cols">
+          <div class="col"><span class="cn">role · content · status</span><span class="cd">user / astrologer / system / tool; streaming / complete / failed / blocked.</span></div>
+          <div class="col"><span class="cn">tool_name · tool_payload</span><span class="cd">For tool turns — which deterministic tool ran (getDivisionalChart, getDashaContext…) and its result.</span></div>
+          <div class="col"><span class="cn">trace_id · model_version · prompt_version</span><span class="cd">The correlation keys that tie an answer to exactly what produced it; full trace lives in the external tracer.</span></div>
+          <div class="col"><span class="cn">temporal_context · retrieved_memory_ids</span><span class="cd">The dasha/transit snapshot and the memories surfaced for this turn — captured for auditability.</span></div>
+          <div class="col"><span class="cn">tokens · ttft_ms · cost_usd · prompt_cache_hit</span><span class="cd">Per-turn cost and latency, including whether the cached prefix was hit (the system's biggest cost lever).</span></div>
+          <div class="col"><span class="cn">guardrail_action</span><span class="cd">allow / rewrite / redirect / crisis_override — the output-check outcome.</span></div>
+        </div></div>
+      </details>
+
+      <h3><span class="dot gen" style="display:inline-block;margin-right:8px"></span>Memory</h3>
+      <details class="entity" open>
+        <summary><span class="tname">memories</span><span class="tpurpose">The longitudinal user model — hybrid structured + vector.</span><span class="chev">▶</span></summary>
+        <div class="ebody"><div class="cols">
+          <div class="col"><span class="cn">fact · category</span><span class="cd">A user-asserted life fact (never a chart fact), typed into occupation / relationships / family / health / finance / goals / location / event / other.</span></div>
+          <div class="col"><span class="cn">embedding</span><span class="cd">pgvector column for semantic retrieval — dimension must match your embedding model.</span></div>
+          <div class="col"><span class="cn">status · supersedes_id</span><span class="cd">proposed / active / edited / deleted, plus a self-referencing chain so "I got a new job" supersedes the old fact instead of duplicating it.</span></div>
+          <div class="col"><span class="cn">source_message_id</span><span class="cd">Provenance — the message a memory was extracted from.</span></div>
+        </div></div>
+      </details>
+
+      <h3><span class="dot neu" style="display:inline-block;margin-right:8px"></span>Feedback &amp; safety</h3>
+      <details class="entity">
+        <summary><span class="tname">message_feedback · session_csat · safety_reports</span><span class="tpurpose">Quality signal: thumbs, session CSAT, and user-flagged responses.</span><span class="chev">▶</span></summary>
+        <div class="ebody"><div class="cols">
+          <div class="col"><span class="cn">message_feedback</span><span class="cd">Per-message up/down with reason tags and an optional comment; one rating per user per message.</span></div>
+          <div class="col"><span class="cn">session_csat</span><span class="cd">A 1–5 score per conversation, prompted on session end.</span></div>
+          <div class="col"><span class="cn">safety_reports</span><span class="cd">A user-reported harmful response routed to priority review (open / reviewing / actioned / dismissed).</span></div>
+        </div></div>
+      </details>
+
+      <details class="entity">
+        <summary><span class="tname">safety_events</span><span class="tpurpose">The internal guardrail log — every action the safety layer takes.</span><span class="chev">▶</span></summary>
+        <div class="ebody"><div class="cols">
+          <div class="col"><span class="cn">stage · category</span><span class="cd">input / output; self_harm / medical / financial / legal / fatalism / exploitation / child_safety / other_harm.</span></div>
+          <div class="col"><span class="cn">action</span><span class="cd">allow / rewrite / redirect / crisis_override — including the case where the persona is suspended for a crisis response.</span></div>
+        </div></div>
+      </details>
+
+      <h3><span class="dot neu" style="display:inline-block;margin-right:8px"></span>Settings &amp; monetization</h3>
+      <details class="entity">
+        <summary><span class="tname">user_settings</span><span class="tpurpose">Per-user preferences, one row per user.</span><span class="chev">▶</span></summary>
+        <div class="ebody"><div class="cols">
+          <div class="col"><span class="cn">memory_mode</span><span class="cd">off / manual / auto — defaults to manual (privacy-respecting but useful).</span></div>
+          <div class="col"><span class="cn">chart_style_pref · language_pref</span><span class="cd">North / South Indian; launch languages (English, Hindi).</span></div>
+          <div class="col"><span class="cn">privacy_prefs</span><span class="cd">JSONB, e.g. whether PII may be sent to model providers.</span></div>
+        </div></div>
+      </details>
+
+      <details class="entity">
+        <summary><span class="tname">plans · subscriptions · usage_counters</span><span class="tpurpose">Metering and entitlement hooks — capability in scope, storefront later.</span><span class="chev">▶</span></summary>
+        <div class="ebody"><div class="cols">
+          <div class="col"><span class="cn">plans.entitlements</span><span class="cd">JSONB resolved at the gateway — e.g. messages_per_day, unlimited_chat, deep_reports, memory_enabled.</span></div>
+          <div class="col"><span class="cn">subscriptions</span><span class="cd">Provider-agnostic (App Store / Play / Stripe) with a single active subscription per user.</span></div>
+          <div class="col"><span class="cn">usage_counters</span><span class="cd">Per-user, per-metric, per-window counts for freemium limits and cost control.</span></div>
+        </div></div>
+      </details>
+    </section>
+
+    <!-- 04 -->
+    <section id="chart-object">
+      <p class="sec-eyebrow"><span class="num">04</span> The Chart object</p>
+      <h2>The one JSON contract everything reads</h2>
+      <p class="lead">The renderer, the synthesizer, the runtime tools, and the LLM grounding all consume this single object. It is computed once, stored immutably in <code>charts.chart_object</code>, and cached. Keeping it as one contract — rather than scattering it across a dozen tables — is why the engine implementation (in-house vs API) stays swappable without touching anything downstream.</p>
+
+      <pre><span class="c">// shape stored in charts.chart_object (illustrative)</span>
+{
+  <span class="p">"meta"</span>: { <span class="p">"ayanamsa"</span>:<span class="s">"Lahiri"</span>, <span class="p">"houseSystem"</span>:<span class="s">"WholeSign"</span>,
+            <span class="p">"engineVersion"</span>:<span class="s">"1.4.0"</span>, <span class="p">"birthTimeKnown"</span>:<span class="k">true</span> },
+  <span class="p">"ascendant"</span>: { <span class="p">"sign"</span>:<span class="s">"Cancer"</span>, <span class="p">"nakshatra"</span>:<span class="s">"Ashlesha"</span>, <span class="p">"pada"</span>:3, <span class="p">"lord"</span>:<span class="s">"Moon"</span> },
+  <span class="p">"moonSign"</span>: <span class="s">"Virgo"</span>, <span class="p">"sunSign"</span>: <span class="s">"Capricorn"</span>,
+  <span class="p">"planets"</span>: [
+    { <span class="p">"graha"</span>:<span class="s">"Jupiter"</span>, <span class="p">"house"</span>:1, <span class="p">"dignity"</span>:<span class="s">"Exalted"</span>,
+      <span class="p">"retrograde"</span>:<span class="k">true</span>, <span class="p">"lordOfHouses"</span>:[6,9] }
+    <span class="c">// … all grahas</span>
+  ],
+  <span class="p">"divisional"</span>: { <span class="p">"D1"</span>:{}, <span class="p">"D9"</span>:{}, <span class="p">"D10"</span>:{} },   <span class="c">// up to D60</span>
+  <span class="p">"vimshottari"</span>: { <span class="p">"balanceAtBirth"</span>:{}, <span class="p">"mahadashas"</span>:[ <span class="c">/* Maha→Antar→Pratyantar */</span> ] },
+  <span class="p">"doshas"</span>: { <span class="p">"mangal"</span>:{}, <span class="p">"kalsarpa"</span>:{}, <span class="p">"sadeSati"</span>:{} },
+  <span class="p">"strengths"</span>: { <span class="p">"ashtakavarga"</span>:{}, <span class="p">"shadbala"</span>:{}, <span class="p">"bhavabala"</span>:{} },
+  <span class="p">"yogas"</span>: [ { <span class="p">"name"</span>:<span class="s">"…"</span>, <span class="p">"planets"</span>:[], <span class="p">"houses"</span>:[] } ]
+}</pre>
+
+      <div class="note">
+        <b>Why "current period" is not stored here.</b> The active Maha / Antar / Pratyantar dasha, the Sade Sati phase, and live transits are pure arithmetic over the natal chart and <code>now()</code>. They are computed on demand at conversation time — the natal chart is frozen, the active periods move with the calendar. Short-lived caching lives in Redis, not in this table.
+      </div>
+    </section>
+
+    <!-- 05 -->
+    <section id="layers">
+      <p class="sec-eyebrow"><span class="num">05</span> Layer mapping</p>
+      <h2>How the schema maps to the intelligence layers</h2>
+      <p class="lead">The System Design doc frames the product as six layers, L0–L6. Each lands somewhere concrete in this schema — or, deliberately, outside it.</p>
+
+      <table class="map">
+        <thead><tr><th>Layer</th><th>What it is</th><th>Where it lives</th></tr></thead>
+        <tbody>
+          <tr><td><span class="lyr">L0</span></td><td>Computation → the Chart object</td><td><span class="mono">charts.chart_object</span> (immutable)</td></tr>
+          <tr><td><span class="lyr">L1</span></td><td>Grounding → the Chart Facts Sheet</td><td><span class="mono">charts.facts_sheet_text</span></td></tr>
+          <tr><td><span class="lyr">L2</span></td><td>Synthesis → the Interpretive Profile</td><td><span class="mono">interpretive_profiles</span></td></tr>
+          <tr><td><span class="lyr">L3</span></td><td>Conversation → the runtime Astrologer</td><td><span class="mono">conversations</span> · <span class="mono">messages</span></td></tr>
+          <tr><td><span class="lyr">L4</span></td><td>Personalization → Memory</td><td><span class="mono">memories</span> (structured + vector)</td></tr>
+          <tr><td><span class="lyr">L5</span></td><td>Safety → Guardrails</td><td><span class="mono">safety_events</span> · <span class="mono">safety_reports</span> · <span class="mono">messages.guardrail_action</span></td></tr>
+          <tr><td><span class="lyr">L6</span></td><td>Learning → feedback &amp; eval</td><td><span class="mono">message_feedback</span> · <span class="mono">session_csat</span> + external tracer</td></tr>
+        </tbody>
+      </table>
+      <p>The runtime astrologer (L3) is <em>grounded by L1, enriched by L2, personalized by L4, protected by L5, and improved by L6</em> — and the schema records, on every message, the prompt and model version so that improvement loop has something to learn from.</p>
+    </section>
+
+    <!-- 06 -->
+    <section id="decisions">
+      <p class="sec-eyebrow"><span class="num">06</span> Open decisions</p>
+      <h2>Four choices that will tweak the schema</h2>
+      <p class="lead">These are the product decisions from the PRD that touch the data layer directly. Worth settling before the first migration.</p>
+
+      <div class="decision"><span class="did">D1</span><span class="dtext"><b>Astrology engine — build vs buy.</b> Sets what <code>engine_version</code> means in practice, and whether birth data ever leaves your infrastructure (a privacy question, not just a cost one).</span></div>
+      <div class="decision"><span class="did">D3</span><span class="dtext"><b>Default memory mode.</b> The schema defaults <code>user_settings.memory_mode</code> to <code>manual</code>, following the PRD's assumption. Flip to Auto or Off if the privacy/personalization trade-off lands elsewhere.</span></div>
+      <div class="decision"><span class="did">D5</span><span class="dtext"><b>LLM &amp; embedding provider.</b> Determines the vector dimension — the schema uses <code>vector(1536)</code>. Change it to match your embedding model, or the pgvector indexes won't fit.</span></div>
+      <div class="decision"><span class="did">D8</span><span class="dtext"><b>Chart depth at launch.</b> D1 + D9 only vs the full Shodashvarga — changes how much computed data lives inside <code>chart_object</code>, and therefore the size of every cached chart.</span></div>
+    </section>
+  </main>
+</div>
+
+<footer>
+  <span class="mono">jyotish_companion_schema.sql</span> · 21 tables · 18 enums · 32 indexes · PostgreSQL 15+ with pgvector, pgcrypto, pg_trgm, citext.
+  Companion documents: <span class="mono">01_PRD</span> · <span class="mono">02_System_Design</span>. This is a living draft of the data layer.
+</footer>
+
+<script>
+(function(){
+  var links = Array.prototype.slice.call(document.querySelectorAll('.toc a'));
+  var map = {};
+  links.forEach(function(a){ var id=a.getAttribute('href').slice(1); var el=document.getElementById(id); if(el) map[id]=a; });
+  if(!('IntersectionObserver' in window)) return;
+  var obs = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting){
+        links.forEach(function(l){ l.classList.remove('active'); });
+        var a = map[e.target.id]; if(a){ a.classList.add('active');
+          a.scrollIntoView({block:'nearest', inline:'nearest'}); }
+      }
+    });
+  }, { rootMargin:'-20% 0px -70% 0px', threshold:0 });
+  Object.keys(map).forEach(function(id){ obs.observe(document.getElementById(id)); });
+})();
+</script>
+</body>
+</html>

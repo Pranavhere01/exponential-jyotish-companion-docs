@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Product Requirements — Personal AI Astrologer (Jyotish Companion)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --night:#0D1023; --night-2:#151A39; --night-3:#1F2650;
+  --paper:#EDEEF4; --card:#FFFFFF; --card-2:#F6F7FB;
+  --ink:#191D2E; --ink-soft:#4F5570; --ink-faint:#888EA8;
+  --line:#E1E2EC; --line-2:#D0D2E0; --line-night:#2A3059;
+  --gold:#C2933A; --gold-ink:#8C681D; --gold-soft:#EFE2B6; --gold-glow:#D9B25E;
+  --amethyst:#6E54C8; --amethyst-ink:#5240A6; --amethyst-soft:#DBD2F4;
+  --slate-soft:#E4E6EF; --slate-ink:#565C76;
+  --star:#F0E4B6;
+  --maxcol:840px; --radius:10px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto} *{animation:none!important; transition:none!important} }
+body{margin:0; background:var(--paper); color:var(--ink);
+  font-family:"Hanken Grotesk",system-ui,-apple-system,sans-serif;
+  font-size:16.5px; line-height:1.72; -webkit-font-smoothing:antialiased; font-feature-settings:"ss01"}
+a{color:inherit; text-decoration:none}
+h1,h2,h3,h4{font-family:"Fraunces",Georgia,serif; font-optical-sizing:auto; line-height:1.14; margin:0; font-weight:600}
+p{margin:0 0 1.05em}
+strong{font-weight:600; color:var(--ink)}
+code,.mono{font-family:"JetBrains Mono",ui-monospace,monospace}
+em{font-style:italic}
+:focus-visible{outline:2px solid var(--amethyst); outline-offset:3px; border-radius:4px}
+
+/* HERO */
+.hero{position:relative; overflow:hidden; background:var(--night); color:#E9EAF5; padding:78px 32px 60px; border-bottom:1px solid var(--line-night)}
+.hero-glow{position:absolute; right:-10%; top:-34%; width:760px; height:760px; pointer-events:none;
+  background:radial-gradient(closest-side, rgba(194,147,58,.17), rgba(110,84,200,.07) 55%, transparent 72%)}
+.kundali{position:absolute; right:-70px; top:50%; transform:translateY(-50%); width:520px; height:520px; opacity:.15; pointer-events:none}
+.kundali line,.kundali polygon,.kundali rect{stroke:var(--gold-glow); fill:none; stroke-width:1}
+.hero-inner{position:relative; max-width:1140px; margin:0 auto}
+.eyebrow{font-family:"JetBrains Mono",monospace; font-size:12px; letter-spacing:.32em; text-transform:uppercase; color:var(--gold-glow); margin:0 0 20px}
+.hero h1{font-size:clamp(38px,6.2vw,66px); font-weight:600; letter-spacing:-.018em; color:#fff; max-width:16ch}
+.hero h1 .thin{font-weight:400; font-style:italic; color:#D7D5EC}
+.hero-sub{max-width:58ch; margin:22px 0 0; color:#B6B8D5; font-size:18px; line-height:1.6}
+.hero-meta{display:flex; flex-wrap:wrap; gap:9px 12px; margin-top:30px}
+.tag{font-family:"JetBrains Mono",monospace; font-size:11.5px; letter-spacing:.05em; text-transform:uppercase; color:#C8CAE5; border:1px solid var(--line-night); padding:6px 11px; border-radius:999px; background:rgba(255,255,255,.02)}
+.tag b{color:var(--gold-glow); font-weight:500}
+.legend{display:flex; flex-wrap:wrap; gap:18px; margin-top:32px; padding-top:22px; border-top:1px solid var(--line-night)}
+.legend .lg{display:flex; align-items:center; gap:9px; font-family:"JetBrains Mono",monospace; font-size:11.5px; letter-spacing:.04em; text-transform:uppercase; color:#C3C5DF}
+.legend .lg b{color:#fff; font-weight:600}
+.lgchip{font-family:"JetBrains Mono",monospace; font-size:10px; letter-spacing:.08em; padding:3px 8px; border-radius:5px; font-weight:600}
+.lg-must{background:var(--gold-soft); color:var(--gold-ink)}
+.lg-should{background:var(--amethyst-soft); color:var(--amethyst-ink)}
+.lg-could{background:#3a4068; color:#C8CAE5}
+
+/* SHELL / TOC */
+.shell{max-width:1140px; margin:0 auto; display:grid; grid-template-columns:230px minmax(0,1fr); gap:54px; padding:0 32px}
+.toc{position:sticky; top:0; align-self:start; height:100vh; overflow-y:auto; padding:50px 8px 40px; scrollbar-width:thin}
+.toc-h{font-family:"JetBrains Mono",monospace; font-size:10.5px; letter-spacing:.2em; text-transform:uppercase; color:var(--ink-faint); margin:0 0 14px; padding-left:10px}
+.toc a{display:flex; gap:9px; align-items:baseline; color:var(--ink-soft); font-size:13px; line-height:1.25; padding:5px 10px; border-radius:7px; border-left:2px solid transparent; transition:color .15s, background .15s, border-color .15s}
+.toc a:hover{color:var(--ink); background:var(--card)}
+.toc a.active{color:var(--gold-ink); border-left-color:var(--gold); background:var(--card); font-weight:600}
+.toc a .n{font-family:"JetBrains Mono",monospace; font-size:10.5px; color:var(--ink-faint); flex:none; width:18px}
+.toc a.active .n{color:var(--gold-ink)}
+
+/* CONTENT */
+main{padding:54px 0 120px; min-width:0}
+section{max-width:var(--maxcol); margin:0 0 60px; scroll-margin-top:28px}
+.sec-eyebrow{font-family:"JetBrains Mono",monospace; font-size:11.5px; letter-spacing:.22em; text-transform:uppercase; color:var(--gold-ink); margin:0 0 12px; display:flex; align-items:center; gap:10px}
+.sec-eyebrow .num{color:var(--ink-faint)}
+section h2{font-size:clamp(26px,3.3vw,32px); letter-spacing:-.01em; margin:0 0 16px}
+section h3{font-size:18.5px; margin:32px 0 12px; letter-spacing:-.005em; display:flex; align-items:baseline; gap:10px}
+section h3 .gid{font-family:"JetBrains Mono",monospace; font-size:11px; font-weight:500; color:var(--ink-faint); letter-spacing:.06em}
+.lead{font-size:18.5px; color:var(--ink-soft); line-height:1.62}
+
+/* callouts */
+.note{border:1px solid var(--line); border-left:3px solid var(--gold); background:var(--card); border-radius:0 var(--radius) var(--radius) 0; padding:15px 19px; margin:20px 0; font-size:15px; color:var(--ink-soft)}
+.note b{color:var(--ink)}
+.assumption{border:1px dashed var(--amethyst); background:rgba(110,84,200,.05); border-radius:var(--radius); padding:11px 15px; margin:14px 0; font-size:14px; color:var(--ink-soft)}
+.assumption .lbl{font-family:"JetBrains Mono",monospace; font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--amethyst-ink); font-weight:600; margin-right:8px}
+.bet{background:var(--night); color:#DDE0EE; border-radius:var(--radius); padding:22px 24px; margin:22px 0; border:1px solid var(--line-night)}
+.bet .lbl{font-family:"JetBrains Mono",monospace; font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--gold-glow); margin:0 0 10px}
+.bet p{margin:0; font-size:16.5px; line-height:1.6; color:#CED1E4}
+.bet strong{color:#fff}
+
+/* requirement rows */
+.reqs{margin:14px 0 4px}
+.req{display:grid; grid-template-columns:104px 64px 1fr; gap:14px; align-items:start; padding:11px 14px; border-bottom:1px solid var(--line)}
+.req:first-child{border-top:1px solid var(--line)}
+.req:hover{background:var(--card)}
+.req .rid{font-family:"JetBrains Mono",monospace; font-size:12px; font-weight:600; color:var(--ink); padding-top:2px; letter-spacing:-.02em}
+.req .rtext{color:var(--ink-soft); font-size:14.5px; line-height:1.5}
+.req .rtext b{color:var(--ink); font-weight:600}
+.chip{font-family:"JetBrains Mono",monospace; font-size:10px; letter-spacing:.06em; font-weight:600; padding:3px 0; border-radius:5px; text-align:center; height:fit-content; margin-top:1px}
+.chip.must{background:var(--gold-soft); color:var(--gold-ink)}
+.chip.should{background:var(--amethyst-soft); color:var(--amethyst-ink)}
+.chip.could{background:var(--slate-soft); color:var(--slate-ink)}
+@media(max-width:600px){ .req{grid-template-columns:1fr; gap:5px} .req .chip{justify-self:start; padding:3px 9px} }
+
+/* scope */
+.scope{display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin:22px 0}
+.scope .scol{border:1px solid var(--line); border-radius:var(--radius); background:var(--card); padding:0 0 8px; overflow:hidden}
+.scope .sh{padding:12px 16px; font-family:"JetBrains Mono",monospace; font-size:11px; letter-spacing:.08em; text-transform:uppercase; font-weight:600; border-bottom:1px solid var(--line)}
+.scope .in .sh{background:var(--gold-soft); color:var(--gold-ink)}
+.scope .out .sh{background:var(--slate-soft); color:var(--slate-ink)}
+.scope .def .sh{background:var(--amethyst-soft); color:var(--amethyst-ink)}
+.scope ul{margin:10px 0 4px; padding:0 16px 0 30px}
+.scope li{font-size:13.5px; color:var(--ink-soft); line-height:1.45; margin-bottom:8px}
+@media(max-width:760px){ .scope{grid-template-columns:1fr} }
+
+/* flows */
+.flow{counter-reset:step; margin:18px 0; padding:0; list-style:none}
+.flow li{position:relative; padding:0 0 16px 44px; font-size:15px; color:var(--ink-soft); line-height:1.55}
+.flow li:before{counter-increment:step; content:counter(step); position:absolute; left:0; top:-2px;
+  width:28px; height:28px; border-radius:50%; background:var(--card); border:1px solid var(--gold);
+  color:var(--gold-ink); font-family:"JetBrains Mono",monospace; font-size:13px; font-weight:600;
+  display:flex; align-items:center; justify-content:center}
+.flow li:after{content:""; position:absolute; left:13.5px; top:30px; bottom:2px; width:1px; background:var(--line)}
+.flow li:last-child:after{display:none}
+.flow li b{color:var(--ink)}
+
+/* tables */
+.ptable{width:100%; border-collapse:collapse; margin:18px 0; font-size:14px}
+.ptable th,.ptable td{text-align:left; padding:10px 13px; border-bottom:1px solid var(--line); vertical-align:top}
+.ptable th{font-family:"JetBrains Mono",monospace; font-size:10.5px; letter-spacing:.07em; text-transform:uppercase; color:var(--ink-faint); font-weight:500}
+.ptable td{color:var(--ink-soft); line-height:1.5}
+.ptable td:first-child{color:var(--ink); font-weight:500}
+.ptable tr:hover td{background:var(--card)}
+.ptable .tgt{font-family:"JetBrains Mono",monospace; font-size:13px; color:var(--gold-ink); font-weight:600; white-space:nowrap}
+.ptable .did{font-family:"JetBrains Mono",monospace; font-weight:600; color:var(--gold-ink)}
+
+/* goals list */
+.goals{counter-reset:goal; margin:16px 0; padding:0; list-style:none}
+.goals li{position:relative; padding:10px 0 10px 42px; border-bottom:1px solid var(--line); font-size:15.5px; color:var(--ink-soft); line-height:1.5}
+.goals li:before{counter-increment:goal; content:counter(goal); position:absolute; left:0; top:10px;
+  font-family:"Fraunces",serif; font-size:22px; font-weight:600; color:var(--gold)}
+.goals li b{color:var(--ink)}
+
+/* plain list */
+.plist{margin:14px 0; padding-left:20px}
+.plist li{margin-bottom:9px; color:var(--ink-soft); font-size:15px; line-height:1.5}
+.plist li b{color:var(--ink)}
+
+footer{border-top:1px solid var(--line); padding:32px 32px 60px; max-width:1140px; margin:0 auto; color:var(--ink-faint); font-size:13.5px}
+footer .mono{font-family:"JetBrains Mono",monospace}
+footer b{color:var(--ink-soft)}
+
+/* responsive */
+@media(max-width:880px){
+  .shell{grid-template-columns:1fr; gap:0}
+  .toc{position:static; height:auto; overflow:visible; padding:22px 0 0; display:flex; gap:6px; overflow-x:auto; border-bottom:1px solid var(--line)}
+  .toc-h{display:none}
+  .toc a{white-space:nowrap; border-left:none; border-bottom:2px solid transparent; border-radius:7px 7px 0 0}
+  .toc a.active{border-left:none; border-bottom-color:var(--gold)}
+  main{padding:34px 0 80px}
+  .hero{padding:60px 24px 48px}
+}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-glow" aria-hidden="true"></div>
+  <svg class="kundali" viewBox="0 0 200 200" aria-hidden="true">
+    <rect x="2" y="2" width="196" height="196"/>
+    <line x1="2" y1="2" x2="198" y2="198"/><line x1="198" y1="2" x2="2" y2="198"/>
+    <polygon points="100,2 198,100 100,198 2,100"/>
+  </svg>
+  <div class="hero-inner">
+    <p class="eyebrow">Project Exponential · Product Requirements · Draft v0.1</p>
+    <h1>Personal AI astrologer <span class="thin">— Jyotish Companion</span></h1>
+    <p class="hero-sub">Enter your birth details once. We compute your full Vedic chart and give you an AI astrologer permanently grounded in that chart — one that remembers your life, is available around the clock, and gives consistent, non-fatalistic guidance.</p>
+    <div class="hero-meta">
+      <span class="tag">~<b>78</b> requirements</span>
+      <span class="tag">V1 scope</span>
+      <span class="tag">Web · Android · iOS</span>
+      <span class="tag">India-first</span>
+      <span class="tag">Companion: <b>System Design</b></span>
+    </div>
+    <div class="legend">
+      <span class="lg"><span class="lgchip lg-must">MUST</span><b>Launch blocker</b> — V1 doesn't ship without it</span>
+      <span class="lg"><span class="lgchip lg-should">SHOULD</span><b>Strong preference</b> — ship without only with sign-off</span>
+      <span class="lg"><span class="lgchip lg-could">COULD</span><b>Nice-to-have</b> — first to be cut</span>
+    </div>
+  </div>
+</header>
+
+<div class="shell">
+  <nav class="toc" aria-label="Contents">
+    <p class="toc-h">Contents</p>
+    <a href="#vision"><span class="n">01</span> Overview &amp; vision</a>
+    <a href="#goals"><span class="n">02</span> Goals &amp; metrics</a>
+    <a href="#personas"><span class="n">03</span> Users &amp; personas</a>
+    <a href="#scope"><span class="n">04</span> Scope</a>
+    <a href="#flows"><span class="n">05</span> Core user flows</a>
+    <a href="#functional"><span class="n">06</span> Functional requirements</a>
+    <a href="#nonfunctional"><span class="n">07</span> Non-functional</a>
+    <a href="#safety"><span class="n">08</span> Safety &amp; ethics</a>
+    <a href="#platforms"><span class="n">09</span> Platforms &amp; rollout</a>
+    <a href="#analytics"><span class="n">10</span> Analytics</a>
+    <a href="#dependencies"><span class="n">11</span> Dependencies</a>
+    <a href="#monetization"><span class="n">12</span> Monetization</a>
+    <a href="#decisions"><span class="n">13</span> Open decisions</a>
+    <a href="#roadmap"><span class="n">14</span> Future roadmap</a>
+  </nav>
+
+  <main>
+    <!-- 01 -->
+    <section id="vision">
+      <p class="sec-eyebrow"><span class="num">01</span> Overview, problem &amp; vision</p>
+      <h2>What we're building, and why now</h2>
+      <p class="lead">People who follow Vedic astrology today get generic, one-size-fits-all content — daily horoscopes by sun sign — or expensive, inconsistent human consultations they have to re-explain their life to every single time. We're building a personal AI astrologer: the user enters their birth details once, we compute their full kundali, and we generate an advisor that is permanently grounded in that specific chart and remembers the user across conversations.</p>
+
+      <h3>The problem</h3>
+      <p>A user wanting astrological guidance today either reads generic horoscopes (not personal), buys a static PDF report (not interactive, no follow-ups), or pays a human astrologer (costly, inconsistent, no memory between sessions). There is no product that is <em>simultaneously</em> grounded in the user's exact chart, conversational, consistent in quality, and able to remember the user's life over time. The desired state is an always-available conversational astrologer that knows your chart cold, remembers what you've told it, and gives consistent, personalized, non-fatalistic guidance for real decisions.</p>
+
+      <div class="bet">
+        <p class="lbl">The bet</p>
+        <p>Giving each user an AI astrologer <strong>permanently grounded in their own computed chart, plus a memory of their life</strong>, will produce guidance personal and trustworthy enough to drive repeat engagement and willingness to pay. We'll know we're right when we see strong <strong>D7 / D30 retention</strong>, high <strong>session CSAT (≥ 4.2/5)</strong>, and a healthy <strong>free → paid conversion</strong> among engaged users.</p>
+      </div>
+
+      <h3>Why now</h3>
+      <p>LLMs are finally good enough to reason over a complex structured chart without hallucinating the facts, hold a coherent multi-turn persona, and extract and use long-term memory. The astrology computation itself is a solved, deterministic problem (ephemeris math). The missing piece — turning a chart into a consistent, personalized advisor that remembers you — is now buildable.</p>
+    </section>
+
+    <!-- 02 -->
+    <section id="goals">
+      <p class="sec-eyebrow"><span class="num">02</span> Goals &amp; success metrics</p>
+      <h2>What success looks like</h2>
+
+      <h3>Product goals</h3>
+      <ol class="goals">
+        <li>Let any user go from "I have a phone" to "I'm chatting with my personal astrologer about my chart" in <b>under 3 minutes</b>.</li>
+        <li>Deliver guidance that is <b>personalized</b> (grounded in chart + remembered context) and <b>consistent</b> (same question → coherent answer, not random).</li>
+        <li>Earn <b>trust</b> through chart accuracy, conversation quality, and <b>safety</b> (no harmful medical / financial / legal / fatalistic advice).</li>
+        <li>Scale to a mass audience across web, Android, and iOS <b>economically</b>.</li>
+      </ol>
+
+      <h3>Leading indicators <span class="gid">first 90 days</span></h3>
+      <table class="ptable">
+        <thead><tr><th>Metric</th><th>Target</th></tr></thead>
+        <tbody>
+          <tr><td>Onboarding completion (form start → chart generated)</td><td class="tgt">≥ 75%</td></tr>
+          <tr><td>Time-to-first-message (signup → first reply)</td><td class="tgt">≤ 3 min median</td></tr>
+          <tr><td>First-session CSAT</td><td class="tgt">≥ 4.0 / 5</td></tr>
+          <tr><td>Per-message thumbs-up rate</td><td class="tgt">≥ 80%</td></tr>
+          <tr><td>Chart accuracy vs reference engines</td><td class="tgt">≥ 99.9%</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Lagging indicators <span class="gid">true outcomes</span></h3>
+      <table class="ptable">
+        <thead><tr><th>Metric</th><th>Target</th></tr></thead>
+        <tbody>
+          <tr><td>D7 retention</td><td class="tgt">≥ 25%</td></tr>
+          <tr><td>D30 retention</td><td class="tgt">≥ 12%</td></tr>
+          <tr><td>Avg sessions / active user / month</td><td class="tgt">≥ 4</td></tr>
+          <tr><td>Memory opt-in rate (Manual or Auto)</td><td class="tgt">≥ 40%</td></tr>
+          <tr><td>Free → paid conversion (engaged users)</td><td class="tgt">≥ 5%</td></tr>
+          <tr><td>Safety incident rate (per 10k msgs)</td><td class="tgt">≈ 0</td></tr>
+        </tbody>
+      </table>
+      <div class="assumption"><span class="lbl">Assumption</span>Specific numbers are placeholders to make targets concrete — calibrate against your own benchmarks. The categories are what matter.</div>
+    </section>
+
+    <!-- 03 -->
+    <section id="personas">
+      <p class="sec-eyebrow"><span class="num">03</span> Users &amp; personas</p>
+      <h2>Who this is for</h2>
+      <table class="ptable">
+        <thead><tr><th>Persona</th><th>Who they are</th><th>Key need from us</th></tr></thead>
+        <tbody>
+          <tr><td>The Seeker <span style="color:var(--gold-ink);font-family:'JetBrains Mono',monospace;font-size:10px"> primary</span></td><td>Believes in astrology, facing a real decision — career, marriage, finances, a health worry.</td><td>Chart-grounded, empathetic, actionable answers for a specific situation.</td></tr>
+          <tr><td>The Curious</td><td>Casually interested, exploring their chart for self-understanding and entertainment.</td><td>Easy onboarding, a beautiful chart, engaging explanations.</td></tr>
+          <tr><td>The Regular</td><td>Returns often, treats the astrologer as an ongoing advisor.</td><td>Strong memory and continuity across sessions.</td></tr>
+          <tr><td>Ops / Quality <span style="color:var(--ink-faint);font-family:'JetBrains Mono',monospace;font-size:10px"> internal</span></td><td>Our team, monitoring conversation quality and safety.</td><td>Feedback data, tracing, eval tooling, flagging.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- 04 -->
+    <section id="scope">
+      <p class="sec-eyebrow"><span class="num">04</span> Scope</p>
+      <h2>What ships in V1 — and what doesn't</h2>
+      <div class="scope">
+        <div class="scol in">
+          <div class="sh">In · V1</div>
+          <ul>
+            <li>Auth — email/password, Google, Apple</li>
+            <li>Birth-data capture (name, date, exact time, place)</li>
+            <li>Server-side full Vedic chart (D1 + divisional charts, dashas, nakshatra, yogas, doshas, ashtakavarga, shadbala)</li>
+            <li>Per-user permanent astrological profile (facts sheet + interpretive profile)</li>
+            <li>Visual chart: North-Indian Lagna + Navamsa, position &amp; dasha tables, PDF report</li>
+            <li>Conversational astrologer grounded in the chart, streaming</li>
+            <li>Memory: Off / Manual / Auto + management screen</li>
+            <li>Per-message thumbs + per-session CSAT</li>
+            <li>Profile &amp; settings management</li>
+            <li>Web + Android + iOS</li>
+            <li>Safety guardrails</li>
+          </ul>
+        </div>
+        <div class="scol out">
+          <div class="sh">Out · not yet</div>
+          <ul>
+            <li>Voice agents (planned V2; architecture supports it now)</li>
+            <li>Compatibility / kundali matching; family charts (single-user self-analysis in V1)</li>
+            <li>Live human-astrologer marketplace</li>
+            <li>Muhurta, prashna, and advanced services beyond conversational Q&amp;A</li>
+            <li>Push-notification daily horoscopes (post-V1)</li>
+            <li>Payments storefront (hooks in scope; storefront is not)</li>
+          </ul>
+        </div>
+        <div class="scol def">
+          <div class="sh">Deferred · V2+</div>
+          <ul>
+            <li>Voice astrologer</li>
+            <li>Compatibility / matchmaking</li>
+            <li>Proactive notifications (dasha / transit alerts)</li>
+            <li>Regional languages beyond launch set</li>
+            <li>Human-in-the-loop expert escalation</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 05 -->
+    <section id="flows">
+      <p class="sec-eyebrow"><span class="num">05</span> Core user flows</p>
+      <h2>How it feels to use</h2>
+
+      <h3>First run &amp; onboarding</h3>
+      <ol class="flow">
+        <li>User opens the app → sees the value prop and a <b>"Create your chart"</b> CTA.</li>
+        <li><b>Authenticate</b> (email, Google, or Apple).</li>
+        <li><b>Birth-data form:</b> full name, date of birth, time of birth (with a clear "don't know exact time?" path), place of birth (autocomplete → lat/long + timezone).</li>
+        <li>User submits → loading state ("Casting your chart…").</li>
+        <li>Backend computes the chart → generates the per-user astrological profile → renders the chart.</li>
+        <li>User lands on the <b>chart view</b> — their visual kundali plus key highlights: ascendant, moon sign, nakshatra, current mahadasha, notable yogas/doshas.</li>
+        <li>Clear CTA: <b>"Talk to your astrologer."</b></li>
+      </ol>
+
+      <h3>Conversation</h3>
+      <ol class="flow">
+        <li>User opens the chat with their astrologer.</li>
+        <li>Optional first-time primer: the astrologer greets them by name and references one true thing from their chart.</li>
+        <li>User asks a question — a life decision, a prediction, "what does my chart say about X".</li>
+        <li>Astrologer responds — grounded in chart facts + current dasha/transit + any remembered context — with streaming text.</li>
+        <li>User follows up; context persists within the session and, via memory, across sessions.</li>
+        <li>Per-message feedback available; on session end, a CSAT prompt.</li>
+      </ol>
+
+      <h3>Memory capture <span class="gid">mode-dependent</span></h3>
+      <p style="font-size:15px;color:var(--ink-soft)"><strong>Off:</strong> nothing is stored beyond the chart and transcripts (retained per policy, not mined into a user model). &nbsp;<strong>Manual:</strong> on detecting a salient fact, the system asks "Want me to remember this? Save / Edit / No" before persisting. &nbsp;<strong>Auto:</strong> salient facts are extracted and saved automatically; the user can review, edit, or delete them anytime.</p>
+    </section>
+
+    <!-- 06 -->
+    <section id="functional">
+      <p class="sec-eyebrow"><span class="num">06</span> Functional requirements</p>
+      <h2>The numbered spec</h2>
+      <p class="lead">Every requirement is tagged with a priority and a stable ID, so engineering, design, and QA can reference it precisely and map it to a test case.</p>
+
+      <h3>Authentication &amp; account <span class="gid">AUTH</span></h3>
+      <div class="reqs">
+        <div class="req"><span class="rid">R-AUTH-01</span><span class="chip must">MUST</span><span class="rtext">Support sign-up / sign-in via <b>email + password, Google, and Apple</b> (Apple is mandatory for the iOS App Store if other social logins are present).</span></div>
+        <div class="req"><span class="rid">R-AUTH-02</span><span class="chip must">MUST</span><span class="rtext">A single account is consistent across web, Android, and iOS — same credentials yield the same profile, chart, memory, and history.</span></div>
+        <div class="req"><span class="rid">R-AUTH-03</span><span class="chip must">MUST</span><span class="rtext">Secure session handling — token-based, refresh tokens, logout invalidates the session.</span></div>
+        <div class="req"><span class="rid">R-AUTH-04</span><span class="chip should">SHOULD</span><span class="rtext">Account deletion that fully removes chart, memory, transcripts, and PII (right-to-erasure — see §8).</span></div>
+        <div class="req"><span class="rid">R-AUTH-05</span><span class="chip should">SHOULD</span><span class="rtext">Email verification and password reset.</span></div>
+        <div class="req"><span class="rid">R-AUTH-06</span><span class="chip could">COULD</span><span class="rtext">Phone / OTP login (common and trusted in the India market).</span></div>
+      </div>
+
+      <h3>Birth-data capture <span class="gid">DATA</span></h3>
+      <div class="reqs">
+        <div class="req"><span class="rid">R-DATA-01</span><span class="chip must">MUST</span><span class="rtext">Collect full name, date of birth, time of birth, and place of birth.</span></div>
+        <div class="req"><span class="rid">R-DATA-02</span><span class="chip must">MUST</span><span class="rtext">Place input uses <b>autocomplete</b> that resolves to latitude, longitude, and timezone — chart accuracy depends on this.</span></div>
+        <div class="req"><span class="rid">R-DATA-03</span><span class="chip must">MUST</span><span class="rtext">Time of birth captured to the minute; the UI explains <em>why</em> exact time matters (ascendant and houses depend on it).</span></div>
+        <div class="req"><span class="rid">R-DATA-04</span><span class="chip must">MUST</span><span class="rtext">A clear path for users who <b>don't know their birth time</b> (flag reduced confidence in time-dependent factors, or offer a "rectification later" note). The astrologer must be told when time is uncertain so it caveats time-sensitive claims.</span></div>
+        <div class="req"><span class="rid">R-DATA-05</span><span class="chip must">MUST</span><span class="rtext">Validate inputs (plausible date ranges, valid time, resolved location) with inline errors.</span></div>
+        <div class="req"><span class="rid">R-DATA-06</span><span class="chip should">SHOULD</span><span class="rtext">Allow editing birth data — which triggers a full chart recompute and profile regeneration, with a warning that this resets chart-derived context.</span></div>
+        <div class="req"><span class="rid">R-DATA-07</span><span class="chip could">COULD</span><span class="rtext">Support multiple saved profiles per account (e.g. family members) — single active profile in V1.</span></div>
+      </div>
+
+      <h3>Chart generation &amp; storage <span class="gid">CHART</span></h3>
+      <div class="reqs">
+        <div class="req"><span class="rid">R-CHART-01</span><span class="chip must">MUST</span><span class="rtext">Compute the chart <b>server-side</b> into a canonical structured Chart object. Computation is deterministic and cached / immutable per birth-data input.</span></div>
+        <div class="req"><span class="rid">R-CHART-02</span><span class="chip must">MUST</span><span class="rtext">Compute, at minimum: ascendant &amp; lord, moon/sun sign, nakshatra + pada; all grahas with dignity, retrograde/combust status and house placement; full <b>Vimshottari</b> timeline with balance at birth; D1 + D9 (broader Shodashvarga SHOULD); doshas (Mangal, Kalsarpa, Sade Sati); strengths (Ashtakavarga, Shadbala, Bhavabala); detected yogas.</span></div>
+        <div class="req"><span class="rid">R-CHART-03</span><span class="chip must">MUST</span><span class="rtext">Use a defined ayanamsa (default <b>Lahiri</b>) and document the house system; expose ayanamsa in stored data for reproducibility.</span></div>
+        <div class="req"><span class="rid">R-CHART-04</span><span class="chip must">MUST</span><span class="rtext">Validate engine output against known reference charts (the AstroSage fixture) to a defined tolerance.</span></div>
+        <div class="req"><span class="rid">R-CHART-05</span><span class="chip should">SHOULD</span><span class="rtext">Recompute <b>time-sensitive</b> elements (current dasha, transits, Sade Sati phase) relative to "now" at conversation time — not just at chart creation.</span></div>
+      </div>
+
+      <h3>Chart visualization <span class="gid">VIZ</span></h3>
+      <div class="reqs">
+        <div class="req"><span class="rid">R-VIZ-01</span><span class="chip must">MUST</span><span class="rtext">Render a traditional <b>North-Indian style</b> Lagna chart and Navamsa chart from the Chart object.</span></div>
+        <div class="req"><span class="rid">R-VIZ-02</span><span class="chip must">MUST</span><span class="rtext">Display a planetary-positions table and the Vimshottari dasha timeline with the <b>current period highlighted</b>.</span></div>
+        <div class="req"><span class="rid">R-VIZ-03</span><span class="chip should">SHOULD</span><span class="rtext">Render the full Shodashvarga set and strength tables, matching the depth of a traditional report.</span></div>
+        <div class="req"><span class="rid">R-VIZ-04</span><span class="chip should">SHOULD</span><span class="rtext">Offer South-Indian style as a toggle.</span></div>
+        <div class="req"><span class="rid">R-VIZ-05</span><span class="chip should">SHOULD</span><span class="rtext">Generate a downloadable <b>PDF report</b> of the full chart + analysis.</span></div>
+        <div class="req"><span class="rid">R-VIZ-06</span><span class="chip must">MUST</span><span class="rtext">Charts render correctly and legibly on web, Android, and iOS (shared rendering).</span></div>
+        <div class="req"><span class="rid">R-VIZ-07</span><span class="chip could">COULD</span><span class="rtext">Interactive charts — tap a house/planet for a detail popover.</span></div>
+      </div>
+
+      <h3>The personalized astrologer <span class="gid">CHAT</span></h3>
+      <div class="reqs">
+        <div class="req"><span class="rid">R-CHAT-01</span><span class="chip must">MUST</span><span class="rtext">A chat interface where the AI astrologer answers questions grounded in <b>their</b> chart.</span></div>
+        <div class="req"><span class="rid">R-CHAT-02</span><span class="chip must">MUST</span><span class="rtext">Grounded in the user's <b>permanent astrological profile</b> (generated once from the chart) so persona and chart facts persist across every session.</span></div>
+        <div class="req"><span class="rid">R-CHAT-03</span><span class="chip must">MUST</span><span class="rtext">The astrologer <b>never invents chart facts</b>. Positions, dignities, dashas, and yogas it cites must come from the computed chart, not the model's imagination.</span></div>
+        <div class="req"><span class="rid">R-CHAT-04</span><span class="chip must">MUST</span><span class="rtext">Responses <b>stream</b> token-by-token.</span></div>
+        <div class="req"><span class="rid">R-CHAT-05</span><span class="chip must">MUST</span><span class="rtext">Incorporates <b>time context</b> — knows the running dasha/antardasha and relevant current transits for timing questions.</span></div>
+        <div class="req"><span class="rid">R-CHAT-06</span><span class="chip must">MUST</span><span class="rtext">Incorporates <b>remembered context</b> (per memory mode) so advice reflects the user's known life situation.</span></div>
+        <div class="req"><span class="rid">R-CHAT-07</span><span class="chip must">MUST</span><span class="rtext">Conversation history is persisted; users can revisit past chats.</span></div>
+        <div class="req"><span class="rid">R-CHAT-08</span><span class="chip must">MUST</span><span class="rtext">Tone is <b>empathetic, balanced, and non-fatalistic</b> — challenges framed as growth, never doom/death predictions.</span></div>
+        <div class="req"><span class="rid">R-CHAT-09</span><span class="chip should">SHOULD</span><span class="rtext">Support multi-session threads vs one continuous thread. <span style="color:var(--amethyst-ink)">[Assumption] V1 = one primary continuous thread per user; multi-thread is a fast-follow.</span></span></div>
+        <div class="req"><span class="rid">R-CHAT-10</span><span class="chip should">SHOULD</span><span class="rtext">Can pull <b>deeper chart data on demand</b> (D9 for marriage, D10 for career) rather than holding the whole chart in context.</span></div>
+        <div class="req"><span class="rid">R-CHAT-11</span><span class="chip could">COULD</span><span class="rtext">Suggested prompt chips to reduce blank-page friction.</span></div>
+      </div>
+
+      <h3>Memory <span class="gid">MEM</span></h3>
+      <div class="reqs">
+        <div class="req"><span class="rid">R-MEM-01</span><span class="chip must">MUST</span><span class="rtext">Three user-selectable modes: <b>Off, Manual, Auto</b>. <span style="color:var(--amethyst-ink)">[Assumption] default Manual — confirm in §13.</span></span></div>
+        <div class="req"><span class="rid">R-MEM-02</span><span class="chip must">MUST</span><span class="rtext">Memories are <b>user-asserted data points, not ground truth</b> — referenced as "you mentioned…", never as astrological fact, and never overriding the chart.</span></div>
+        <div class="req"><span class="rid">R-MEM-03</span><span class="chip must">MUST</span><span class="rtext"><b>Auto:</b> salient life facts (occupation, marital status, major events, stated goals) extracted and stored automatically.</span></div>
+        <div class="req"><span class="rid">R-MEM-04</span><span class="chip must">MUST</span><span class="rtext"><b>Manual:</b> surface a candidate memory and ask Save / Edit / Discard before persisting.</span></div>
+        <div class="req"><span class="rid">R-MEM-05</span><span class="chip must">MUST</span><span class="rtext"><b>Off:</b> no user-model extraction or storage (beyond transcript retention per policy).</span></div>
+        <div class="req"><span class="rid">R-MEM-06</span><span class="chip must">MUST</span><span class="rtext">A memory-management screen: list memories with category, source, and date; allow edit, delete, and export.</span></div>
+        <div class="req"><span class="rid">R-MEM-07</span><span class="chip must">MUST</span><span class="rtext">Mode changes respected immediately. Switching to Off offers to also delete existing memories.</span></div>
+        <div class="req"><span class="rid">R-MEM-08</span><span class="chip should">SHOULD</span><span class="rtext">Memories are <b>categorized</b> (occupation, relationships, family, health, finances, goals) for structured recall.</span></div>
+        <div class="req"><span class="rid">R-MEM-09</span><span class="chip should">SHOULD</span><span class="rtext">De-duplication / update logic — a new "I got a new job" updates the occupation fact rather than piling duplicates.</span></div>
+        <div class="req"><span class="rid">R-MEM-10</span><span class="chip must">MUST</span><span class="rtext">Memory data is encrypted and fully covered by account deletion / erasure.</span></div>
+      </div>
+
+      <h3>Feedback &amp; CSAT <span class="gid">FB</span></h3>
+      <div class="reqs">
+        <div class="req"><span class="rid">R-FB-01</span><span class="chip must">MUST</span><span class="rtext">Per-message <b>thumbs up/down</b>.</span></div>
+        <div class="req"><span class="rid">R-FB-02</span><span class="chip should">SHOULD</span><span class="rtext">A thumbs-down opens quick reason tags ("inaccurate", "too generic", "unhelpful", "felt wrong/unsafe") + optional free text.</span></div>
+        <div class="req"><span class="rid">R-FB-03</span><span class="chip must">MUST</span><span class="rtext"><b>Per-session CSAT</b> (1–5) prompted on session end, with optional comment.</span></div>
+        <div class="req"><span class="rid">R-FB-04</span><span class="chip must">MUST</span><span class="rtext">All feedback stored and linked to the exact message/conversation + the <b>prompt/model version</b> used (for eval and improvement).</span></div>
+        <div class="req"><span class="rid">R-FB-05</span><span class="chip should">SHOULD</span><span class="rtext">A safety-flag path — user can report a response as harmful, routed to review with priority.</span></div>
+      </div>
+
+      <h3>Settings &amp; profile <span class="gid">SET</span></h3>
+      <div class="reqs">
+        <div class="req"><span class="rid">R-SET-01</span><span class="chip must">MUST</span><span class="rtext">View/edit birth data (with recompute warning), memory mode, account, and privacy controls.</span></div>
+        <div class="req"><span class="rid">R-SET-02</span><span class="chip must">MUST</span><span class="rtext">Data controls — export my data, delete my account/data.</span></div>
+        <div class="req"><span class="rid">R-SET-03</span><span class="chip should">SHOULD</span><span class="rtext">Chart-style preference (North/South), language preference, notification preferences.</span></div>
+      </div>
+    </section>
+
+    <!-- 07 -->
+    <section id="nonfunctional">
+      <p class="sec-eyebrow"><span class="num">07</span> Non-functional requirements</p>
+      <h2>Performance, scale, reliability</h2>
+      <div class="reqs">
+        <div class="req"><span class="rid">R-NFR-01</span><span class="chip must">MUST</span><span class="rtext">Chart computation completes within <b>a few seconds</b> at onboarding (cached thereafter).</span></div>
+        <div class="req"><span class="rid">R-NFR-02</span><span class="chip must">MUST</span><span class="rtext">Astrologer <b>first-token latency &lt; 2s</b>; full responses stream.</span></div>
+        <div class="req"><span class="rid">R-NFR-03</span><span class="chip must">MUST</span><span class="rtext">App remains responsive under load.</span></div>
+        <div class="req"><span class="rid">R-NFR-04</span><span class="chip must">MUST</span><span class="rtext">Designed for mass rollout — <b>stateless services, horizontal scaling, async</b> processing for heavy work (profile generation, memory extraction).</span></div>
+        <div class="req"><span class="rid">R-NFR-05</span><span class="chip must">MUST</span><span class="rtext">Cost controls — model tiering, <b>prompt caching</b> of the static per-user prompt, token budgeting.</span></div>
+        <div class="req"><span class="rid">R-NFR-06</span><span class="chip should">SHOULD</span><span class="rtext">Target <b>99.9%</b> availability for core chat + chart APIs.</span></div>
+        <div class="req"><span class="rid">R-NFR-07</span><span class="chip must">MUST</span><span class="rtext"><b>Graceful degradation</b> — if the LLM provider is down, fail over to a secondary; if memory/retrieval fails, still answer from the chart.</span></div>
+        <div class="req"><span class="rid">R-NFR-08</span><span class="chip should">SHOULD</span><span class="rtext">WCAG-aligned accessibility (contrast, screen-reader labels, scalable text). Charts need text alternatives.</span></div>
+        <div class="req"><span class="rid">R-NFR-09</span><span class="chip should">SHOULD</span><span class="rtext">i18n-ready architecture (strings externalized). <b>Hindi + English</b> are the first targets for the India market.</span></div>
+      </div>
+    </section>
+
+    <!-- 08 -->
+    <section id="safety">
+      <p class="sec-eyebrow"><span class="num">08</span> Safety, ethics &amp; compliance</p>
+      <h2>First-class, not optional polish</h2>
+      <p class="lead">A mass-market advisor that touches health, money, relationships, and life decisions can cause real harm if it overreaches or frightens vulnerable users. The classical texts our domain draws on contain fatalistic and alarming statements — predictions of death, disease — that appear verbatim in standard reports. We must not reproduce that.</p>
+
+      <h3>Hard guardrails <span class="gid">SAFE</span></h3>
+      <div class="reqs">
+        <div class="req"><span class="rid">R-SAFE-01</span><span class="chip must">MUST</span><span class="rtext"><b>Mental health / self-harm:</b> on distress, hopelessness, or self-harm ideation, the astrologer <b>breaks persona</b> and responds with care and appropriate crisis resources — no astrological platitudes, no fatalistic readings, no mention of methods. This overrides everything.</span></div>
+        <div class="req"><span class="rid">R-SAFE-02</span><span class="chip must">MUST</span><span class="rtext"><b>No fatalism / no doom:</b> never predict death, terminal illness, or catastrophe, and never frame a chart factor as an unavoidable curse. Challenges are tendencies and growth areas, with agency preserved.</span></div>
+        <div class="req"><span class="rid">R-SAFE-03</span><span class="chip must">MUST</span><span class="rtext"><b>Medical:</b> no diagnoses, no medication/treatment directives. Health framed gently and redirected to qualified professionals; never weaponize chart "health" indications into alarming claims.</span></div>
+        <div class="req"><span class="rid">R-SAFE-04</span><span class="chip must">MUST</span><span class="rtext"><b>Financial:</b> no specific investment/trading directives that could cause loss. General, non-directive framing; recommend professionals for real decisions.</span></div>
+        <div class="req"><span class="rid">R-SAFE-05</span><span class="chip must">MUST</span><span class="rtext"><b>Legal:</b> no legal advice; redirect to qualified counsel.</span></div>
+        <div class="req"><span class="rid">R-SAFE-06</span><span class="chip must">MUST</span><span class="rtext"><b>Child safety &amp; abuse:</b> standard prohibitions apply across the product.</span></div>
+        <div class="req"><span class="rid">R-SAFE-07</span><span class="chip must">MUST</span><span class="rtext"><b>No exploitation:</b> never use fear ("buy this remedy or disaster strikes") to manipulate; remedies are framed as traditional, optional, low-cost, never coercive.</span></div>
+        <div class="req"><span class="rid">R-SAFE-08</span><span class="chip must">MUST</span><span class="rtext"><b>Disclaimer:</b> a clear, persistent disclaimer that the product is for guidance/entertainment and is not a substitute for professional medical, legal, financial, or psychological advice.</span></div>
+        <div class="req"><span class="rid">R-SAFE-09</span><span class="chip must">MUST</span><span class="rtext">Guardrails apply on <b>both input and output</b>, enforced by a layer the persona prompt cannot override.</span></div>
+      </div>
+
+      <h3>Data privacy &amp; compliance <span class="gid">PRIV</span></h3>
+      <div class="reqs">
+        <div class="req"><span class="rid">R-PRIV-01</span><span class="chip must">MUST</span><span class="rtext">Birth data, memories, and transcripts are <b>sensitive personal data</b> — encrypted at rest and in transit.</span></div>
+        <div class="req"><span class="rid">R-PRIV-02</span><span class="chip must">MUST</span><span class="rtext">Explicit consent for memory capture (especially Auto), with clear, granular controls.</span></div>
+        <div class="req"><span class="rid">R-PRIV-03</span><span class="chip must">MUST</span><span class="rtext">Right to access, export, and erasure (GDPR-style; India's <b>DPDP Act</b> is directly relevant).</span></div>
+        <div class="req"><span class="rid">R-PRIV-04</span><span class="chip should">SHOULD</span><span class="rtext">Data-residency awareness — plan for region-appropriate storage.</span></div>
+        <div class="req"><span class="rid">R-PRIV-05</span><span class="chip must">MUST</span><span class="rtext">Define a retention policy for transcripts and memories; honor deletion <b>end-to-end</b>, including vector stores and backups.</span></div>
+        <div class="req"><span class="rid">R-PRIV-06</span><span class="chip should">SHOULD</span><span class="rtext">Be deliberate about sending PII to third-party providers — prefer zero-retention / no-training terms; minimize PII in prompts.</span></div>
+      </div>
+    </section>
+
+    <!-- 09 -->
+    <section id="platforms">
+      <p class="sec-eyebrow"><span class="num">09</span> Platforms &amp; rollout</p>
+      <h2>Where it runs, and how it ships</h2>
+      <p><strong>Platforms:</strong> web app, Android app, and iOS app, served by a single backend/API.</p>
+      <div class="assumption"><span class="lbl">Assumption</span>Cross-platform mobile (React Native or Flutter) to ship Android + iOS faster from one codebase, with a web app sharing as much logic and design as possible. Native is an option for maximum polish — decision in §13.</div>
+
+      <h3>Phased rollout</h3>
+      <ol class="flow">
+        <li><b>Internal alpha</b> — team + trusted testers. Validate chart accuracy and conversation quality.</li>
+        <li><b>Closed beta</b> — invite cohort, feature-flagged. Tune prompts, guardrails, latency, cost.</li>
+        <li><b>Staged GA</b> — percentage rollout via flags, web-first or all-platforms by readiness, with monitoring and kill-switches.</li>
+        <li><b>Scale</b> — open to mass audience once safety, cost, and reliability targets hold.</li>
+      </ol>
+      <div class="note"><b>Feature flags are a MUST</b> for risky surfaces (memory Auto mode, new model versions, guardrail changes) so they can be toggled without redeploying.</div>
+    </section>
+
+    <!-- 10 -->
+    <section id="analytics">
+      <p class="sec-eyebrow"><span class="num">10</span> Analytics &amp; instrumentation</p>
+      <h2>What we measure</h2>
+      <p>Track — privacy-respecting and consented — the events needed to measure §2:</p>
+      <ul class="plist">
+        <li><b>Onboarding funnel:</b> form-start, each field, submit, chart-generated, first-message.</li>
+        <li><b>Engagement:</b> sessions, messages/session, returning sessions, thread length.</li>
+        <li><b>Quality:</b> per-message thumbs, session CSAT, safety flags, regeneration/edits.</li>
+        <li><b>Memory:</b> mode chosen, candidates surfaced, saved/edited/discarded counts, memory-screen usage.</li>
+        <li><b>Reliability / cost:</b> latency (first-token, full), token usage, model/version, provider, errors, fallbacks.</li>
+        <li>Every astrologer turn is <b>traced</b> with the assembled prompt version, tools used, and model version.</li>
+      </ul>
+    </section>
+
+    <!-- 11 -->
+    <section id="dependencies">
+      <p class="sec-eyebrow"><span class="num">11</span> Dependencies</p>
+      <h2>What we rely on</h2>
+      <ul class="plist">
+        <li><b>Astrology computation:</b> an ephemeris library (e.g. Swiss Ephemeris) or a third-party astrology API — decision in §13.</li>
+        <li><b>LLM provider(s)</b> for the astrologer, the memory extractor, the profile synthesizer, and embeddings.</li>
+        <li><b>Auth provider</b> — build vs Firebase / Auth0 / Clerk / Cognito.</li>
+        <li><b>Geocoding / timezone provider</b> for place → lat/long/tz.</li>
+        <li><b>Vector database</b> for memory (and an optional Jyotish knowledge base).</li>
+        <li><b>Object storage</b> for rendered charts/PDFs; a relational DB; a cache.</li>
+      </ul>
+    </section>
+
+    <!-- 12 -->
+    <section id="monetization">
+      <p class="sec-eyebrow"><span class="num">12</span> Monetization</p>
+      <h2>Capability in scope, storefront out</h2>
+      <p>The reference product's pattern is instructive: <strong>free basic chart → paid detailed reports → paid astrologer chat</strong>. Likely options for us:</p>
+      <ul class="plist">
+        <li><b>Freemium:</b> free chart + limited astrologer messages/day; subscription for unlimited chat, deeper reports, memory, premium features.</li>
+        <li><b>Subscription tiers</b> (monthly / annual).</li>
+        <li><b>One-off purchases</b> (full PDF report, specialized readings).</li>
+      </ul>
+      <div class="note">V1 <b>MUST</b> include the <em>hooks</em> — usage metering per user, entitlement checks — even if the storefront ships later. The pricing model itself is an open decision (§13).</div>
+    </section>
+
+    <!-- 13 -->
+    <section id="decisions">
+      <p class="sec-eyebrow"><span class="num">13</span> Open decisions</p>
+      <h2>Resolve before — or early in — the build</h2>
+      <table class="ptable">
+        <thead><tr><th>#</th><th>Decision</th><th>Options</th><th>Owner</th><th>Why it matters</th></tr></thead>
+        <tbody>
+          <tr><td class="did">D1</td><td>Astrology engine: build vs buy</td><td>Swiss Ephemeris in-house · 3rd-party API · hybrid</td><td>Eng lead</td><td>Cost at scale, accuracy control, licensing (AGPL vs commercial)</td></tr>
+          <tr><td class="did">D2</td><td>Mobile approach</td><td>React Native · Flutter · Native</td><td>Eng lead</td><td>Speed-to-ship vs polish; shared chart renderer</td></tr>
+          <tr><td class="did">D3</td><td>Default memory mode</td><td>Off · Manual · Auto</td><td>Product + Legal</td><td>Privacy posture vs personalization</td></tr>
+          <tr><td class="did">D4</td><td>Launch languages</td><td>English-only · English + Hindi · more</td><td>Product</td><td>Market fit (India) vs scope</td></tr>
+          <tr><td class="did">D5</td><td>LLM provider(s) &amp; data terms</td><td>provider choices</td><td>Eng + Legal</td><td>Quality, cost, PII handling, no-train options</td></tr>
+          <tr><td class="did">D6</td><td>Monetization model</td><td>Freemium · subscription · one-off</td><td>Product / Business</td><td>Revenue + which features gate</td></tr>
+          <tr><td class="did">D7</td><td>One vs multi-thread chat</td><td>Single continuous · multiple</td><td>Product</td><td>UX complexity</td></tr>
+          <tr><td class="did">D8</td><td>Chart depth at launch</td><td>D1+D9 only · full Shodashvarga</td><td>Product</td><td>Effort vs perceived completeness</td></tr>
+          <tr><td class="did">D9</td><td>"Unknown birth time" handling</td><td>Block · default + caveat · rectification flow</td><td>Product</td><td>Accuracy vs accessibility</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- 14 -->
+    <section id="roadmap">
+      <p class="sec-eyebrow"><span class="num">14</span> Future roadmap</p>
+      <h2>After V1</h2>
+      <ul class="plist">
+        <li><b>Voice astrologer (V2 headline):</b> speak to your astrologer; same "brain," latency-optimized (STT → astrologer → TTS). The architecture is designed now to slot this in.</li>
+        <li><b>Compatibility / kundali matching</b> between two charts — revives the relationship-analysis use case.</li>
+        <li><b>Proactive guidance:</b> notifications when a significant dasha changes or a major transit hits.</li>
+        <li><b>Human-expert escalation:</b> hand off to a real astrologer for premium / edge cases.</li>
+        <li><b>Deeper personalization:</b> longitudinal trend tracking across the user's life.</li>
+        <li><b>More divisional depth &amp; specialized readings</b> (career deep-dive, marriage timing, finance).</li>
+      </ul>
+    </section>
+  </main>
+</div>
+
+<footer>
+  <b>Living draft.</b> Next step: resolve the §13 decisions, then engineering breaks the System Design doc into tickets. &nbsp;Companion documents: <span class="mono">02_System_Design</span> · <span class="mono">03_Database_Schema</span>. &nbsp;Self-audit: requirements (<span class="mono">R-*</span>) map directly to test cases; ambiguities live in the System Design doc; open forks are in §13.
+</footer>
+
+<script>
+(function(){
+  var links = Array.prototype.slice.call(document.querySelectorAll('.toc a'));
+  var map = {};
+  links.forEach(function(a){ var id=a.getAttribute('href').slice(1); var el=document.getElementById(id); if(el) map[id]=a; });
+  if(!('IntersectionObserver' in window)) return;
+  var obs = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting){
+        links.forEach(function(l){ l.classList.remove('active'); });
+        var a = map[e.target.id]; if(a){ a.classList.add('active'); a.scrollIntoView({block:'nearest', inline:'nearest'}); }
+      }
+    });
+  }, { rootMargin:'-15% 0px -75% 0px', threshold:0 });
+  Object.keys(map).forEach(function(id){ obs.observe(document.getElementById(id)); });
+})();
+</script>
+</body>
+</html>

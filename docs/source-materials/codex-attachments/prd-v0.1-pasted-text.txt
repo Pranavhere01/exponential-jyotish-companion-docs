@@ -1,0 +1,343 @@
+Product Requirements Document — Personal AI Astrologer ("Jyotish Companion")
+Status: Draft v0.1 (for review) Author: Product Last updated: 2026-06-23 Companion doc: 02_System_Design_and_Architecture.md (the "how")
+This document covers what we're building and why. The technical "how" — services, agents, prompts, data schemas, LLMOps — lives in the companion System Design doc. Read this first.
+
+0. How to read this document
+Every requirement is tagged with a priority:
+MUST — launch blocker. V1 does not ship without it.
+SHOULD — strong preference. Ship without only with explicit sign-off.
+COULD — nice-to-have. First to be cut under time pressure.
+Requirements are numbered (e.g. R-AUTH-01) so engineering, design, and QA can reference them precisely.
+Assumptions I made (because you said you're scoping from scratch) are called out in [ASSUMPTION] blocks. Anywhere you disagree, that's a decision to flip — see §13 Open Decisions.
+
+1. Overview, problem, and vision
+1.1 The one-paragraph version
+People who follow Vedic astrology today get generic, one-size-fits-all content (daily horoscopes by sun sign) or expensive, inconsistent human consultations they have to re-explain their life to every single time. We're building a personal AI astrologer: the user enters their birth details once, we compute their full Vedic birth chart (kundali), and we generate an AI advisor that is permanently grounded in that specific chart and remembers the user across conversations. The result is advice that is personalized to both the user's chart and their actual life circumstances, available 24/7, at near-zero marginal cost.
+1.2 Problem statement (current state → gap → desired state)
+Current state: A user wanting astrological guidance either reads generic horoscopes (not personal), buys a static PDF report (not interactive, can't ask follow-ups), or pays for a human astrologer (costly, inconsistent quality, no memory between sessions, has to re-explain context each time).
+Gap: There is no product that is simultaneously (a) grounded in the user's exact chart, (b) conversational and able to handle follow-ups, (c) consistent in quality, and (d) able to remember the user's life over time.
+Desired state: An always-available conversational astrologer that knows your chart cold, remembers what you've told it, and gives consistent, personalized, non-fatalistic guidance for real life decisions.
+1.3 The bet (explicit hypothesis)
+We believe that giving each user an AI astrologer permanently grounded in their own computed chart, plus a memory of their life, will produce guidance that feels personal and trustworthy enough to drive repeat engagement and willingness to pay, for the large audience of Vedic-astrology followers. We'll know we're right when we see strong D7/D30 retention, high session CSAT (≥4.2/5), and a healthy free → paid conversion among engaged users.
+1.4 Why now
+LLMs are finally good enough to (a) reason over a complex structured chart without hallucinating the facts, (b) hold a coherent multi-turn persona, and (c) extract and use long-term memory. The astrology computation itself is a solved, deterministic problem (ephemeris math). The missing piece — turning a chart into a consistent, personalized advisor that remembers you — is now buildable.
+
+2. Goals and success metrics
+2.1 Product goals
+Let any user go from "I have a phone" to "I'm chatting with my personal astrologer about my chart" in under 3 minutes.
+Deliver guidance that is personalized (grounded in chart + remembered life context) and consistent (same question → coherent answer, not random).
+Earn trust through accuracy of the chart, quality of conversation, and safety (no harmful medical/financial/legal/fatalistic advice).
+Scale to a mass audience across web, Android, and iOS economically.
+2.2 Success metrics
+Leading indicators (early signals):
+Metric
+Target (first 90 days post-launch)
+Onboarding completion rate (start form → chart generated)
+≥ 75%
+Time-to-first-message (signup → first astrologer reply)
+≤ 3 min median
+First-session CSAT
+≥ 4.0 / 5
+Per-message thumbs-up rate
+≥ 80%
+Chart computation accuracy vs reference engines
+≥ 99.9% on validation set
+
+Lagging indicators (true outcomes):
+Metric
+Target
+D7 retention
+≥ 25%
+D30 retention
+≥ 12%
+Avg sessions / active user / month
+≥ 4
+Memory opt-in rate (Manual or Auto)
+≥ 40%
+Free → paid conversion (engaged users)
+≥ 5%
+Safety incident rate (harmful response per 10k msgs)
+≈ 0 (hard guardrail)
+
+[ASSUMPTION] Specific numbers are placeholders to make targets concrete; calibrate against your own benchmarks. The categories are what matter.
+
+3. Users and personas
+Persona
+Who they are
+What they want
+Key need from us
+The Seeker (primary)
+Believes in astrology, faces a real decision (career move, marriage, finances, health worry).
+Personalized guidance for a specific situation.
+Chart-grounded, empathetic, actionable answers.
+The Curious
+Casually interested, exploring their chart.
+To understand themselves; entertainment + insight.
+Easy onboarding, beautiful chart, engaging explanations.
+The Regular
+Returns often, treats the astrologer as an ongoing advisor.
+An advisor that remembers them and tracks their life.
+Strong memory + continuity across sessions.
+(Internal) Ops/Quality reviewer
+Our team.
+To monitor conversation quality and safety.
+Feedback data, tracing, eval tooling, flagging.
+
+
+4. Scope
+4.1 V1 — IN
+Authentication (email/password, Google, Apple).
+Birth-data capture form (name, date, exact time, place).
+Server-side computation of the full Vedic chart (D1 + key divisional charts, dashas, nakshatra, yogas, doshas, ashtakavarga, shadbala).
+Generation of a per-user permanent astrological profile that grounds the AI ("the chart facts sheet" + interpretive profile).
+Visual chart rendering: traditional North-Indian style Lagna + Navamsa at minimum, with planetary positions and dasha tables; downloadable PDF report.
+Conversational AI astrologer grounded in the user's chart, with streaming responses.
+Memory system with three modes: Off / Manual / Auto, plus a memory-management screen (view/edit/delete).
+Per-chat feedback: per-message thumbs up/down + per-session CSAT (1–5) + optional comment.
+Profile + settings management.
+Web app + Android app + iOS app.
+Safety guardrails (medical/financial/legal/self-harm/fatalism).
+4.2 V1 — OUT (explicitly not building yet)
+Voice agents (planned V2 — see §14; architecture is designed to support it now).
+Multi-person features: compatibility/matchmaking (kundali matching between two people), family charts. (The uploaded "relationship compatibility" project framing is deferred; V1 is single-user self-analysis.)#park
+Live human-astrologer marketplace (the AstroSage "chat with a real astrologer" model).
+Muhurta (electional timing), prashna (horary), and other advanced services beyond conversational Q&A.#park
+Push-notification daily horoscopes (COULD, post-V1).
+Payments/monetization mechanics (see §12 — decision pending; the capability hooks are in scope but the storefront is not).
+4.3 DEFERRED (V2+ roadmap)
+Voice astrologer · compatibility/matchmaking · proactive notifications (dasha/transit alerts) · regional language support beyond launch set · human-in-the-loop expert escalation.
+
+5. Core user flows
+5.1 First-run / onboarding
+User opens app → sees value prop + "Create your chart" CTA.
+Authenticate (email, Google, or Apple).
+Birth-data form: full name, date of birth, time of birth (with a clear "don't know exact time?" path — see R-DATA-04), place of birth (autocomplete → lat/long + timezone).
+User submits → loading state ("Casting your chart…").
+Backend computes chart → generates per-user astrological profile → renders chart.
+User lands on chart view (their visual kundali + key highlights: ascendant, moon sign, nakshatra, current mahadasha, notable yogas/doshas).
+Clear CTA: "Talk to your astrologer."
+5.2 Conversation
+User opens the chat with their astrologer.
+Optional first-time primer: astrologer greets them by name, references one true thing from their chart ("As a Cancer ascendant with Jupiter exalted in your 1st house…").
+User asks a question (life decision, prediction, "what does my chart say about X").
+Astrologer responds — grounded in chart facts + current dasha/transit + any remembered context — with streaming text.
+User can follow up; context persists within the session and (via memory) across sessions.
+Per-message feedback (thumbs) available; on session end, CSAT prompt.
+5.3 Memory capture (mode-dependent)
+Off: nothing is stored about the user beyond the chart and transcripts (transcripts retained per privacy policy, but not mined into a user model).
+Manual: when the system detects a salient life fact, it asks: "Want me to remember this? [Save] [Edit] [No]" before persisting.
+Auto: salient facts are extracted and saved automatically; user can review/edit/delete anytime in the memory screen.
+5.4 Feedback(potential for rl-model will switch to custom world model–v3)
+Per message: 👍 / 👎 (👎 optionally asks "what was wrong?" with quick tags).
+Per session: CSAT (1–5 stars) + optional free text on close/exit.
+
+6. Functional requirements
+6.1 Authentication & account (AUTH)
+R-AUTH-01 MUST Support sign-up/sign-in via email + password, Google, and Apple (Apple is mandatory for iOS App Store if other social logins are present).Oauth
+R-AUTH-02 MUST A single user account is consistent across web, Android, iOS (same credentials → same profile, chart, memory, history).
+R-AUTH-03 MUST Secure session handling (token-based; refresh tokens; logout invalidates session).
+R-AUTH-04 SHOULD Account deletion that fully removes chart, memory, transcripts, and PII (right-to-erasure — see §8).
+R-AUTH-05 SHOULD Email verification and password reset.
+R-AUTH-06 COULD Phone/OTP login (common and trusted in the India market).
+6.2 Birth-data capture (DATA)
+R-DATA-01 MUST Collect: full name, date of birth, time of birth, place of birth.
+R-DATA-02 MUST Place input uses autocomplete that resolves to latitude, longitude, and timezone (chart accuracy depends on this).
+R-DATA-03 MUST Time of birth captured to the minute; UI explains why exact time matters (ascendant and houses depend on it).
+R-DATA-04 MUST Provide a clear path for users who don't know their birth time (e.g., default to a chart that flags reduced confidence in time-dependent factors, or offer a "rectification later" note). The astrologer must be told when time is uncertain so it caveats time-sensitive claims.
+R-DATA-05 MUST Validate inputs (plausible date ranges, valid time, resolved location) with inline errors. Example: empty time field → "Birth time is required for an accurate chart."
+R-DATA-06 SHOULD Allow the user to edit birth data (which triggers a full chart recompute and profile regeneration — and should warn that this resets chart-derived context).
+R-DATA-07 COULD Support multiple saved profiles per account (e.g., for family members) — but single active profile in V1.
+6.3 Chart generation & storage (CHART)
+R-CHART-01 MUST Compute the chart server-side from birth data, producing a canonical structured Chart object (see System Design §4). Computation is deterministic and cached/immutable per (birth-data) input.
+R-CHART-02 MUST Compute, at minimum:
+Ascendant (Lagna) and its lord; Moon sign (Rasi) and lord; Sun sign; Nakshatra + Pada and lord.
+Planetary positions (Sun→Saturn, Rahu, Ketu; outer planets optional) with sign, degree, nakshatra, retrograde/combust/exalted/debilitated/own-sign status, and house placement.
+Vimshottari Dasha full timeline (Maha → Antar → Pratyantar) with the balance-of-dasha at birth.
+Key divisional charts — D1 (Rashi) and D9 (Navamsa) MUST; broader Shodashvarga (D2…D60) SHOULD.
+Doshas: Mangal/Manglik, Kalsarpa, Sade Sati status.
+Strength tables: Ashtakavarga, Shadbala, Bhavabala.
+Yogas detected (Raja, Dhana, etc.).
+R-CHART-03 MUST Use a defined ayanamsa (default Lahiri) and document the house system used; expose ayanamsa in stored data for reproducibility.
+R-CHART-04 MUST Validate engine output against known reference charts (the uploaded AstroSage chart is a fixture) to a defined tolerance.
+R-CHART-05 SHOULD Recompute time-sensitive elements (current Maha/Antar/Pratyantar dasha, current transits, current Sade Sati phase) relative to "now" at conversation time, not just at chart creation. (The static natal chart never changes; the active periods move with time.)
+6.4 Chart visualization (VIZ)
+R-VIZ-01 MUST Render a traditional North-Indian style Lagna chart and Navamsa chart from the Chart object.
+R-VIZ-02 MUST Display planetary-positions table (planet, sign, degree, nakshatra, pada, status) and the Vimshottari dasha timeline with the current period highlighted.
+R-VIZ-03 SHOULD Render the full Shodashvarga (divisional) chart set and strength tables (Ashtakavarga/Shadbala), matching the depth of a traditional report.
+R-VIZ-04 SHOULD Offer South-Indian style as a toggle (regional preference).
+R-VIZ-05 SHOULD Generate a downloadable PDF report of the full chart + analysis (parity with the kind of report users expect).
+R-VIZ-06 MUST Charts render correctly and legibly on web, Android, and iOS (shared rendering — see System Design §5).
+R-VIZ-07 COULD Interactive charts (tap a house/planet → detail popover).
+6.5 The personalized astrologer — conversation (CHAT)
+R-CHAT-01 MUST Provide a chat interface where the AI astrologer answers the user's questions, grounded in their chart.
+R-CHAT-02 MUST The astrologer is grounded in the user's permanent astrological profile (generated once from the chart) so its persona and the chart facts persist across every session.
+R-CHAT-03 MUST The astrologer never invents chart facts. Planetary positions, dignities, dashas, and yogas it cites must come from the computed chart, not from the model's imagination. (See System Design — grounding pattern.)
+R-CHAT-04 MUST Responses stream token-by-token for responsiveness.
+R-CHAT-05 MUST The astrologer incorporates time context — it knows what dasha/antardasha is currently running and relevant current transits when giving timing-related guidance.
+R-CHAT-06 MUST The astrologer incorporates remembered context (per memory mode) so advice reflects the user's known life situation.
+R-CHAT-07 MUST Conversation history is persisted; users can revisit past chats.
+R-CHAT-08 MUST The astrologer's tone is empathetic, balanced, and non-fatalistic — challenges framed as growth, never doom/death predictions (see §8 Safety).
+R-CHAT-09 SHOULD Support multi-session "threads" (user can have distinct conversations) vs one continuous thread — [ASSUMPTION] V1 = one primary continuous thread per user for simplicity; multi-thread is a fast-follow.
+R-CHAT-10 SHOULD The astrologer can pull deeper chart data on demand (e.g., consult the D9 for a marriage question, the D10 for career) rather than holding the entire chart in context at all times.
+R-CHAT-11 COULD Suggested prompt chips ("Ask about career," "What's my current period like?") to reduce blank-page friction.
+6.6 Memory (MEM)
+R-MEM-01 MUST Provide three memory modes selectable by the user: Off, Manual, Auto. Default = [ASSUMPTION] Manual (privacy-respecting but useful). Confirm in §13.
+R-MEM-02 MUST Memories are treated as user-asserted data points, not ground truth — the astrologer references them as "you mentioned…", never as astrological fact, and never lets a memory override the chart.
+R-MEM-03 MUST Auto mode: salient life facts (occupation, marital status, major events, stated goals/concerns) are extracted and stored automatically.
+R-MEM-04 MUST Manual mode: the system surfaces a candidate memory and asks the user to Save / Edit / Discard before persisting.
+R-MEM-05 MUST Off mode: no user-model extraction or storage (beyond transcript retention per policy).
+R-MEM-06 MUST A memory-management screen: list all stored memories with category, source, and date; allow edit and delete; allow export.
+R-MEM-07 MUST Mode changes are respected immediately. Switching to Off offers to also delete existing memories.
+R-MEM-08 SHOULD Memories are categorized (e.g., occupation, relationships, family, health, finances, goals) for structured recall and easy review.
+R-MEM-09 SHOULD De-duplication / update logic (new "I got a new job" updates the occupation fact rather than piling duplicates).
+R-MEM-10 MUST Memory data is encrypted and fully covered by account deletion / erasure.
+6.7 Feedback & CSAT (FB)
+R-FB-01 MUST Per-message thumbs up/down.
+R-FB-02 SHOULD A thumbs-down opens quick reason tags ("inaccurate," "too generic," "unhelpful," "felt wrong/unsafe") + optional free text.
+R-FB-03 MUST Per-session CSAT (1–5) prompted on session end/exit, with optional comment.
+R-FB-04 MUST All feedback is stored and linked to the exact message/conversation + the prompt/model version used (for eval and improvement — see System Design LLMOps).
+R-FB-05 SHOULD A safety-flag path: user can report a response as harmful, which routes to review with priority.
+6.8 Settings & profile (SET)
+R-SET-01 MUST View/edit birth data (with recompute warning), memory mode, account, privacy controls.
+R-SET-02 MUST Data controls: export my data, delete my account/data.
+R-SET-03 SHOULD Chart-style preference (North/South Indian), language preference, notification preferences (when notifications ship).
+
+7. Non-functional requirements
+7.1 Performance & responsiveness
+R-NFR-01 MUST Chart computation completes within a few seconds at onboarding (cached thereafter).
+R-NFR-02 MUST Astrologer first-token latency target < 2s; full responses stream.
+R-NFR-03 MUST App remains responsive under load (see scalability).
+7.2 Scalability
+R-NFR-04 MUST Designed for mass rollout: stateless services, horizontal scaling, async processing for heavy/slow work (profile generation, memory extraction). See System Design §15.
+R-NFR-05 MUST Cost controls: model tiering, prompt caching for the static per-user system prompt, token budgeting (System Design §12).
+7.3 Availability & reliability
+R-NFR-06 SHOULD Target 99.9% availability for core chat + chart APIs.
+R-NFR-07 MUST Graceful degradation: if the LLM provider is down, fail over to a secondary; if memory/retrieval fails, still answer from the chart.
+7.4 Privacy, security, compliance — see §8 (treated as first-class given sensitivity).
+7.5 Accessibility & internationalization
+R-NFR-08 SHOULD WCAG-aligned accessibility (contrast, screen-reader labels, scalable text). Charts need text alternatives.
+R-NFR-09 SHOULD i18n-ready architecture (strings externalized). Launch language(s) per §13; Hindi + English are the obvious first targets for the India market.
+
+8. Safety, ethics & compliance (first-class — read carefully)
+This is not optional polish. A mass-market advisor that touches health, money, relationships, and life decisions can cause real harm if it overreaches or frightens vulnerable users. The classical texts our domain draws on contain fatalistic and even alarming statements (e.g., predictions of death of family members, "leprosy," "suicide" found verbatim in standard reports). We must not reproduce that.
+8.1 Hard guardrails (SAFE)
+R-SAFE-01 MUST — Mental health / self-harm: If a user expresses distress, hopelessness, or self-harm/suicidal ideation, the astrologer breaks persona and responds with care and appropriate crisis resources — it does not offer astrological platitudes or fatalistic readings. No mention of methods. This overrides everything.
+R-SAFE-02 MUST — No fatalism / no doom: The astrologer never predicts death, terminal illness, or catastrophe for the user or named others, and never frames a chart factor as an unavoidable curse. Challenges are framed as tendencies and growth areas, with agency preserved.
+R-SAFE-03 MUST — Medical: No diagnoses, no telling users to start/stop medication or treatment. Health topics are framed gently and redirect to qualified professionals. It must not weaponize chart "health" indications into alarming claims.
+R-SAFE-04 MUST — Financial: No specific investment/trading directives that could cause loss ("sell everything," "put it all in X"). General, non-directive framing; recommend professionals for real financial decisions.
+R-SAFE-05 MUST — Legal: No legal advice; redirect to qualified counsel.
+R-SAFE-06 MUST — Child safety & abuse: Standard prohibitions apply across the product.
+R-SAFE-07 MUST — No exploitation: The astrologer must not use fear ("buy this remedy or disaster strikes") to manipulate; remedies, if discussed, are framed as traditional, optional, low-cost, and never coercive.
+R-SAFE-08 MUST — Disclaimer: A clear, persistent disclaimer that the product is for guidance/entertainment and is not a substitute for professional medical, legal, financial, or psychological advice (mirrors industry standard).
+R-SAFE-09 MUST Guardrails apply on both input and output, and are enforced by a layer the persona prompt cannot override (System Design §8 Guardrail layer).
+8.2 Data privacy & compliance
+R-PRIV-01 MUST Birth data, life memories, and transcripts are sensitive personal data — encrypted at rest and in transit.
+R-PRIV-02 MUST Explicit consent for memory capture (especially Auto). Clear, granular controls.
+R-PRIV-03 MUST Right to access, export, and erasure (GDPR-style; India's DPDP Act is directly relevant given the market).
+R-PRIV-04 SHOULD Data-residency awareness (the reference report names Indian jurisdiction; plan for region-appropriate storage).
+R-PRIV-05 MUST Define retention policy for transcripts and memories; honor deletion end-to-end including from vector stores and backups per policy.
+R-PRIV-06 SHOULD Be deliberate about sending PII to third-party model providers (use providers with appropriate data-handling terms; consider zero-retention / no-training options; minimize PII in prompts where feasible).
+
+9. Platforms & rollout
+9.1 Platforms
+MUST Web app, Android app, iOS app. Single backend/API serving all three (System Design §1).
+[ASSUMPTION] Cross-platform mobile (React Native or Flutter) to ship Android + iOS faster from one codebase, with a web app sharing as much logic/design as possible. Native is an option if you want maximum polish — see System Design §16. Decision in §13.
+9.2 Phased rollout
+Internal alpha — team + trusted testers. Validate chart accuracy (against references) and conversation quality.
+Closed beta — invite cohort, feature-flagged. Tune prompts, guardrails, latency, cost.
+Staged GA — percentage rollout (feature flags / gradual ramp), web first or all-platforms depending on readiness, with monitoring and kill-switches.
+Scale — open to mass audience once safety + cost + reliability targets hold.
+MUST Feature flags for risky surfaces (memory Auto mode, new model versions, guardrail changes) so they can be toggled without redeploying.
+
+10. Analytics & instrumentation
+Track (privacy-respecting, consented) the events needed to measure §2:
+Onboarding funnel: form-start, each field, submit, chart-generated, first-message.
+Engagement: sessions, messages/session, returning sessions, thread length.
+Quality: per-message thumbs, session CSAT, safety flags, regeneration/edits.
+Memory: mode chosen, candidates surfaced, saved/edited/discarded counts, memory-screen usage.
+Reliability/cost: latency (first-token, full), token usage, model/version, provider, errors, fallbacks triggered.
+Every astrologer turn is traced with the assembled prompt version, tools used, model version (System Design §13 LLMOps).
+
+11. Dependencies
+Astrology computation: an ephemeris library (e.g., Swiss Ephemeris) or a third-party astrology API — decision in §13 (System Design §3 covers tradeoffs + licensing).
+LLM provider(s) for the astrologer, the memory extractor, the profile synthesizer, and embeddings.
+Auth provider (build vs Firebase/Auth0/Clerk/Cognito).
+Geocoding/timezone provider for place → lat/long/tz.
+Vector database for memory (and optional Jyotish knowledge base).
+Object storage for rendered charts/PDFs; relational DB; cache.
+
+12. Monetization (decision pending — capability in scope, storefront out)
+The reference product's pattern is instructive: free basic chart → paid detailed reports → paid astrologer chat. Likely options for us:
+Freemium: free chart + limited astrologer messages/day; subscription for unlimited chat, deeper reports, memory, premium features.
+Subscription tiers (monthly/annual).
+One-off purchases (full PDF report, specialized readings).
+V1 MUST include the hooks (usage metering per user, entitlement checks) even if the storefront ships later. The pricing model itself is an open decision (§13).
+
+13. Open decisions (resolve before/early in build)
+#
+Decision
+Options
+Owner
+Why it matters
+D1
+Astrology engine: build vs buy
+Swiss Ephemeris in-house · 3rd-party API · hybrid
+Eng lead
+Cost at scale, accuracy control, licensing (AGPL vs commercial)
+D2
+Mobile approach
+React Native · Flutter · Native
+Eng lead
+Speed-to-ship vs polish; shared chart renderer
+D3
+Default memory mode
+Off · Manual · Auto
+Product + Legal
+Privacy posture vs personalization
+D4
+Launch languages
+English-only · English + Hindi · more
+Product
+Market fit (India) vs scope
+D5
+LLM provider(s) & data terms
+(provider choices)
+Eng + Legal
+Quality, cost, PII handling, no-train options
+D6
+Monetization model
+Freemium · subscription · one-off
+Product/Business
+Revenue + which features gate
+D7
+One thread vs multi-thread chat
+Single continuous · multiple
+Product
+UX complexity
+D8
+Chart depth at launch
+D1+D9 only · full Shodashvarga
+Product
+Effort vs perceived completeness
+D9
+"Unknown birth time" handling
+Block · default + caveat · rectification flow
+Product
+Accuracy vs accessibility
+
+
+14. Future roadmap (post-V1)
+Voice astrologer (V2 headline): speak to your astrologer; same "brain," latency-optimized (STT → astrologer agent → TTS). Architecture is designed now to slot this in (System Design §18).
+Compatibility / kundali matching between two charts (revives the relationship-analysis use case).
+Proactive guidance: notifications when a significant dasha changes or a major transit hits ("Your Jupiter mahadasha begins next month").
+Human-expert escalation: hand off to a real astrologer for premium/edge cases.
+Deeper personalization: longitudinal trend tracking ("last quarter you were anxious about work; here's how the period shifted").
+More divisional depth & specialized readings (career deep-dive, marriage timing, finance).
+
+15. The Stranger / Engineer / QA test (self-audit)
+Stranger test: Someone with zero context can read §1–§6 and know what we're building and why. ✔ (intentionally front-loaded.)
+Engineer test: Ambiguities are pushed to the System Design doc with explicit data contracts; open forks are listed in §13 rather than hidden in prose.
+QA test: Numbered, prioritized requirements (R-*) map directly to test cases.
+Leadership test: §2 metrics, §9 rollout, §12 monetization, §8 risk give the impact/cost/tradeoff picture.
+This is a living draft. Next step: resolve §13 decisions, then engineering breaks down the System Design doc into tickets.
+

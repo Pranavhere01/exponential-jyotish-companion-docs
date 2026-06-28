@@ -1,0 +1,589 @@
+System Design & Technical Architecture — Personal AI Astrologer
+Status: Draft v0.1 Companion: 01_PRD_Personal_AI_Astrologer.md (the "what/why")
+This document is the "how." It covers the whole system, the intelligence layers, every agent and sub-agent, the concrete system prompts, the data contracts, and the LLMOps/security/scaling practices. It's written so a novice can follow the moving parts and an engineer can build from it.
+
+0. The single most important idea (read this first)
+There are two kinds of intelligence in this product, and keeping them separate is what makes it work:
+Deterministic intelligence (math). Computing the chart, the planetary positions, the dashas, the divisional charts, the doshas — this is solved astronomy + classical rules. It must be exact and never hallucinated. We compute it with code, store it as structured data, and treat it as ground truth.--tools
+
+
+Generative intelligence (the LLM). Interpreting that chart in conversation, remembering the user, giving empathetic guidance. This is where the LLM lives.--general world models
+
+
+The golden rule: The LLM reasons from the computed facts; it never invents them. When the astrologer says "your Jupiter is exalted in your 1st house," that fact came from the deterministic engine and was handed to the model — the model did not guess it. This is the difference between a trustworthy product and a confident-sounding random-fact generator.
+A corollary: don't use an LLM where math or a lookup will do. Computing the current dasha is arithmetic, not a prompt. Fetching the D9 chart is a database read, not a prompt. We use LLMs only for synthesis, conversation, and extraction.
+
+1. High-level architecture
+┌─────────────────────────────────────────────────────────────────────────┐
+│                              CLIENTS                                      │
+│        Web (browser)        Android app        iOS app                    │
+│        (shared design system + shared chart renderer)                     │
+└───────────────────────────────┬───────────────────────────────────────────┘
+                                 │  HTTPS / WSS (streaming)
+                         ┌───────▼────────┐
+                         │  API Gateway / │   auth, rate-limit, routing,
+                         │      BFF       │   request shaping, entitlements
+                         └───────┬────────┘
+        ┌────────────────────────┼─────────────────────────────────────┐
+        │                        │                                      │
+┌───────▼──────┐   ┌─────────────▼──────────┐   ┌─────────────────▼─────────────┐
+│ Auth & User  │   │  Astrology Engine svc  │   │  Conversation Orchestrator    │
+│ /Profile svc │   │  (deterministic math)  │   │  ("the Astrologer" runtime)   │
+│              │   │  - chart from birth    │   │  - assembles context          │
+│ - accounts   │   │  - dashas / transits   │   │  - calls tools                │
+│ - birth data │   │  - divisional charts   │   │  - calls LLM Gateway          │
+│ - settings   │   │  - doshas, strengths   │   │  - streams response           │
+│ - mem mode   │   └─────────┬──────────────┘   └──────┬─────────────┬──────────┘
+└──────┬───────┘             │                         │             │
+       │            ┌────────▼─────────┐      ┌─────────▼───┐  ┌──────▼────────┐
+       │            │ Profile/Prompt   │      │  Memory svc │  │  LLM Gateway  │
+       │            │ Synthesizer svc  │      │  - extract  │  │  - routing    │
+       │            │ (one-shot, async)│      │  - store    │  │  - prompt asm │
+       │            └────────┬─────────┘      │  - retrieve │  │  - caching    │
+       │                     │                └──────┬──────┘  │  - guardrails │
+       │            ┌────────▼─────────┐             │         │  - fallbacks  │
+       │            │ Chart Renderer   │             │         └──────┬────────┘
+       │            │ (SVG / PDF)      │             │                │
+       │            └──────────────────┘             │        ┌───────▼────────┐
+       │                                             │        │ Model providers│
+┌──────▼─────────────────────────────────────────────▼──┐     │ (LLM, embed,   │
+│  DATA STORES                                           │     │  moderation)   │
+│  Relational DB │ Vector DB │ Object store │ Cache(Redis)│     └────────────────┘
+│  (users,chats, │ (memories,│ (rendered    │ (sessions,  │
+│   feedback)    │  knowledge)│  charts,PDFs)│  hot chart) │
+└────────────────────────────────────────────────────────┘
+                                 ▲
+                  ┌──────────────┴───────────────┐
+                  │  Observability / LLMOps       │
+                  │  tracing, eval, cost, flags,  │
+                  │  feedback loop, dashboards    │
+                  └───────────────────────────────┘
+
+Everything stateless and horizontally scalable; heavy/slow work (profile generation, memory extraction, PDF rendering) runs async via a job queue, not in the user's request path.
+
+2. Component responsibilities (the moving parts)
+Component
+Responsibility
+LLM?
+API Gateway / BFF
+Single entry point. Auth check, rate limiting, routing, request/response shaping per client, entitlement (free/paid) checks.
+No
+Auth & User/Profile svc
+Accounts, social login, birth data, settings, memory mode, references to the user's chart.
+No
+Astrology Engine svc
+Pure deterministic computation: chart from birth data, dashas, divisional charts, doshas, strengths, yogas, and on-demand current dasha/transits for a given datetime.
+No
+Profile/Prompt Synthesizer svc
+Runs once after chart creation. Turns the Chart object into (a) a deterministic Chart Facts Sheet and (b) an LLM-generated Interpretive Profile. Produces the per-user system prompt material.
+Yes (one-shot)
+Chart Renderer
+Turns the Chart object into SVG charts (North/South Indian, divisional) and a downloadable PDF report.
+No
+Conversation Orchestrator
+The runtime "brain wiring." For each user turn: builds context (natal core + temporal snapshot + retrieved memories), calls tools, invokes the LLM via the Gateway, streams the answer, triggers memory extraction.
+Orchestrates LLM calls
+Memory svc
+Extracts salient life facts (LLM), stores them (vector + structured), retrieves relevant ones at conversation time, enforces mode (Off/Manual/Auto), powers the memory-management UI.
+Yes (extraction only)
+LLM Gateway
+One choke point for all model calls: provider routing, prompt assembly, prompt caching, streaming, retries/fallbacks, token & cost accounting, and the guardrail wrapper.
+It is the LLM access layer
+Data stores
+Relational (users, chats, feedback, entitlements), vector (memories, optional Jyotish knowledge), object (rendered charts/PDFs), cache (sessions, hot chart data).
+No
+Observability / LLMOps
+Tracing of every turn, evaluation harness, cost dashboards, feature flags, feedback pipeline.
+No (observes LLMs)
+
+
+3. The Astrology Engine (foundation)
+3.1 Build vs buy (Decision D1)
+Option
+Pros
+Cons
+In-house (Swiss Ephemeris)
+Full control, exact, no per-call cost at scale, no third-party dependency/uptime risk, can compute everything (dashas, vargas, ashtakavarga…).
+More engineering; licensing: Swiss Ephemeris is dual-licensed AGPL-3.0 or commercial — a closed-source commercial product needs the commercial license or full AGPL compliance. Budget/legal must clear this.
+3rd-party API (various Vedic astrology APIs exist)
+Fast to ship; offloads the math.
+Per-call cost grows with scale; dependency on their uptime/accuracy/terms; less control; sending birth data to a third party (privacy).
+Hybrid (recommended path)
+Ship MVP on an API to validate product, migrate to in-house Swiss-Ephemeris engine before scale to control cost and data.
+Two integrations over time.
+
+Recommendation: Architect the engine behind a clean internal interface (AstrologyEngine.computeChart(birthData) → ChartObject) so the implementation (API vs in-house) is swappable without touching anything downstream. This is the key design move — everything else depends only on the Chart object, not on how it was produced.
+3.2 What it computes (per PRD R-CHART-02)
+Ascendant + lord · Moon sign/Sun sign · Nakshatra + Pada + lord · all grahas (Sun→Saturn, Rahu, Ketu; outers optional) with sign/degree/nakshatra/retro/combust/exalt/debilit/own + house placement · full Vimshottari (Maha→Antar→Pratyantar) + balance at birth · divisional charts (D1, D9 minimum; D2–D60 Shodashvarga) · doshas (Mangal, Kalsarpa, Sade Sati phase) · strengths (Ashtakavarga, Shadbala, Bhavabala) · yogas detected · ayanamsa (Lahiri) + house system recorded.
+3.3 Temporal endpoint (R-CHART-05)
+A separate method computeTemporalContext(chart, datetime=now) returns the currently active Maha/Antar/Pratyantar dasha, current Sade Sati phase, and key current transits. This is pure arithmetic over the natal chart and the date. Called at conversation time so guidance is time-relevant. The natal chart is immutable; this snapshot moves.
+3.4 Validation
+The uploaded reference chart (and any others) become golden fixtures. CI compares engine output (positions, dasha dates, dosha flags) to references within tolerance. This is both correctness QA and a guard against regressions when we swap implementations.
+
+4. The Chart object (the central data contract)
+Everything downstream consumes this. Compute once, store immutably, cache. Sketch (illustrative shape, not final schema):
+{
+  "chartId": "uuid",
+  "meta": {
+    "ayanamsa": "Lahiri",
+    "ayanamsaValue": "23-53-57",
+    "houseSystem": "WholeSign",     // document the choice
+    "computedAt": "ISO-8601",
+    "engineVersion": "1.4.0",
+    "birthTimeKnown": true          // drives time-sensitivity caveats
+  },
+  "birth": { "name": "...", "datetime": "...", "tz": "+5.5",
+             "place": "...", "lat": 26.21, "lon": 78.18 },
+
+  "ascendant": { "sign": "Cancer", "degree": "23-40-25",
+                 "nakshatra": "Ashlesha", "pada": 3, "lord": "Moon" },
+  "moonSign": "Virgo", "sunSign": "Capricorn",
+  "nakshatra": { "name": "Chitra", "pada": 2, "lord": "Mars" },
+
+  "planets": [
+    { "graha": "Jupiter", "sign": "Cancer", "house": 1,
+      "degree": "20-21-41", "nakshatra": "Ashlesha", "pada": 2,
+      "retrograde": true, "combust": false,
+      "dignity": "Exalted", "lordOfHouses": [6, 9] }
+    // ... all grahas
+  ],
+
+  "divisional": {
+    "D1":  { /* sign→planets, house map */ },
+    "D9":  { /* Navamsa */ },
+    "D10": { /* ... */ } // up to D60 when computed
+  },
+
+  "vimshottari": {
+    "balanceAtBirth": { "lord": "Mars", "y": 3, "m": 7, "d": 17 },
+    "mahadashas": [
+      { "lord": "Mars",   "start": "2003-01-24", "end": "2006-09-12",
+        "antardashas": [ /* Antar → Pratyantar nested */ ] }
+      // ...
+    ]
+  },
+
+  "doshas": {
+    "mangal":   { "present": false, "fromLagna": 5, "fromMoon": 3 },
+    "kalsarpa": { "present": false },
+    "sadeSati": { "currentPhase": null, "timeline": [ /* phases */ ] }
+  },
+
+  "strengths": {
+    "ashtakavarga": { "perSign": [/* 12 */], "perPlanet": { /* ... */ } },
+    "shadbala":     { /* per planet, rupas, rank */ },
+    "bhavabala":    { /* per house */ }
+  },
+
+  "yogas": [ { "name": "...", "planets": ["..."], "houses": [/*..*/] } ]
+}
+
+Why this matters: the renderer, the synthesizer, the runtime tools, and the LLM grounding all read this one object. It is the spine of the system.
+
+5. Chart rendering (visual kundali)
+Input: the Chart object. Output: SVG (interactive-capable) + a PDF report.
+Shared renderer: implement chart drawing as a pure function of the Chart object → SVG, packaged so web and mobile use the same logic (e.g., a shared TS rendering lib; React renders SVG natively, React Native via an SVG lib). This avoids three divergent chart implementations.
+Styles: North-Indian (diamond) — default; South-Indian (square) — toggle. Divisional charts reuse the same renderer with different data slices.
+Static vs interactive: charts are static once computed, so server-side SVG (cached in object store) is cheap; client-side SVG enables tap-to-inspect (R-VIZ-07). Recommend client-side SVG components fed by the Chart object, with a server-rendered PDF for download/sharing.
+PDF report: generated async (job queue) and stored in object storage; user downloads a link. Mirrors the depth users expect from traditional reports.
+
+6. The intelligence layers (mental model)
+A clean way to think about "where the intelligence lives":
+Layer
+Name
+What it is
+LLM?
+When it runs
+L0
+Computation
+Ephemeris + classical rules → Chart object
+No
+Once at onboarding (cached)
+L1
+Grounding
+Chart Facts Sheet — authoritative, compact, machine-generated text/data of the chart
+No
+Once (derived from L0)
+L2
+Synthesis
+Interpretive Profile — rich natal narrative generated by an LLM from L0/L1
+Yes
+Once at onboarding (async)
+L3
+Conversation
+The runtime Astrologer answering questions
+Yes
+Every user turn
+L4
+Personalization
+Memory — longitudinal user model of life facts
+Yes (extraction)
+Async after turns / on demand
+L5
+Safety
+Guardrails on input + output
+Classifier/LLM
+Every turn
+L6
+Learning
+Feedback → eval → prompt/model improvement
+No (analyzes LLMs)
+Continuous
+
+The runtime astrologer (L3) is grounded by L1, enriched by L2, personalized by L4, protected by L5, and improved by L6.
+
+7. The personalization pipeline (chart → system prompt)
+This is the "permanent system instructions per user" you described. It has three stages.
+7.1 Stage A — Chart Facts Sheet (L1, deterministic)
+A template-generated, compact, authoritative rendering of the chart in a form the LLM can reason over without ambiguity. No LLM, no hallucination risk. Example fragment:
+ASCENDANT: Cancer (Ashlesha pada 3), lord Moon.
+MOON SIGN: Virgo. SUN SIGN: Capricorn. BIRTH NAKSHATRA: Chitra pada 2 (lord Mars).
+PLANETS:
+  Jupiter — Cancer, House 1, Exalted, Retrograde, lord of 6 & 9.
+  Mars    — Scorpio, House 5, Own sign, lord of 5 & 10.
+  ... (all grahas)
+DOSHAS: Manglik — No. Kalsarpa — No.
+KEY YOGAS: <detected>.
+
+This is the non-negotiable ground truth injected into the astrologer's context.
+7.2 Stage B — Interpretive Profile (L2, LLM, one-shot, stored)
+An LLM (using the expert-astrologer persona — your uploaded astrologer prompt is an excellent base) reads the Chart object + Facts Sheet and produces a rich natal profile: personality, strengths/challenges, career/relationship/health themes, dasha narrative, dosha interpretation, remedies framing. Generated once, async, cached. This gives the astrologer depth and a consistent "reading" of the user without re-deriving it every message.
+Optional sub-agents (depth): the synthesizer can be decomposed into specialists — Personality, Career, Relationships, Health, Dasha-narrative, Yogas/Doshas — each analyzing one slice, then a Composer merges them into the profile. This improves quality and parallelizes, at higher one-time cost. Start monolithic; split if quality demands.
+7.3 Stage C — Runtime system prompt assembly (L3)
+For each conversation, the Orchestrator assembles the astrologer's context as layers, ordered so the static part is cacheable:
+[STATIC, cached per user]
+  1. Persona + behavioral rules + SAFETY guardrails   (mostly identical across users)
+  2. Chart Facts Sheet (L1)                            (static per user)
+  3. Interpretive Profile summary (L2)                 (static per user)
+[DYNAMIC, per request]
+  4. Temporal context: current Maha/Antar/Pratyantar dasha, current transits, Sade Sati phase
+  5. Retrieved memories (L4), clearly labeled "user-asserted, not chart fact"
+  6. Recent conversation history (windowed/summarized)
+  7. The user's new message
+
+Critical optimization: sections 1–3 are static per user and identical across all their messages, so we exploit provider prompt caching — the large static prefix is cached and not re-billed/re-processed each turn. This is the single biggest cost/latency lever in the system (see §12).
+Avoid context bloat: we do not stuff all 16 divisional charts, full dasha tables, and ashtakavarga into every prompt. The compact natal core covers ~90% of questions. For depth, the astrologer calls a tool (next section) to fetch exactly the slice it needs (e.g., D9 for marriage). This keeps prompts small, cheap, and focused.
+
+8. The agents & sub-agents (detailed)
+We distinguish LLM agents (reason/generate) from deterministic tools/services (compute/lookup). Don't burn an LLM on arithmetic.
+8.1 Agent map
+                        ┌──────────────────────────┐
+   one-shot, onboarding  │  PROFILE SYNTHESIZER       │  LLM
+   (async)               │  (+ optional sub-agents:   │
+                         │   Personality, Career,     │
+                         │   Relationships, Health,   │
+                         │   Dasha, Yogas/Doshas,     │
+                         │   Composer)                │
+                         └──────────────┬─────────────┘
+                                        │ writes Interpretive Profile
+                                        ▼
+   runtime, every turn   ┌────────────────────────────┐
+                         │   ASTROLOGER (conversational│  LLM  ← the main agent
+                         │   agent)                    │
+                         │   tools ↓                   │
+                         └───┬─────────┬──────────┬────┘
+                             │         │          │
+              ┌──────────────▼┐  ┌─────▼──────┐  ┌▼───────────────┐
+   tools      │ Chart Query    │  │ Temporal   │  │ Memory Retrieve│   (deterministic)
+   (NOT LLMs) │ (D9/D10/varga, │  │ Context    │  │ (vector + rank)│
+              │  dasha, yoga)  │  │ (dasha/    │  └────────────────┘
+              └────────────────┘  │  transit)  │
+                                  └────────────┘
+   async, after turns    ┌────────────────────────────┐
+                         │   MEMORY EXTRACTOR          │  LLM (cheap model)
+                         └────────────────────────────┘
+   wraps every LLM call  ┌────────────────────────────┐
+                         │   GUARDRAIL / SAFETY        │  classifier + LLM + rules
+                         └────────────────────────────┘
+
+8.2 The Astrologer (runtime agent) — the main brain
+Role: answer the user's questions as a warm, knowledgeable Vedic astrologer, grounded in their chart + temporal context + memory.
+Grounding: Chart Facts Sheet (authoritative) + Interpretive Profile (depth). Never invents chart facts.
+Tools it can call (function calling):
+getDivisionalChart(divisor) → e.g., D9 for marriage, D10 for career. (deterministic)
+getDashaContext(datetime) → current/upcoming periods. (deterministic)
+getYogasDoshas() / getStrength(planet|house) → ashtakavarga/shadbala slices. (deterministic)
+searchMemory(query) → relevant user-asserted facts. (deterministic)
+saveMemory(fact, category) → propose/store a memory (mode-gated).
+(optional) searchJyotishKnowledge(query) → retrieve classical-rule references to ground interpretation (RAG, §13).
+Output: streamed, empathetic, balanced, non-fatalistic, safety-compliant.
+8.3 Profile Synthesizer (one-shot agent) — see §7.2.
+8.4 Memory Extractor (async agent)
+Role: read a conversation (or the latest turn) and extract salient, durable life facts (occupation, marital status, family, health context, finances, stated goals/worries). Categorize, assign confidence, dedupe/update against existing memory.
+Model: a cheaper/faster model — extraction is simpler than the main conversation.
+Mode gating: Off → don't run. Manual → produce candidates, surface for user confirmation, persist only on Save/Edit. Auto → persist directly (user can edit/delete later).
+8.5 Deterministic tools (NOT agents)
+Chart Query, Temporal Context, Memory Retrieve are plain functions/services. Treating them as "agents" would add latency, cost, and hallucination risk for zero benefit. Most "what does my chart say about X" requests resolve to: (a) figure out which data slice is relevant (the LLM decides via tool call) → (b) fetch it deterministically → (c) LLM interprets.
+8.6 Guardrail / Safety layer — see §11. Wraps every LLM interaction; the persona prompt cannot override it.
+8.7 End-to-end: one user message (the full turn flow)
+1. User sends message  ──▶ API Gateway (auth, rate-limit, entitlement)
+2. ──▶ Conversation Orchestrator
+3.    Guardrail (input):   crisis/abuse/harm check.  If crisis → SAFE path, stop.
+4.    Build context:
+        • load cached static prefix (persona+facts+profile)   [prompt cache hit]
+        • Temporal Context tool → current dasha/transits (now)
+        • Memory Retrieve (if mode≠Off) → relevant facts
+        • window/summarize recent history
+5.    Call LLM (via Gateway) with tools enabled, streaming on.
+6.    If model requests a tool (e.g., getDivisionalChart("D9")):
+        • execute deterministically → return data → model continues.
+7.    Stream tokens back to client as they arrive.
+8.    Guardrail (output): scan final answer for medical/financial/legal/fatalism/safety.
+        • If violation → rewrite/redirect before/while surfacing.
+9.    Persist turn (transcript). Emit trace (prompt version, tools, tokens, latency, cost).
+10.   Async: Memory Extractor runs (mode-gated). CSAT/thumbs hooks attached.
+
+
+9. Concrete example system prompts
+These are representative and adaptable — version them as code (see §13). Your uploaded "expert Vedic Astrologer" prompt is an excellent foundation for the persona; below shows how to operationalize it with grounding, tools, temporal context, memory, and safety.
+9.1 The Astrologer (runtime) — system prompt skeleton
+ROLE
+You are {AstrologerName}, a warm, wise Vedic astrologer (Jyotish). You give
+personalized guidance grounded ONLY in the user's computed chart provided below.
+
+ABSOLUTE RULES (override everything else)
+- NEVER invent or alter chart facts. Every planetary position, dignity, house,
+  dasha, yoga, or dosha you mention MUST come from the CHART FACTS or from a tool
+  result. If you don't have a fact, fetch it with a tool or say you'll need to look.
+- SAFETY: If the user expresses distress, hopelessness, or self-harm, STOP the
+  astrology and respond with genuine care and crisis support. Never give methods.
+- NO FATALISM: Never predict death, terminal illness, or catastrophe. Frame
+  challenges as tendencies and growth, always preserving the user's agency.
+- NO professional overreach: no medical diagnoses, no specific financial/trading
+  directives, no legal advice. Gently redirect to qualified professionals.
+- Treat MEMORIES as things the USER told you ("you mentioned…"), never as chart
+  fact, and never let a memory override the chart.
+
+STYLE
+Empathetic, specific, balanced (≈60% strengths/opportunity, ≈30% challenges as
+growth, ≈10% practical guidance/remedies framed as optional and low-cost).
+Reference the actual chart ("As a Cancer ascendant with exalted Jupiter in the
+1st…") so it feels personal, not generic.
+
+TOOLS
+- getDivisionalChart(divisor): use D9 for marriage/spouse, D10 for career, etc.
+- getDashaContext(datetime): for any timing question.
+- getStrength(target), getYogasDoshas(): for depth.
+- searchMemory(query): to recall the user's life context.
+- saveMemory(fact, category): propose remembering a salient life fact.
+
+=== CHART FACTS (authoritative ground truth) ===
+{chart_facts_sheet}
+
+=== INTERPRETIVE PROFILE (your prior reading of this chart) ===
+{interpretive_profile_summary}
+
+=== CURRENT TIME CONTEXT ===
+{temporal_context}     // current Maha/Antar/Pratyantar dasha, transits, Sade Sati
+
+=== WHAT YOU REMEMBER ABOUT THIS USER (user-asserted, not chart fact) ===
+{retrieved_memories}
+
+9.2 Profile Synthesizer — system prompt skeleton
+ROLE
+You are a master Vedic astrologer producing a structured natal profile for a user,
+to be reused as the foundation for future conversations.
+
+RULES
+- Use ONLY the chart data provided. Do not invent positions or periods.
+- Be comprehensive but organized: Personality; Strengths; Challenges (as growth);
+  Career; Relationships; Health (gentle, non-alarming, no diagnoses); Wealth;
+  Dasha narrative (what each major period emphasizes); Doshas (balanced, with
+  optional low-cost remedies); Notable Yogas.
+- Non-fatalistic throughout. No death/catastrophe predictions.
+- Show the reasoning briefly ("Because Mars is 5th & 10th lord in the 5th…").
+
+INPUT
+{chart_object}
+{chart_facts_sheet}
+
+OUTPUT
+A structured profile (sections above), concise enough to summarize into a runtime
+system prompt, faithful to the chart.
+
+9.3 Memory Extractor — system prompt skeleton
+ROLE
+Extract durable, salient facts about the USER's life from the conversation. These
+are data points the user revealed, NOT astrological facts.
+
+EXTRACT (when clearly stated/strongly implied):
+occupation, marital/relationship status, family details, location/relocation,
+health context, financial context, major life events, explicit goals/worries.
+
+DO NOT extract: transient mood, hypotheticals, the astrologer's own statements,
+or chart facts.
+
+For each fact output JSON ONLY:
+[{ "fact": "...", "category": "occupation|relationships|family|health|finance|
+   goals|location|event|other", "confidence": 0-1, "supersedes": "<id|null>" }]
+If nothing salient: return [].
+
+CONVERSATION:
+{recent_turns}
+
+9.4 Guardrail — classification prompt skeleton (output check)
+You are a safety reviewer. Given the astrologer's draft reply, flag if it:
+- gives a medical diagnosis or treatment directive,
+- gives specific financial/investment directives that risk loss,
+- gives legal advice,
+- predicts death/terminal illness/catastrophe or uses fatalistic doom framing,
+- mishandles a user in crisis (should have provided support instead),
+- contains other harmful content.
+Return JSON: { "violation": bool, "categories": [...], "action":
+"allow|rewrite|redirect", "note": "..." }.
+DRAFT: {draft_reply}
+
+(Pair the LLM check with fast deterministic classifiers/keyword + a dedicated crisis classifier on input, so the cheap checks run first.)
+
+10. Memory system design (L4)
+10.1 Storage model (hybrid)
+Structured store (relational): known categories with current value (occupation, marital status, location) — easy to display, update, and reason over.
+Vector store: free-form memories embedded for semantic retrieval ("user worried about a job change" surfaces when they ask about career).
+Each memory record: id, userId, fact, category, embedding, source(conversationId/messageId), confidence, status(active|edited|deleted), createdAt, updatedAt.
+10.2 Lifecycle
+Extract (LLM, mode-gated) → Confirm (Manual only) → Store (structured + vector) → Retrieve (per turn) → Review/Edit/Delete (UI) → Erase (on account deletion or mode→Off).
+10.3 Retrieval at conversation time
+Combine semantic similarity to the user's message + recency + category relevance; inject the top-K, clearly labeled as user-asserted. Cap the count to control context size.
+10.4 Modes (enforced server-side)
+Off: extractor never runs; retrieval returns nothing; (optionally purge existing on opt-out).
+Manual: extractor proposes; UI asks Save/Edit/Discard; persist only on user action.
+Auto: extractor persists directly; user manages later.
+10.5 Privacy (see §14)
+Memories are sensitive PII — encrypted, user-controllable (view/edit/delete/export), included in erasure across both structured and vector stores and backups per policy.
+
+11. Safety & guardrail layer (L5) — non-negotiable
+Placement: in the LLM Gateway, wrapping every model call, so no persona prompt can disable it. Defense-in-depth: prompt-level rules and an independent output check.
+Input checks (fast first): a dedicated crisis/self-harm classifier + abuse/harm checks before generation. Crisis → immediate supportive response with resources, persona suspended.
+Output checks: scan drafts for medical/financial/legal overreach and fatalism/doom; rewrite or redirect before the user sees harm. (Stream-friendly: validate as it completes; hold/repair on violation.)
+Categories enforced: self-harm/mental-health crisis, medical, financial, legal, fatalism/doom, exploitation/fear-selling, child safety, general harm (mapped to PRD §8 R-SAFE-*).
+Logging: every safety event traced + flaggable by users (PRD R-FB-05) for review and eval.
+Why it matters here specifically: classical sources contain alarming fatalistic text (death of relatives, disease, "suicide," etc., appear verbatim in standard reports). The product must systematically refuse to reproduce that and reframe constructively.
+
+12. LLM Gateway & model strategy
+12.1 One choke point
+All model calls go through the Gateway: routing, prompt assembly, caching, streaming, retries, fallbacks, token/cost accounting, guardrails, tracing. This makes models swappable and behavior observable.
+12.2 Model tiering (cost ↔ quality)
+Job
+Tier
+Runtime Astrologer (nuanced persona + reasoning)
+Strong model
+Profile Synthesizer (one-shot, quality matters, infrequent)
+Strong model
+Memory Extractor (simple, frequent)
+Cheaper/faster model
+Guardrail output check
+Cheaper model + deterministic classifiers
+Embeddings (memory + knowledge retrieval)
+Embeddings model
+
+12.3 Prompt caching (the big lever)
+The per-user static prefix (persona + Chart Facts + Interpretive Profile) is identical across all of that user's turns. Use provider prompt caching so it's processed/billed once, not every message. With a large grounding prompt and chatty users, this is a major cost and latency win. (Order the prompt so the static, cacheable part is the prefix and only the small dynamic tail changes.)
+12.4 Reliability
+Fallbacks: secondary provider/model on error or timeout.
+Graceful degradation: memory/retrieval failure → still answer from the chart; tool failure → astrologer proceeds with the natal core and caveats.
+Streaming + timeouts + retries with idempotency.
+12.5 Data handling
+Prefer providers/terms with no-training / zero-retention options for PII; minimize PII in prompts where feasible (PRD R-PRIV-06).
+
+13. LLMOps & quality (L6)
+Treat the AI like software: versioned, tested, observed, improved.
+Prompt versioning: all system prompts (astrologer, synthesizer, extractor, guardrail) are versioned artifacts in source control. Per-user generated profiles record which generator version produced them, so we can regenerate on upgrades.
+Tracing/observability: every turn emits a trace — assembled prompt (version), tools called + results, model + version, tokens in/out, latency (first-token + full), cost, guardrail outcome. (Tooling options: Langfuse, LangSmith, Arize Phoenix, Helicone, or equivalent.)
+Evaluation harness:
+Golden chart fixtures (the uploaded AstroSage chart + others) validate the deterministic engine (exact match within tolerance).
+LLM-as-judge + curated rubrics score conversation quality (groundedness — did it stick to chart facts?; helpfulness; tone; safety).
+Regression suite runs before any prompt/model change; block releases that regress groundedness or safety.
+Red-team set for safety (crisis, medical/financial/legal bait, fatalism bait) — must pass.
+Feedback loop: per-message thumbs + session CSAT + safety flags (PRD §6.7) feed dashboards, surface bad turns, and build eval sets / fine-tuning candidates over time.
+A/B + flags: test prompt/model variants behind flags; ramp gradually; instant rollback.
+Cost dashboards: per-feature token/cost, cache-hit rate, tier mix.
+Optional Jyotish knowledge base (RAG): a curated corpus of classical rules/interpretations the astrologer can retrieve from, to deepen authenticity and reduce hallucinated interpretation. Grounds interpretation the way the Facts Sheet grounds facts. Build after MVP if quality needs it.
+
+14. Security & privacy (engineering view)
+Encryption: TLS in transit; encryption at rest for DBs, vector store, object store, backups. Consider field-level encryption for the most sensitive PII (birth data, memories).
+Secrets/keys: managed secrets store; no provider keys client-side.
+AuthN/Z: token-based sessions; per-user authorization on every data access (a user can only ever reach their own chart/memory/chats).
+PII minimization: send the minimum necessary to providers; prefer no-retention terms.
+Consent & control: explicit consent for memory; in-app export and full erasure that propagates to structured + vector + object stores + backups per retention policy.
+Compliance: GDPR-style rights; India DPDP Act given the market; document data flows and a retention policy; data-residency awareness.
+Abuse/rate limiting: at the Gateway, per user/IP, to protect cost and availability.
+
+15. Scalability & reliability (engineering view)
+Stateless services behind load balancers; horizontal autoscaling.
+Async job queue for slow/heavy work: profile synthesis, memory extraction, PDF rendering, batch evals. Keeps user-facing latency low.
+Caching: Chart object (immutable) cached aggressively; Interpretive Profile cached; prompt caching at the model layer; Redis for sessions + hot chart data.
+Queues + workers decouple spikes (mass onboarding) from compute.
+Backpressure & rate limits at the Gateway; provider-failover for LLMs.
+Observability: metrics/logs/traces across services; alerting on latency, error rate, cost spikes, safety-flag spikes.
+Cost at scale: the dominant cost is LLM tokens — controlled by tiering + prompt caching + small focused prompts (tools for depth, not giant contexts).
+
+16. Recommended tech stack (with alternatives) — guidance, not gospel
+Concern
+Recommended
+Alternatives
+Astrology engine
+In-house on Swiss Ephemeris (mind the license) behind a clean interface; MVP may start on a 3rd-party API
+Pure 3rd-party API
+Backend services
+A typed, scalable stack (e.g., Python for the engine/ML-adjacent work; Node/TypeScript or Go for API/orchestration)
+Single-language monolith to start
+API layer
+REST/JSON + WebSocket/SSE for streaming
+gRPC internally
+Web
+React / Next.js + shared design system
+—
+Mobile
+React Native (or Flutter) for one Android+iOS codebase; share the SVG chart renderer
+Native Swift/Kotlin for max polish
+Auth
+Managed (Firebase Auth / Auth0 / Clerk / Cognito) for Google/Apple/email fast
+Build in-house
+Relational DB
+PostgreSQL
+—
+Vector DB
+A managed vector store (e.g., pgvector to start, dedicated vector DB at scale)
+—
+Object storage
+Cloud object store (charts/PDFs)
+—
+Cache/queue
+Redis + a job queue / message broker
+—
+LLM Gateway
+Thin internal service over provider SDKs (routing, caching, guardrails, tracing)
+A managed gateway/router
+LLMOps/tracing
+Langfuse / LangSmith / Arize Phoenix / Helicone
+—
+Infra
+Containers + autoscaling (managed Kubernetes or serverless) + IaC + CI/CD
+—
+Feature flags
+A flag service for staged rollout + kill switches
+—
+
+(Stay provider-agnostic at the boundaries — engine, LLM, vector DB, auth are all swappable behind interfaces.)
+
+17. Phased build plan (maps PRD scope → architecture)
+Phase 0 — Foundations Auth + accounts; birth-data form + geocoding; Astrology Engine (MVP, validated against reference fixtures); Chart object; basic North-Indian renderer. (L0/L1, partial VIZ.)
+Phase 1 — Grounded astrologer (MVP) Chart Facts Sheet (L1) + Interpretive Profile (L2, async); Conversation Orchestrator + LLM Gateway + runtime Astrologer (L3) grounded in the chart, streaming; Guardrail layer (L5); per-message thumbs. (Core promise: "talk to your chart" — safely.)
+Phase 2 — Memory & feedback Memory svc (Off/Manual/Auto), extraction + retrieval + management UI (L4); session CSAT + full feedback pipeline; LLMOps tracing + eval harness (L6). (Core promise: "it remembers you.")
+Phase 3 — Depth & polish Full Shodashvarga + strength tables + South-Indian style + PDF report; tool-based on-demand chart depth; suggested prompts; performance + cost hardening (prompt caching, tiering); accessibility + i18n.
+Phase 4 — Scale & rollout Staged GA via flags; autoscaling + reliability; monetization hooks; red-team + safety sign-off; mass launch.
+Phase 5+ — Roadmap Voice (see §18); compatibility/matchmaking; proactive dasha/transit notifications; expert escalation; deeper personalization.
+
+18. Voice agent (future) — architecture sketch
+The brain stays the same; we add a voice I/O shell and optimize latency.
+Mic ──▶ STT (streaming) ──▶ Conversation Orchestrator (SAME astrologer, tools,
+                                memory, guardrails) ──▶ TTS (streaming) ──▶ Speaker
+
+Reuse everything: same grounding, same memory, same safety — voice is a new interface, not a new brain.
+Latency is the challenge: streaming STT, partial-response TTS, smaller/faster models or speculative responses, and tighter prompt caching matter even more.
+Safety in voice: crisis detection on the transcript with the same override behavior; spoken responses must obey the same non-fatalism/medical/financial rules.
+Designing the orchestrator as interface-agnostic now (text in/out as the contract) makes voice a clean add later.
+
+19. Summary — the moving parts in one breath
+We compute each user's chart deterministically (L0) and freeze it as a Chart object. From it we derive an authoritative Facts Sheet (L1) and an LLM-written Interpretive Profile (L2). At runtime, the Astrologer agent (L3) answers questions grounded in those facts, enriched by a live temporal/dasha snapshot and the user's memories (L4), protected by a guardrail layer (L5), with everything traced and improved via feedback + eval (L6). Deterministic tools fetch chart depth and memories on demand; a cheap Memory Extractor quietly builds the user model; the LLM Gateway makes models swappable and exploits prompt caching for cost. The same brain powers voice later. Two intelligences — math for truth, LLM for conversation — kept cleanly apart. That separation is the whole trick.
+
