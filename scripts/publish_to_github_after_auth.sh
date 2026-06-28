@@ -4,21 +4,25 @@ set -euo pipefail
 usage() {
   cat <<'USAGE'
 Usage:
-  scripts/publish_to_github_after_auth.sh <github-repo>
+  scripts/publish_to_github_after_auth.sh <github-repo> [collaborator-username]
 
 Example:
   scripts/publish_to_github_after_auth.sh Pranavhere01/exponential-jyotish-companion
+  scripts/publish_to_github_after_auth.sh Pranavhere01/exponential-jyotish-companion teammate-github-user
 
 Before running:
   gh auth login -h github.com
 
 What this does:
   1. Verifies GitHub CLI auth.
-  2. Adds origin if missing.
-  3. Pushes main to the GitHub repo.
+  2. Creates the private GitHub repo if it does not already exist.
+  3. Adds origin if missing.
+  4. Pushes clean main and working dev.
+  5. Optionally grants push access to one collaborator.
 
-It does not create the GitHub repo. Create the repo first, or run:
-  gh repo create <owner>/<repo> --private --source . --remote origin --push
+Branch policy:
+  main = stable baseline
+  dev  = working branch with current documentation/schema changes
 USAGE
 }
 
@@ -28,6 +32,7 @@ if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
 fi
 
 repo="${1:-}"
+collaborator="${2:-}"
 if [[ -z "$repo" ]]; then
   usage
   exit 2
@@ -44,9 +49,33 @@ if [[ -n "$(git status --short)" ]]; then
   exit 1
 fi
 
+for branch in main dev; do
+  if ! git rev-parse --verify "$branch" >/dev/null 2>&1; then
+    echo "Missing required local branch: $branch" >&2
+    exit 1
+  fi
+done
+
+if ! gh repo view "$repo" >/dev/null 2>&1; then
+  gh repo create "$repo" --private --source . --remote origin
+fi
+
 if ! git remote get-url origin >/dev/null 2>&1; then
   git remote add origin "git@github.com:${repo}.git"
 fi
 
-git push -u origin main
+git push origin main:main
+git push -u origin dev:dev
 
+gh repo edit "$repo" --visibility private --default-branch main
+
+if [[ -n "$collaborator" ]]; then
+  gh api \
+    -X PUT \
+    "repos/${repo}/collaborators/${collaborator}" \
+    -f permission=push >/dev/null
+  echo "Invited collaborator: ${collaborator}"
+fi
+
+echo "Published private repo: ${repo}"
+echo "Pushed branches: main, dev"

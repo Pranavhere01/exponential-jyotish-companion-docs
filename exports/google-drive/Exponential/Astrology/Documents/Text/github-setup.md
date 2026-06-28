@@ -27,24 +27,31 @@ Suggested default branch:
 main
 ```
 
+Branch policy:
+
+- `main`: stable baseline, protected, merged into intentionally.
+- `dev`: working branch where current documentation/schema changes live.
+
 ## Initial publish commands
 
 Run these after GitHub authentication is working:
 
 ```bash
-git remote add origin git@github.com:<org-or-user>/exponential-jyotish-companion.git
-git push -u origin main
+scripts/publish_to_github_after_auth.sh <org-or-user>/exponential-jyotish-companion
 ```
 
-If creating the repo with GitHub CLI:
+To invite a collaborator with push access during publish:
 
 ```bash
-gh repo create <org-or-user>/exponential-jyotish-companion --private --source . --remote origin --push
+scripts/publish_to_github_after_auth.sh <org-or-user>/exponential-jyotish-companion <github-username>
 ```
+
+The script creates the repo as private if needed, pushes `main` and `dev`, keeps `main` as the default branch, and makes `dev` the branch for active work.
 
 ## Required repo settings
 
 - Require pull requests for `main`.
+- Use `dev` for active work and branch off it for focused changes when needed.
 - Require at least one approving review before merge.
 - Use the PR template in `.github/pull_request_template.md`.
 - Store docs, schema, prompts, and eval changes in Git before exporting to Drive.
@@ -63,4 +70,3 @@ Then verify:
 ```bash
 gh auth status
 ```
-

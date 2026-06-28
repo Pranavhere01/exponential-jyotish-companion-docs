@@ -33,6 +33,9 @@ test -f exports/google-drive/Exponential/Astrology/Documents/Text/evals_model_ro
 
 cmp -s docs/version-manifest.md exports/google-drive/Exponential/Astrology/Documents/Text/version-manifest.md
 cmp -s docs/completion-audit.md exports/google-drive/Exponential/Astrology/Documents/Text/completion-audit.md
+cmp -s docs/github-setup.md exports/google-drive/Exponential/Astrology/Documents/Text/github-setup.md
+cmp -s docs/external-publish-runbook.md exports/google-drive/Exponential/Astrology/Documents/Text/external-publish-runbook.md
+cmp -s docs/sop/context-versioning-sop.md exports/google-drive/Exponential/Astrology/Documents/Text/context-versioning-sop.md
 cmp -s docs/schema-v0.3-change-spec.md exports/google-drive/Exponential/Astrology/Documents/Text/schema-v0.3-change-spec.md
 cmp -s docs/schema-v0.3-discovery-and-plan.md exports/google-drive/Exponential/Astrology/Documents/Text/schema-v0.3-discovery-and-plan.md
 
@@ -61,7 +64,9 @@ rg -n "Schema v0.3 Change Spec|Schema v0.3 Discovery and Plan" docs/version-mani
 rg -n "Completion Audit|GitHub Setup|External Publish Runbook" docs/version-manifest.md >/dev/null
 rg -n "async_tasks|Embedding lifecycle|Hybrid retrieval|Chart reproducibility" docs/schema-v0.3-change-spec.md >/dev/null
 rg -n "blocked for direct migration|memory_facts|text_embeddings|Draft PR description" docs/schema-v0.3-discovery-and-plan.md >/dev/null
-rg -n "schema v0.3|runnable application repo|feat/schema-v0.3" docs/completion-audit.md >/dev/null
+rg -n "schema v0.3|runnable application repo|main.*stable baseline|dev.*working branch" docs/completion-audit.md >/dev/null
+rg -n "main = stable baseline|dev  = working branch|collaborator-username" scripts/publish_to_github_after_auth.sh >/dev/null
+rg -n "main.*stable baseline|dev.*working branch" docs/github-setup.md docs/external-publish-runbook.md >/dev/null
 rg -n "1WwsQmCiCqZxCctNEfqdnGwKJjtC2ChWf|1by8WT9dQ_jgxEd5irK5vy3A4fwYyZBzI|1uLn5DvIVTMw2yWJ83xM8TEx_a68wqwwb" docs/external-publish-runbook.md docs/sop/context-versioning-sop.md docs/completion-audit.md exports/google-drive/README.md >/dev/null
 rg -n "schema-v0.3-change-spec|completion-audit|external-publish-runbook" exports/google-drive/README.md >/dev/null
 rg -n "scripts/verify_artifacts.sh" .github/workflows/verify-artifacts.yml >/dev/null

@@ -95,8 +95,10 @@ Evidence:
 - `.github/pull_request_template.md` exists.
 - `.github/workflows/verify-artifacts.yml` exists and runs `scripts/verify_artifacts.sh`.
 - `.gitignore` exists.
-- `docs/github-setup.md` documents the publish commands.
+- `docs/github-setup.md` documents the publish commands, private repo setup, and `main`/`dev` branch policy.
+- `scripts/publish_to_github_after_auth.sh` creates the private repo if needed, pushes clean `main` plus working `dev`, and can invite a collaborator when a GitHub username is provided.
 - `docs/version-manifest.md` records current source and export artifact versions.
+- Local branch state: `main` is the stable baseline; `dev` is the working branch.
 
 Blocker:
 
@@ -149,7 +151,7 @@ Evidence:
 - `docs/schema-v0.3-discovery-and-plan.md` records the discovery result, table mapping mismatch, blocked gates, ordered implementation plan, and draft PR description.
 - `docs/version-manifest.md` now tracks both v0.3 schema artifacts and their export copies.
 - Export copies exist under `exports/google-drive/Exponential/Astrology/Documents/Text/`.
-- Local branch `feat/schema-v0.3` contains commit `513b470 Add schema v0.3 discovery plan`.
+- Local branch `dev` contains the v0.3 work, including commit `513b470 Add schema v0.3 discovery plan`.
 
 Blocker:
 
@@ -162,4 +164,4 @@ Required external action:
 
 ## Current conclusion
 
-The local source-of-truth repo is ready and committed through the schema v0.3 discovery branch. The remaining unfinished pieces are external publishing tasks (GitHub remote/auth and Google Drive connector access) plus the app-level schema v0.3 implementation, which requires the runnable application repository or explicit schema mapping decisions.
+The local source-of-truth repo is ready and committed with `main` as the clean stable baseline and `dev` as the working branch. The remaining unfinished pieces are external publishing tasks (GitHub remote/auth, collaborator username, and Google Drive connector access) plus the app-level schema v0.3 implementation, which requires the runnable application repository or explicit schema mapping decisions.

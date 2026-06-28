@@ -5,8 +5,12 @@ Date: 2026-06-29
 
 ## Current local state
 
-The local repository is committed, with the latest schema/documentation work on branch
-`feat/schema-v0.3`. Use this command to see the latest local commits:
+The local repository is committed with two local branches:
+
+- `main`: clean stable baseline.
+- `dev`: working branch with the latest schema/documentation work.
+
+Use this command to see the latest local commits:
 
 ```bash
 git log --oneline --max-count=5
@@ -33,14 +37,16 @@ gh auth login -h github.com
 Create the GitHub repository if it does not already exist:
 
 ```bash
-gh repo create <owner>/exponential-jyotish-companion --private --source . --remote origin --push
-```
-
-If the repo already exists:
-
-```bash
 scripts/publish_to_github_after_auth.sh <owner>/exponential-jyotish-companion
 ```
+
+To invite a collaborator with push access during publish:
+
+```bash
+scripts/publish_to_github_after_auth.sh <owner>/exponential-jyotish-companion <github-username>
+```
+
+The script creates the repo as private if it does not exist, pushes `main` and `dev`, keeps `main` as the default branch, and leaves `dev` as the working branch.
 
 ## Publish to Google Drive
 
