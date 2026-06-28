@@ -87,13 +87,16 @@ Evidence:
 
 ### 8. Set up on GitHub
 
-Status: partially complete; local Git setup is complete, remote publish is blocked by auth/remote.
+Status: docs repository published locally/remotely; platform repository split is in progress.
 
 Evidence:
 
 - Repository has an initial commit: `38b5221 Initialize Jyotish Companion docs base`.
+- Documentation/resources repository target: `Pranavhere01/exponential-jyotish-companion-docs`.
+- Main platform repository target: `Pranavhere01/exponential-jyotish-companion-platform`.
 - `.github/pull_request_template.md` exists.
 - `.github/workflows/verify-artifacts.yml` exists and runs `scripts/verify_artifacts.sh`.
+- `.github/workflows/deploy-docs-pages.yml` exists to publish the MkDocs site from `main`.
 - `.gitignore` exists.
 - `docs/github-setup.md` documents the publish commands, private repo setup, and `main`/`dev` branch policy.
 - `scripts/publish_to_github_after_auth.sh` creates the private repo if needed, pushes clean `main` plus working `dev`, and can invite a collaborator when a GitHub username is provided.
@@ -102,17 +105,16 @@ Evidence:
 
 Blocker:
 
-- No GitHub remote is configured.
-- `gh auth status` reports the current GitHub token is invalid.
-- Current account shown by `gh auth status`: `Pranavhere01`.
+- Collaborator username is still needed before access can be shared.
+- Platform repository needs to be created and pushed after the repo split commit.
 
 Required external action:
 
 ```bash
-gh auth login -h github.com
+scripts/publish_to_github_after_auth.sh Pranavhere01/exponential-jyotish-companion-docs <github-username>
 ```
 
-Then create or provide the repository remote and push.
+Then create or push the platform repository.
 
 ### 9. Store documentation in Exponential shared Google Drive folder
 

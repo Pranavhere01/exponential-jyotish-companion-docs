@@ -18,6 +18,8 @@ Update it whenever a durable document, prompt, schema, eval, or export version c
 | Schema v0.3 Discovery and Plan | v0.1 | `docs/schema-v0.3-discovery-and-plan.md` | `exports/google-drive/Exponential/Astrology/Documents/Text/schema-v0.3-discovery-and-plan.md` |
 | Context SOP | v0.2 | `docs/sop/context-versioning-sop.md` | `exports/google-drive/Exponential/Astrology/Documents/Text/context-versioning-sop.md` |
 | Way Forward | v0.2 | `docs/01-way-forward.md` | `exports/google-drive/Exponential/Astrology/Documents/Text/01-way-forward.md` |
+| Docs Site Guide | v0.1 | `docs/docs-site-guide.md` | `exports/google-drive/Exponential/Astrology/Documents/Text/docs-site-guide.md` |
+| Repository Split Execution Plan | v0.1 | `docs/repo-split-execution-plan.md` | `exports/google-drive/Exponential/Astrology/Documents/Text/repo-split-execution-plan.md` |
 | Completion Audit | v0.1 | `docs/completion-audit.md` | `exports/google-drive/Exponential/Astrology/Documents/Text/completion-audit.md` |
 | GitHub Setup | v0.1 | `docs/github-setup.md` | `exports/google-drive/Exponential/Astrology/Documents/Text/github-setup.md` |
 | External Publish Runbook | v0.1 | `docs/external-publish-runbook.md` | `exports/google-drive/Exponential/Astrology/Documents/Text/external-publish-runbook.md` |

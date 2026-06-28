@@ -34,19 +34,27 @@ After re-authentication:
 gh auth login -h github.com
 ```
 
-Create the GitHub repository if it does not already exist:
+Create or update the documentation/resources repository if it does not already exist:
 
 ```bash
-scripts/publish_to_github_after_auth.sh <owner>/exponential-jyotish-companion
+scripts/publish_to_github_after_auth.sh <owner>/exponential-jyotish-companion-docs
 ```
 
 To invite a collaborator with push access during publish:
 
 ```bash
-scripts/publish_to_github_after_auth.sh <owner>/exponential-jyotish-companion <github-username>
+scripts/publish_to_github_after_auth.sh <owner>/exponential-jyotish-companion-docs <github-username>
 ```
 
 The script creates the repo as private if it does not exist, pushes `main` and `dev`, keeps `main` as the default branch, and leaves `dev` as the working branch.
+
+Main platform repository:
+
+```text
+<owner>/exponential-jyotish-companion-platform
+```
+
+Keep product, architecture, prompt, eval, and schema context in the docs repo. Keep application code, deployable services, app-specific migrations, and runtime infrastructure in the platform repo.
 
 ## Publish to Google Drive
 

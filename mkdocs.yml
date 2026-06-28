@@ -1,0 +1,34 @@
+site_name: Exponential Jyotish Companion Docs
+site_description: Internal product, architecture, schema, prompt, and eval context for Jyotish Companion.
+site_url: https://pranavhere01.github.io/exponential-jyotish-companion-docs/
+repo_url: https://github.com/Pranavhere01/exponential-jyotish-companion-docs
+repo_name: Pranavhere01/exponential-jyotish-companion-docs
+docs_dir: docs
+site_dir: site
+strict: true
+
+theme:
+  name: material
+  features:
+    - navigation.indexes
+    - navigation.sections
+    - navigation.top
+    - search.highlight
+    - toc.follow
+    - content.code.copy
+
+plugins:
+  - search
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - def_list
+  - fenced_code
+  - footnotes
+  - tables
+  - toc:
+      permalink: true
+
+exclude_docs: |
+  pm_first_principles_guide.html

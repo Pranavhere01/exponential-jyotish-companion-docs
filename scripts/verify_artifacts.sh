@@ -7,11 +7,16 @@ python3 -m html.parser exports/google-drive/Exponential/Astrology/Documents/Html
 test -f docs/prd_jyotish_companion_v0_2.md
 test -f docs/system_design_jyotish_companion_v0_2.md
 test -f db/schema_v0_2_base.sql
+test -f mkdocs.yml
+test -f docs/index.md
+test -f docs/docs-site-guide.md
+test -f docs/repo-split-execution-plan.md
 test -f docs/schema-v0.3-change-spec.md
 test -f docs/schema-v0.3-discovery-and-plan.md
 test -f docs/completion-audit.md
 test -f docs/version-manifest.md
 test -f .github/workflows/verify-artifacts.yml
+test -f .github/workflows/deploy-docs-pages.yml
 test -f prompts/astrologer_persona/v0.2.md
 test -f prompts/profile_synthesizer/v0.2.md
 test -f prompts/memory_extractor/v0.2.md
@@ -25,6 +30,8 @@ test -f exports/google-drive/Exponential/Astrology/Documents/Text/version-manife
 test -f exports/google-drive/Exponential/Astrology/Documents/Text/schema_v0_2_base.sql
 test -f exports/google-drive/Exponential/Astrology/Documents/Text/schema-v0.3-change-spec.md
 test -f exports/google-drive/Exponential/Astrology/Documents/Text/schema-v0.3-discovery-and-plan.md
+test -f exports/google-drive/Exponential/Astrology/Documents/Text/docs-site-guide.md
+test -f exports/google-drive/Exponential/Astrology/Documents/Text/repo-split-execution-plan.md
 test -f exports/google-drive/Exponential/Astrology/Documents/Text/completion-audit.md
 test -f exports/google-drive/Exponential/Astrology/Documents/Text/github-setup.md
 test -f exports/google-drive/Exponential/Astrology/Documents/Text/external-publish-runbook.md
@@ -36,6 +43,7 @@ cmp -s docs/completion-audit.md exports/google-drive/Exponential/Astrology/Docum
 cmp -s docs/github-setup.md exports/google-drive/Exponential/Astrology/Documents/Text/github-setup.md
 cmp -s docs/external-publish-runbook.md exports/google-drive/Exponential/Astrology/Documents/Text/external-publish-runbook.md
 cmp -s docs/sop/context-versioning-sop.md exports/google-drive/Exponential/Astrology/Documents/Text/context-versioning-sop.md
+cmp -s docs/repo-split-execution-plan.md exports/google-drive/Exponential/Astrology/Documents/Text/repo-split-execution-plan.md
 cmp -s docs/schema-v0.3-change-spec.md exports/google-drive/Exponential/Astrology/Documents/Text/schema-v0.3-change-spec.md
 cmp -s docs/schema-v0.3-discovery-and-plan.md exports/google-drive/Exponential/Astrology/Documents/Text/schema-v0.3-discovery-and-plan.md
 
@@ -65,6 +73,11 @@ rg -n "Completion Audit|GitHub Setup|External Publish Runbook" docs/version-mani
 rg -n "async_tasks|Embedding lifecycle|Hybrid retrieval|Chart reproducibility" docs/schema-v0.3-change-spec.md >/dev/null
 rg -n "blocked for direct migration|memory_facts|text_embeddings|Draft PR description" docs/schema-v0.3-discovery-and-plan.md >/dev/null
 rg -n "schema v0.3|runnable application repo|main.*stable baseline|dev.*working branch" docs/completion-audit.md >/dev/null
+rg -n "exponential-jyotish-companion-docs|exponential-jyotish-companion-platform" README.md docs/index.md docs/github-setup.md docs/external-publish-runbook.md docs/completion-audit.md >/dev/null
+rg -n "Stage 1 - Set Up Documentation Repository|Stage 3 - Empty Main Platform Repository|Stage 5 - Build Platform Structure Plan" docs/repo-split-execution-plan.md >/dev/null
+rg -n "mkdocs-material|deploy-pages|mkdocs build --strict" .github/workflows/deploy-docs-pages.yml >/dev/null
+rg -n "site_name: Exponential Jyotish Companion Docs|docs_dir: docs" mkdocs.yml >/dev/null
+rg -n "How to add a new document|GitHub Pages|Markdown-first" docs/docs-site-guide.md >/dev/null
 rg -n "main = stable baseline|dev  = working branch|collaborator-username" scripts/publish_to_github_after_auth.sh >/dev/null
 rg -n "main.*stable baseline|dev.*working branch" docs/github-setup.md docs/external-publish-runbook.md >/dev/null
 rg -n "1WwsQmCiCqZxCctNEfqdnGwKJjtC2ChWf|1by8WT9dQ_jgxEd5irK5vy3A4fwYyZBzI|1uLn5DvIVTMw2yWJ83xM8TEx_a68wqwwb" docs/external-publish-runbook.md docs/sop/context-versioning-sop.md docs/completion-audit.md exports/google-drive/README.md >/dev/null

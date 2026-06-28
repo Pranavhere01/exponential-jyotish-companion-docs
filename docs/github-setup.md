@@ -7,12 +7,18 @@ Date: 2026-06-29
 
 Make this repository the canonical source of truth for Exponential Jyotish Companion documentation, schema, prompts, and evals.
 
-## Recommended repository
+## Repository split
 
-Suggested repository name:
+Documentation/resources repository:
 
 ```text
-exponential-jyotish-companion
+exponential-jyotish-companion-docs
+```
+
+Main platform repository:
+
+```text
+exponential-jyotish-companion-platform
 ```
 
 Suggested visibility:
@@ -34,16 +40,16 @@ Branch policy:
 
 ## Initial publish commands
 
-Run these after GitHub authentication is working:
+Run these after GitHub authentication is working for the docs repo:
 
 ```bash
-scripts/publish_to_github_after_auth.sh <org-or-user>/exponential-jyotish-companion
+scripts/publish_to_github_after_auth.sh <org-or-user>/exponential-jyotish-companion-docs
 ```
 
 To invite a collaborator with push access during publish:
 
 ```bash
-scripts/publish_to_github_after_auth.sh <org-or-user>/exponential-jyotish-companion <github-username>
+scripts/publish_to_github_after_auth.sh <org-or-user>/exponential-jyotish-companion-docs <github-username>
 ```
 
 The script creates the repo as private if needed, pushes `main` and `dev`, keeps `main` as the default branch, and makes `dev` the branch for active work.

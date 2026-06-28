@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - main
+      - dev
 
 jobs:
   verify:
@@ -22,3 +23,19 @@ jobs:
 
       - name: Verify documentation artifacts
         run: bash scripts/verify_artifacts.sh
+
+      - name: Verify docs site config
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          required = [
+              "mkdocs.yml",
+              "docs/index.md",
+              "docs/docs-site-guide.md",
+              ".github/workflows/deploy-docs-pages.yml",
+          ]
+          for path in required:
+              if not Path(path).exists():
+                  raise SystemExit(f"missing {path}")
+          PY

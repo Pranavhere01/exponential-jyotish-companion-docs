@@ -1,10 +1,21 @@
-# Exponential Jyotish Companion
+# Exponential Jyotish Companion Docs
 
-Version-controlled product, architecture, SOP, and schema base for the Exponential Jyotish Companion project.
+Version-controlled product, architecture, SOP, prompt, eval, and schema context for the Exponential Jyotish Companion project.
 
 ## Source of truth
 
 This repository is the canonical documentation home from day 1. Google Drive, PDFs, slides, and HTML exports may exist for sharing, but they are derived copies. Product decisions, schema changes, prompts, SOPs, and architecture notes should land here first so they can be reviewed, versioned, and indexed through MCP.
+
+## Repository split
+
+- Documentation/resources repo: `exponential-jyotish-companion-docs`.
+- Main platform repo: `exponential-jyotish-companion-platform`.
+
+Both repositories use `main` as the stable branch and `dev` as the working branch.
+
+## Docs site
+
+This repo is MkDocs-ready. Add Markdown files under `docs/`, link durable entry points from `docs/index.md`, and merge to `main` to publish the hosted docs site.
 
 ## Current baseline
 
@@ -28,6 +39,7 @@ This repository is the canonical documentation home from day 1. Google Drive, PD
 - [Google Drive export package](exports/google-drive/README.md)
 - [Context/versioning SOP](docs/sop/context-versioning-sop.md)
 - [Version manifest](docs/version-manifest.md)
+- [Docs site guide](docs/docs-site-guide.md)
 - [Schema v0.2 base](db/schema_v0_2_base.sql)
 - [Schema v0.3 change spec](docs/schema-v0.3-change-spec.md)
 - [Schema v0.3 discovery and plan](docs/schema-v0.3-discovery-and-plan.md)
