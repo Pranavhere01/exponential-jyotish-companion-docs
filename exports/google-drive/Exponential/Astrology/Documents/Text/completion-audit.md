@@ -126,7 +126,12 @@ Evidence:
 Blocker:
 
 - The Google Drive connector cannot see the screenshot folder IDs from this session. Metadata/list calls for the visible folder IDs returned `404`, `400`, or empty listings.
+- Screenshot-visible folder IDs:
+  - `Exponential`: `1WwsQmCiCqZxCctNEfqdnGwKJjtC2ChWf`
+  - `Astrology`: `1by8WT9dQ_jgxEd5irK5vy3A4fwYyZBzI`
+  - `Documents`: `1uLn5DvIVTMw2yWJ83xM8TEx_a68wqwwb`
 - Live re-check on 2026-06-29: Drive search for accessible folders named `Exponential`, `Astrology`, and `Documents` returned no matching folders.
+- Live metadata re-check on 2026-06-29: `Exponential` and `Astrology` returned `404`; `Documents` returned `400`.
 - The connector can see the individual Google Doc `System Design & Technical Architecture — Personal AI Astrologer`, but its parent IDs are not exposed.
 - The Google Doc URL in the objective resolves to `Fundamentals - ML and MLops`, not the Jyotish PRD. It should not be edited as the PRD without explicit confirmation.
 

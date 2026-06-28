@@ -62,6 +62,8 @@ rg -n "Completion Audit|GitHub Setup|External Publish Runbook" docs/version-mani
 rg -n "async_tasks|Embedding lifecycle|Hybrid retrieval|Chart reproducibility" docs/schema-v0.3-change-spec.md >/dev/null
 rg -n "blocked for direct migration|memory_facts|text_embeddings|Draft PR description" docs/schema-v0.3-discovery-and-plan.md >/dev/null
 rg -n "schema v0.3|runnable application repo|feat/schema-v0.3" docs/completion-audit.md >/dev/null
+rg -n "1WwsQmCiCqZxCctNEfqdnGwKJjtC2ChWf|1by8WT9dQ_jgxEd5irK5vy3A4fwYyZBzI|1uLn5DvIVTMw2yWJ83xM8TEx_a68wqwwb" docs/external-publish-runbook.md docs/sop/context-versioning-sop.md docs/completion-audit.md exports/google-drive/README.md >/dev/null
+rg -n "schema-v0.3-change-spec|completion-audit|external-publish-runbook" exports/google-drive/README.md >/dev/null
 rg -n "scripts/verify_artifacts.sh" .github/workflows/verify-artifacts.yml >/dev/null
 
 echo "Artifacts verified."

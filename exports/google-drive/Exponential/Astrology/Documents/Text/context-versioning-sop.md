@@ -76,4 +76,12 @@ When publishing exports to Google Drive, use this structure:
 - `Exponential / Astrology / Documents / Html` for HTML exports.
 - `Exponential / Astrology / Documents / Text` for Markdown or plain-text exports.
 
+The browser-visible folder IDs from the original screenshots are:
+
+- `Exponential`: `1WwsQmCiCqZxCctNEfqdnGwKJjtC2ChWf`
+- `Astrology`: `1by8WT9dQ_jgxEd5irK5vy3A4fwYyZBzI`
+- `Documents`: `1uLn5DvIVTMw2yWJ83xM8TEx_a68wqwwb`
+
+If the Drive connector cannot access these IDs, do not create a parallel folder tree without explicit approval. Keep exporting locally and reconnect the connector to the Drive account that can see the shared folder.
+
 The Git file remains canonical even after the Drive export exists.
