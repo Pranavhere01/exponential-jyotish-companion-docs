@@ -1,0 +1,4 @@
+interface:
+  display_name: "Jyotish Docs Entry"
+  short_description: "Make surgical, graph-aware docs entries"
+  default_prompt: "Use $jyotish-docs-entry to add or update Jyotish Companion documentation with the correct structure, metadata, registry links, verification, and publish workflow."

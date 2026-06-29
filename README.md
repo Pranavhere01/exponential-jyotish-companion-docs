@@ -17,6 +17,7 @@ The docs use enterprise knowledge domains so new material has an obvious owner a
 - `docs/ai/` - prompts, evaluator behavior, rubrics, fixtures.
 - `docs/operations/` - SOPs, repo setup, publishing, audits, runbooks.
 - `docs/governance/` - ADRs and durable decision history.
+- `docs/domain-knowledge/` - reviewed subject-matter doctrine and retrieval taxonomy.
 - `docs/archive/` - raw source inputs preserved for provenance.
 
 ## Repository split
@@ -46,12 +47,15 @@ This repo is MkDocs-ready. Add Markdown files under the right `docs/` shelf, lin
 - [Knowledge map](docs/handbook/knowledge-map.md)
 - [Version manifest](docs/handbook/version-manifest.md)
 - [Knowledge architecture](docs/handbook/knowledge-architecture.md)
+- [Artifact registry](docs/handbook/artifact-registry.md)
+- [Relation types](docs/handbook/relation-types.md)
 - [Contribution guide](docs/handbook/contribution-guide.md)
 - [Way forward](docs/product/strategy/way-forward.md)
 - [PRD v0.2](docs/product/requirements/prd-v0.2.md)
 - [PM first-principles guide](docs/product/guides/pm-first-principles-guide.md)
 - [System Design v0.2](docs/architecture/system/system-design-v0.2.md)
 - [Context Graph and Knowledge System](docs/architecture/patterns/context-graph-knowledge-system/README.md)
+- [Jyotish domain knowledge](docs/domain-knowledge/jyotish/index.md)
 - [Schema v0.2 base](docs/engineering/data-model/schema-v0.2-base.sql)
 - [Schema v0.3 change spec](docs/engineering/data-model/schema-v0.3-change-spec.md)
 - [Schema v0.3 discovery and plan](docs/engineering/data-model/schema-v0.3-discovery-and-plan.md)

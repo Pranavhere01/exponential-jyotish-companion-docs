@@ -11,6 +11,9 @@ Update it whenever a durable document, prompt, schema, eval, or export version c
 | Artifact | Current version | Source path | Export path |
 | --- | --- | --- | --- |
 | Knowledge Map | v0.1 | `docs/handbook/knowledge-map.md` | n/a |
+| Metadata Standard | v0.1 | `docs/handbook/metadata-standard.md` | n/a |
+| Artifact Registry | v0.1 | `docs/handbook/artifact-registry.yaml` | n/a |
+| Relation Types | v0.1 | `docs/handbook/relation-types.md` | n/a |
 | PRD | v0.2 | `docs/product/requirements/prd-v0.2.md` | `exports/google-drive/Exponential/Astrology/Documents/Text/prd_jyotish_companion_v0_2.md` |
 | System Design | v0.2 | `docs/architecture/system/system-design-v0.2.md` | `exports/google-drive/Exponential/Astrology/Documents/Text/system_design_jyotish_companion_v0_2.md` |
 | Context Graph And Knowledge System Pattern | v0.1 | `docs/architecture/patterns/context-graph-knowledge-system/README.md` | n/a |
@@ -22,6 +25,8 @@ Update it whenever a durable document, prompt, schema, eval, or export version c
 | Context SOP | v0.2 | `docs/governance/standards/context-versioning-sop.md` | `exports/google-drive/Exponential/Astrology/Documents/Text/context-versioning-sop.md` |
 | Way Forward | v0.2 | `docs/product/strategy/way-forward.md` | `exports/google-drive/Exponential/Astrology/Documents/Text/01-way-forward.md` |
 | Contribution Guide | v0.1 | `docs/handbook/contribution-guide.md` | `exports/google-drive/Exponential/Astrology/Documents/Text/contribution-guide.md` |
+| Jyotish Domain Knowledge | v0.1 | `docs/domain-knowledge/jyotish/index.md` | n/a |
+| Jyotish Docs Entry Skill | v0.1 | `skills/jyotish-docs-entry/SKILL.md` | n/a |
 | Repository Split Execution Plan | v0.1 | `docs/operations/repository/repo-split-execution-plan.md` | `exports/google-drive/Exponential/Astrology/Documents/Text/repo-split-execution-plan.md` |
 | Source Materials Archive | v0.1 | `docs/archive/source-materials/index.md` | n/a |
 | Completion Audit | v0.1 | `docs/operations/audits/completion-audit.md` | `exports/google-drive/Exponential/Astrology/Documents/Text/completion-audit.md` |

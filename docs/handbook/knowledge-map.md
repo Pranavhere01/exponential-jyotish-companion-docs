@@ -12,8 +12,9 @@ This map explains where to read first and where new knowledge belongs.
 2. [PRD v0.2](../product/requirements/prd-v0.2.md)
 3. [System Design v0.2](../architecture/system/system-design-v0.2.md)
 4. [Knowledge Architecture](knowledge-architecture.md)
-5. [Version Manifest](version-manifest.md)
-6. [ADR Index](../governance/decisions/adr/index.md)
+5. [Artifact Registry](artifact-registry.md)
+6. [Version Manifest](version-manifest.md)
+7. [ADR Index](../governance/decisions/adr/index.md)
 
 ## Placement Guide
 
@@ -26,6 +27,7 @@ This map explains where to read first and where new knowledge belongs.
 | Schema, tables, migrations, data contracts | `docs/engineering/data-model/` |
 | Prompts, model behavior, evaluation, safety rubrics | `docs/ai/` |
 | Durable decisions or standards | `docs/governance/` |
+| Reviewed Jyotish doctrine, source maps, and retrieval taxonomy | `docs/domain-knowledge/` |
 | Publishing, repo setup, audits, runbooks | `docs/operations/` |
 | Raw originals, pasted source text, historical inputs | `docs/archive/` |
 
@@ -37,5 +39,6 @@ This map explains where to read first and where new knowledge belongs.
 - Architecture patterns: [Multi-Turn Chat Harness v0](../architecture/patterns/chat-harness/README.md)
 - Schema: [Schema v0.2 Base](../engineering/data-model/schema-v0.2-base.md)
 - AI behavior: [AI Quality](../ai/index.md)
+- Domain knowledge: [Jyotish Domain Knowledge](../domain-knowledge/jyotish/index.md)
 - Decisions: [ADR Index](../governance/decisions/adr/index.md)
 - Operations: [Operations](../operations/index.md)

@@ -16,6 +16,10 @@ test -f docs/index.md
 test -f docs/handbook/index.md
 test -f docs/handbook/knowledge-architecture.md
 test -f docs/handbook/knowledge-map.md
+test -f docs/handbook/metadata-standard.md
+test -f docs/handbook/artifact-registry.md
+test -f docs/handbook/artifact-registry.yaml
+test -f docs/handbook/relation-types.md
 test -f docs/handbook/contribution-guide.md
 test -f docs/handbook/version-manifest.md
 test -f docs/product/index.md
@@ -32,6 +36,8 @@ test -f docs/operations/index.md
 test -f docs/operations/repository/index.md
 test -f docs/operations/publishing/index.md
 test -f docs/operations/audits/index.md
+test -f docs/domain-knowledge/index.md
+test -f docs/domain-knowledge/jyotish/index.md
 test -f docs/governance/index.md
 test -f docs/governance/decisions/index.md
 test -f docs/governance/decisions/adr/index.md
@@ -60,6 +66,9 @@ test -f docs/ai/prompts/prediction-evaluator-v0.2.md
 test -f docs/ai/evaluation/model-router-validation-v0.1.md
 test -f docs/ai/evaluation/responsible-prediction-v0.1.md
 test -f docs/ai/evaluation/model-router-cases-v0.1.jsonl
+test -f skills/jyotish-docs-entry/SKILL.md
+test -f skills/jyotish-docs-entry/references/project-context.md
+test -f skills/jyotish-docs-entry/agents/openai.yaml
 test -f exports/google-drive/Exponential/Astrology/Documents/Text/prd_jyotish_companion_v0_2.md
 test -f exports/google-drive/Exponential/Astrology/Documents/Text/system_design_jyotish_companion_v0_2.md
 test -f exports/google-drive/Exponential/Astrology/Documents/Text/version-manifest.md
@@ -107,6 +116,25 @@ with path.open() as handle:
             json.loads(line)
 PY
 
+python3 - <<'PY'
+from pathlib import Path
+import yaml
+
+path = Path("docs/handbook/artifact-registry.yaml")
+data = yaml.safe_load(path.read_text())
+assert data["registry_version"] == "v0.1"
+artifact_ids = {artifact["id"] for artifact in data["artifacts"]}
+required = {
+    "prd:v0.2",
+    "pattern:context-graph-knowledge-system:v0.1",
+    "domain-knowledge:jyotish:index:v0.1",
+    "skill:jyotish-docs-entry:v0.1",
+}
+missing = required - artifact_ids
+if missing:
+    raise SystemExit(f"Missing artifact registry ids: {sorted(missing)}")
+PY
+
 if rg -n "Only safe chunks|Only approved chunks|approved_for_user_retrieval" README.md docs exports --glob '!docs/archive/source-materials/**'; then
   echo "Found retired safe-chunks-only wording." >&2
   exit 1
@@ -130,13 +158,18 @@ rg -n "site_name: Exponential Jyotish Companion Docs|docs_dir: docs" mkdocs.yml 
 rg -n "Add Or Change A Document|Quality Bar|docs-as-code" docs/handbook/contribution-guide.md >/dev/null
 rg -n "First Read Path|Placement Guide|Current Source Of Truth" docs/handbook/knowledge-map.md >/dev/null
 rg -n "Information Architecture|Enterprise Rules|Naming Standard|Review Standard" docs/handbook/knowledge-architecture.md >/dev/null
+rg -n "Required Fields|Relationship Rules|runtime_user_context" docs/handbook/metadata-standard.md >/dev/null
+rg -n "registry_version: v0.1|prd:v0.2|pattern:context-graph-knowledge-system:v0.1|skill:jyotish-docs-entry:v0.1" docs/handbook/artifact-registry.yaml >/dev/null
+rg -n "implemented_by|implements_policy|governed_by|Runtime Edge Label Examples" docs/handbook/relation-types.md >/dev/null
+rg -n "Reviewed chunks|delivery_policy|context_graph_nodes|not a positivity filter" docs/domain-knowledge/jyotish/index.md >/dev/null
 rg -n "Multi-Turn Chat Harness|End-To-End Flow|Recommended Jyotish Companion Mapping" docs/architecture/patterns/chat-harness/README.md >/dev/null
 rg -n "architecture/patterns/chat-harness/README.md|Multi-Turn Chat Harness" mkdocs.yml docs/architecture/index.md docs/handbook/knowledge-map.md docs/handbook/version-manifest.md >/dev/null
 rg -n "Context Graph And Knowledge System|Graph Scopes|Explanation Packet|Stale Fact Rule" docs/architecture/patterns/context-graph-knowledge-system/README.md >/dev/null
 rg -n "0007-context-graph-knowledge-system|Context Graph And Knowledge System|Context Graph And Knowledge System Pattern" mkdocs.yml docs/architecture/index.md docs/architecture/patterns/index.md docs/handbook/knowledge-map.md docs/handbook/version-manifest.md docs/governance/decisions/adr/index.md >/dev/null
 rg -n "Context Graph And Knowledge System|context-graph-knowledge-system" README.md docs/index.md >/dev/null
 rg -n "Postgres-first|runtime_user_context|context_assembly_runs|Neo4j" docs/governance/decisions/adr/0007-context-graph-knowledge-system.md >/dev/null
-rg -n "handbook|product|architecture|engineering|ai|governance|operations|archive" README.md docs/handbook/knowledge-map.md mkdocs.yml >/dev/null
+rg -n "name: jyotish-docs-entry|artifact-registry.yaml|mkdocs build --strict|Postgres-first context graph" skills/jyotish-docs-entry/SKILL.md skills/jyotish-docs-entry/references/project-context.md >/dev/null
+rg -n "handbook|product|architecture|engineering|ai|governance|operations|domain-knowledge|archive" README.md docs/handbook/knowledge-map.md mkdocs.yml >/dev/null
 if rg -n "00-start-here|10-product|20-architecture|30-data-and-schema|40-ai-quality|50-operations|60-decisions|90-archive|docs/ai/evals|docs/governance/adr" README.md docs mkdocs.yml --glob '!docs/archive/source-materials/**'; then
   echo "Found retired folder taxonomy or stale docs path." >&2
   exit 1

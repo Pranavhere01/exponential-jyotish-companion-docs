@@ -26,6 +26,9 @@ nav:
       - handbook/index.md
       - Knowledge Architecture: handbook/knowledge-architecture.md
       - Knowledge Map: handbook/knowledge-map.md
+      - Metadata Standard: handbook/metadata-standard.md
+      - Artifact Registry: handbook/artifact-registry.md
+      - Relation Types: handbook/relation-types.md
       - Contribution Guide: handbook/contribution-guide.md
       - Version Manifest: handbook/version-manifest.md
   - Product:
@@ -78,6 +81,10 @@ nav:
       - Standards:
           - governance/standards/index.md
           - Context Versioning SOP: governance/standards/context-versioning-sop.md
+  - Domain Knowledge:
+      - domain-knowledge/index.md
+      - Jyotish:
+          - domain-knowledge/jyotish/index.md
   - Operations:
       - operations/index.md
       - Repository:
@@ -100,6 +107,7 @@ markdown_extensions:
   - def_list
   - fenced_code
   - footnotes
+  - meta
   - tables
   - toc:
       permalink: true

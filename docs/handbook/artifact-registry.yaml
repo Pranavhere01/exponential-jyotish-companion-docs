@@ -1,0 +1,211 @@
+registry_version: v0.1
+updated_at: "2026-06-30"
+scope_values:
+  - project_knowledge
+  - domain_knowledge
+  - runtime_user_context
+artifacts:
+  - id: handbook:knowledge-architecture:v0.1
+    type: standard
+    scope: project_knowledge
+    status: accepted
+    owner: product_engineering
+    version: v0.1
+    path: docs/handbook/knowledge-architecture.md
+    relations:
+      defines:
+        - standard:metadata:v0.1
+        - standard:relation-types:v0.1
+
+  - id: standard:metadata:v0.1
+    type: standard
+    scope: project_knowledge
+    status: draft
+    owner: product_engineering
+    version: v0.1
+    path: docs/handbook/metadata-standard.md
+    relations:
+      governs:
+        - registry:artifact:v0.1
+        - pattern:context-graph-knowledge-system:v0.1
+
+  - id: standard:relation-types:v0.1
+    type: standard
+    scope: project_knowledge
+    status: draft
+    owner: product_engineering
+    version: v0.1
+    path: docs/handbook/relation-types.md
+    relations:
+      governs:
+        - registry:artifact:v0.1
+
+  - id: registry:artifact:v0.1
+    type: registry
+    scope: project_knowledge
+    status: draft
+    owner: product_engineering
+    version: v0.1
+    path: docs/handbook/artifact-registry.yaml
+    relations:
+      constrained_by:
+        - standard:metadata:v0.1
+        - standard:relation-types:v0.1
+
+  - id: prd:v0.2
+    type: prd
+    scope: project_knowledge
+    status: draft
+    owner: product
+    version: v0.2
+    path: docs/product/requirements/prd-v0.2.md
+    relations:
+      constrained_by:
+        - adr:0001
+        - adr:0002
+        - adr:0003
+        - adr:0004
+        - adr:0005
+        - adr:0006
+        - adr:0007
+      implemented_by:
+        - schema:v0.2-base
+      tested_by:
+        - eval:model-router-validation:v0.1
+        - eval:responsible-prediction:v0.1
+
+  - id: architecture:system-design:v0.2
+    type: architecture
+    scope: project_knowledge
+    status: draft
+    owner: engineering
+    version: v0.2
+    path: docs/architecture/system/system-design-v0.2.md
+    relations:
+      implements:
+        - prd:v0.2
+      constrained_by:
+        - adr:0007
+
+  - id: pattern:context-graph-knowledge-system:v0.1
+    type: pattern
+    scope: project_knowledge
+    status: draft
+    owner: engineering_ai_quality
+    version: v0.1
+    path: docs/architecture/patterns/context-graph-knowledge-system/README.md
+    relations:
+      decided_by:
+        - adr:0007
+      constrains_future:
+        - schema:v0.3-change-spec
+
+  - id: pattern:chat-harness:v0
+    type: pattern
+    scope: project_knowledge
+    status: draft
+    owner: engineering
+    version: v0
+    path: docs/architecture/patterns/chat-harness/README.md
+    relations:
+      informs:
+        - pattern:context-graph-knowledge-system:v0.1
+
+  - id: schema:v0.2-base
+    type: schema
+    scope: project_knowledge
+    status: draft
+    owner: engineering
+    version: v0.2
+    path: docs/engineering/data-model/schema-v0.2-base.sql
+    relations:
+      supports:
+        - prd:v0.2
+      constrained_by:
+        - adr:0001
+        - adr:0002
+        - adr:0003
+
+  - id: schema:v0.3-change-spec
+    type: schema_change_spec
+    scope: project_knowledge
+    status: draft
+    owner: engineering
+    version: v0.1
+    path: docs/engineering/data-model/schema-v0.3-change-spec.md
+    relations:
+      extends:
+        - schema:v0.2-base
+      constrained_by:
+        - adr:0007
+
+  - id: prompt:astrologer-persona:v0.2
+    type: prompt
+    scope: project_knowledge
+    status: draft
+    owner: product_ai_quality
+    version: v0.2
+    path: docs/ai/prompts/astrologer-persona-v0.2.md
+    relations:
+      implements_policy:
+        - adr:0005
+
+  - id: prompt:memory-extractor:v0.2
+    type: prompt
+    scope: project_knowledge
+    status: draft
+    owner: product_ai_quality
+    version: v0.2
+    path: docs/ai/prompts/memory-extractor-v0.2.md
+    relations:
+      implements_policy:
+        - adr:0006
+      constrained_by:
+        - adr:0007
+
+  - id: eval:model-router-validation:v0.1
+    type: eval
+    scope: project_knowledge
+    status: draft
+    owner: ai_quality
+    version: v0.1
+    path: docs/ai/evaluation/model-router-validation-v0.1.md
+    relations:
+      tests:
+        - adr:0004
+
+  - id: eval:responsible-prediction:v0.1
+    type: eval
+    scope: project_knowledge
+    status: draft
+    owner: ai_quality
+    version: v0.1
+    path: docs/ai/evaluation/responsible-prediction-v0.1.md
+    relations:
+      tests:
+        - adr:0005
+
+  - id: domain-knowledge:jyotish:index:v0.1
+    type: domain_knowledge
+    scope: domain_knowledge
+    status: draft
+    owner: product_ai_quality
+    version: v0.1
+    path: docs/domain-knowledge/jyotish/index.md
+    relations:
+      governed_by:
+        - adr:0002
+        - adr:0007
+
+  - id: skill:jyotish-docs-entry:v0.1
+    type: codex_skill
+    scope: project_knowledge
+    status: draft
+    owner: product_engineering
+    version: v0.1
+    path: skills/jyotish-docs-entry/SKILL.md
+    relations:
+      implements:
+        - standard:metadata:v0.1
+        - standard:relation-types:v0.1
+        - pattern:context-graph-knowledge-system:v0.1

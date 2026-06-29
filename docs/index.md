@@ -21,6 +21,7 @@ This is the public documentation hub for Jyotish Companion. Git is the source of
 | [Engineering](engineering/index.md) | Data model, schema, implementation-facing specs | Engineering |
 | [AI](ai/index.md) | Prompts, model behavior, evaluation, quality gates | AI quality, engineering, product |
 | [Governance](governance/index.md) | ADRs, standards, source-of-truth policies | Everyone making durable decisions |
+| [Domain Knowledge](domain-knowledge/index.md) | Reviewed Jyotish doctrine, source maps, and retrieval taxonomy | Product, AI quality, domain reviewers |
 | [Operations](operations/index.md) | Runbooks, repo management, publishing, audits | PM, engineering, operations |
 | [Archive](archive/index.md) | Original inputs and provenance | Future auditors and maintainers |
 
