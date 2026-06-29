@@ -42,6 +42,7 @@ nav:
           - System Design v0.2: architecture/system/system-design-v0.2.md
       - Patterns:
           - architecture/patterns/index.md
+          - Context Graph And Knowledge System: architecture/patterns/context-graph-knowledge-system/README.md
           - Multi-Turn Chat Harness v0: architecture/patterns/chat-harness/README.md
   - Engineering:
       - engineering/index.md
@@ -73,6 +74,7 @@ nav:
           - ADR 0004: governance/decisions/adr/0004-model-router-and-open-model-strategy.md
           - ADR 0005: governance/decisions/adr/0005-responsible-prediction-ux.md
           - ADR 0006: governance/decisions/adr/0006-end-of-chat-memory-review.md
+          - ADR 0007: governance/decisions/adr/0007-context-graph-knowledge-system.md
       - Standards:
           - governance/standards/index.md
           - Context Versioning SOP: governance/standards/context-versioning-sop.md

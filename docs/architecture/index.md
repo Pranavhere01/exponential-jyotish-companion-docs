@@ -6,6 +6,7 @@ The architecture domain owns system shape: boundaries, principles, runtime flows
 
 - [System Design v0.2](system/system-design-v0.2.md)
 - [Architecture Patterns](patterns/index.md)
+- [Context Graph And Knowledge System](patterns/context-graph-knowledge-system/README.md)
 - [Multi-Turn Chat Harness v0](patterns/chat-harness/README.md)
 
 ## Ownership

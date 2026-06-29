@@ -10,6 +10,7 @@ Architecture Decision Records capture durable decisions and why they were made.
 | [0004](0004-model-router-and-open-model-strategy.md) | Accepted | Model router and open-model validation |
 | [0005](0005-responsible-prediction-ux.md) | Accepted | Responsible prediction delivery |
 | [0006](0006-end-of-chat-memory-review.md) | Accepted | End-of-chat Manual memory review |
+| [0007](0007-context-graph-knowledge-system.md) | Accepted | Context graph and governed knowledge system |
 
 ## When to add an ADR
 

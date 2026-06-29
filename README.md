@@ -51,6 +51,7 @@ This repo is MkDocs-ready. Add Markdown files under the right `docs/` shelf, lin
 - [PRD v0.2](docs/product/requirements/prd-v0.2.md)
 - [PM first-principles guide](docs/product/guides/pm-first-principles-guide.md)
 - [System Design v0.2](docs/architecture/system/system-design-v0.2.md)
+- [Context Graph and Knowledge System](docs/architecture/patterns/context-graph-knowledge-system/README.md)
 - [Schema v0.2 base](docs/engineering/data-model/schema-v0.2-base.sql)
 - [Schema v0.3 change spec](docs/engineering/data-model/schema-v0.3-change-spec.md)
 - [Schema v0.3 discovery and plan](docs/engineering/data-model/schema-v0.3-discovery-and-plan.md)

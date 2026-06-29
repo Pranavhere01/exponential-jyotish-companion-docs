@@ -21,6 +21,7 @@ test -f docs/handbook/version-manifest.md
 test -f docs/product/index.md
 test -f docs/architecture/index.md
 test -f docs/architecture/patterns/index.md
+test -f docs/architecture/patterns/context-graph-knowledge-system/README.md
 test -f docs/architecture/patterns/chat-harness/README.md
 test -f docs/architecture/patterns/chat-harness/chat-harness-v0.html
 test -f docs/engineering/index.md
@@ -34,6 +35,7 @@ test -f docs/operations/audits/index.md
 test -f docs/governance/index.md
 test -f docs/governance/decisions/index.md
 test -f docs/governance/decisions/adr/index.md
+test -f docs/governance/decisions/adr/0007-context-graph-knowledge-system.md
 test -f docs/governance/standards/index.md
 test -f docs/archive/index.md
 test -f docs/operations/repository/repo-split-execution-plan.md
@@ -130,6 +132,10 @@ rg -n "First Read Path|Placement Guide|Current Source Of Truth" docs/handbook/kn
 rg -n "Information Architecture|Enterprise Rules|Naming Standard|Review Standard" docs/handbook/knowledge-architecture.md >/dev/null
 rg -n "Multi-Turn Chat Harness|End-To-End Flow|Recommended Jyotish Companion Mapping" docs/architecture/patterns/chat-harness/README.md >/dev/null
 rg -n "architecture/patterns/chat-harness/README.md|Multi-Turn Chat Harness" mkdocs.yml docs/architecture/index.md docs/handbook/knowledge-map.md docs/handbook/version-manifest.md >/dev/null
+rg -n "Context Graph And Knowledge System|Graph Scopes|Explanation Packet|Stale Fact Rule" docs/architecture/patterns/context-graph-knowledge-system/README.md >/dev/null
+rg -n "0007-context-graph-knowledge-system|Context Graph And Knowledge System|Context Graph And Knowledge System Pattern" mkdocs.yml docs/architecture/index.md docs/architecture/patterns/index.md docs/handbook/knowledge-map.md docs/handbook/version-manifest.md docs/governance/decisions/adr/index.md >/dev/null
+rg -n "Context Graph And Knowledge System|context-graph-knowledge-system" README.md docs/index.md >/dev/null
+rg -n "Postgres-first|runtime_user_context|context_assembly_runs|Neo4j" docs/governance/decisions/adr/0007-context-graph-knowledge-system.md >/dev/null
 rg -n "handbook|product|architecture|engineering|ai|governance|operations|archive" README.md docs/handbook/knowledge-map.md mkdocs.yml >/dev/null
 if rg -n "00-start-here|10-product|20-architecture|30-data-and-schema|40-ai-quality|50-operations|60-decisions|90-archive|docs/ai/evals|docs/governance/adr" README.md docs mkdocs.yml --glob '!docs/archive/source-materials/**'; then
   echo "Found retired folder taxonomy or stale docs path." >&2

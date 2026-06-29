@@ -13,6 +13,7 @@ Update it whenever a durable document, prompt, schema, eval, or export version c
 | Knowledge Map | v0.1 | `docs/handbook/knowledge-map.md` | n/a |
 | PRD | v0.2 | `docs/product/requirements/prd-v0.2.md` | `exports/google-drive/Exponential/Astrology/Documents/Text/prd_jyotish_companion_v0_2.md` |
 | System Design | v0.2 | `docs/architecture/system/system-design-v0.2.md` | `exports/google-drive/Exponential/Astrology/Documents/Text/system_design_jyotish_companion_v0_2.md` |
+| Context Graph And Knowledge System Pattern | v0.1 | `docs/architecture/patterns/context-graph-knowledge-system/README.md` | n/a |
 | Multi-Turn Chat Harness Pattern | v0 | `docs/architecture/patterns/chat-harness/README.md` | n/a |
 | PM First-Principles Guide | v0.2 | `docs/product/guides/pm-first-principles-guide.html` | `exports/google-drive/Exponential/Astrology/Documents/Html/pm_first_principles_guide.html` |
 | Schema Base | v0.2 | `docs/engineering/data-model/schema-v0.2-base.sql` | `exports/google-drive/Exponential/Astrology/Documents/Text/schema_v0_2_base.sql` |
@@ -44,6 +45,7 @@ Update it whenever a durable document, prompt, schema, eval, or export version c
 | `docs/governance/decisions/adr/0004-model-router-and-open-model-strategy.md` | accepted | Model router and open-model validation |
 | `docs/governance/decisions/adr/0005-responsible-prediction-ux.md` | accepted | Responsible prediction delivery |
 | `docs/governance/decisions/adr/0006-end-of-chat-memory-review.md` | accepted | End-of-chat Manual memory review |
+| `docs/governance/decisions/adr/0007-context-graph-knowledge-system.md` | accepted | Context graph and governed knowledge system |
 
 ## Versioning Rules
 

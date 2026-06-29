@@ -22,6 +22,7 @@ This map explains where to read first and where new knowledge belongs.
 | Product scope, PM decisions, user flows | `docs/product/` |
 | System boundaries, services, runtime flows | `docs/architecture/` |
 | Reusable platform patterns or reference architectures | `docs/architecture/patterns/` |
+| Governed context, graph memory, and evidence packet design | `docs/architecture/patterns/` plus `docs/governance/decisions/adr/` |
 | Schema, tables, migrations, data contracts | `docs/engineering/data-model/` |
 | Prompts, model behavior, evaluation, safety rubrics | `docs/ai/` |
 | Durable decisions or standards | `docs/governance/` |
@@ -32,6 +33,7 @@ This map explains where to read first and where new knowledge belongs.
 
 - Product: [PRD v0.2](../product/requirements/prd-v0.2.md)
 - Architecture: [System Design v0.2](../architecture/system/system-design-v0.2.md)
+- Context graph: [Context Graph And Knowledge System](../architecture/patterns/context-graph-knowledge-system/README.md)
 - Architecture patterns: [Multi-Turn Chat Harness v0](../architecture/patterns/chat-harness/README.md)
 - Schema: [Schema v0.2 Base](../engineering/data-model/schema-v0.2-base.md)
 - AI behavior: [AI Quality](../ai/index.md)

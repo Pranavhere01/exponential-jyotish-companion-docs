@@ -10,6 +10,7 @@ This is the public documentation hub for Jyotish Companion. Git is the source of
 - [Product Way Forward](product/strategy/way-forward.md)
 - [PRD v0.2](product/requirements/prd-v0.2.md)
 - [System Design v0.2](architecture/system/system-design-v0.2.md)
+- [Context Graph And Knowledge System](architecture/patterns/context-graph-knowledge-system/README.md)
 
 ## Core Domains
 

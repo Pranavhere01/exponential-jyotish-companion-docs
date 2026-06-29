@@ -6,6 +6,7 @@ They are not full product requirements and they are not implementation migration
 
 ## Patterns
 
+- [Context Graph And Knowledge System](context-graph-knowledge-system/README.md)
 - [Multi-Turn Chat Harness v0](chat-harness/README.md)
 
 ## Ownership
