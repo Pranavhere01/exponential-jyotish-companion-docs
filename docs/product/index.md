@@ -7,6 +7,7 @@ The product domain owns user-facing intent: strategy, requirements, scope, PM de
 - [Product Way Forward](strategy/way-forward.md)
 - [PRD v0.2](requirements/prd-v0.2.md)
 - [PM First-Principles Guide](guides/pm-first-principles-guide.md)
+- [Brand And Logo Exploration](brand/index.md)
 
 ## Ownership
 
@@ -16,6 +17,7 @@ Required reviewers when changed: Engineering for feasibility, AI Quality for mod
 ## Belongs Here
 
 - Product vision and positioning.
+- Brand identity, naming direction, logo exploration, and visual positioning.
 - User segments, jobs, and workflows.
 - In-scope and out-of-scope decisions.
 - Roadmap direction and PM-readable technical explanations.

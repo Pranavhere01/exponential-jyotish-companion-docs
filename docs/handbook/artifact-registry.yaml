@@ -74,6 +74,19 @@ artifacts:
         - eval:model-router-validation:v0.1
         - eval:responsible-prediction:v0.1
 
+  - id: brand:logo-exploration:v0.1
+    type: brand_exploration
+    scope: project_knowledge
+    status: draft
+    owner: product
+    version: v0.1
+    path: docs/product/brand/logo-exploration-v0.1.html
+    relations:
+      extends:
+        - prd:v0.2
+      informs:
+        - architecture:system-design:v0.2
+
   - id: architecture:system-design:v0.2
     type: architecture
     scope: project_knowledge

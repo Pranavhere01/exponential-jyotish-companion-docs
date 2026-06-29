@@ -39,6 +39,9 @@ nav:
           - PRD v0.2: product/requirements/prd-v0.2.md
       - Guides:
           - PM First-Principles Guide: product/guides/pm-first-principles-guide.md
+      - Brand:
+          - Brand And Logo Exploration: product/brand/index.md
+          - Logo Exploration v0.1: product/brand/logo-exploration-v0.1.html
   - Architecture:
       - architecture/index.md
       - System:
