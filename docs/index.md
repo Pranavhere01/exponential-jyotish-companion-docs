@@ -6,25 +6,43 @@ Git is the source of truth. Google Drive, exported HTML, and hosted pages are re
 
 ## Start Here
 
-- [Way Forward](01-way-forward.md)
-- [PRD v0.2](prd_jyotish_companion_v0_2.md)
-- [System Design v0.2](system_design_jyotish_companion_v0_2.md)
-- [Schema v0.2 Base](https://github.com/Pranavhere01/exponential-jyotish-companion-docs/blob/main/db/schema_v0_2_base.sql)
-- [Schema v0.3 Change Spec](schema-v0.3-change-spec.md)
-- [Schema v0.3 Discovery and Plan](schema-v0.3-discovery-and-plan.md)
-- [Context and Version Control SOP](sop/context-versioning-sop.md)
-- [How To Add Docs](docs-site-guide.md)
-- [Repository Split Execution Plan](repo-split-execution-plan.md)
-- [Source Materials Archive](source-materials/index.md)
+- [Knowledge Map](00-start-here/knowledge-map.md)
+- [Docs Site Guide](00-start-here/docs-site-guide.md)
+- [Version Manifest](00-start-here/version-manifest.md)
+
+## Product And Strategy
+
+- [Way Forward](10-product/way-forward.md)
+- [PRD v0.2](10-product/prd-v0.2.md)
+- [PM First-Principles Guide](10-product/pm-first-principles-guide.md)
+
+## Architecture And Data
+
+- [System Design v0.2](20-architecture/system-design-v0.2.md)
+- [Schema v0.2 Base](30-data-and-schema/schema-v0.2-base.sql)
+- [Schema v0.3 Change Spec](30-data-and-schema/schema-v0.3-change-spec.md)
+- [Schema v0.3 Discovery and Plan](30-data-and-schema/schema-v0.3-discovery-and-plan.md)
+
+## AI Quality
+
+- [Prompt Artifacts](40-ai-quality/prompts/index.md)
+- [Evaluation Artifacts](40-ai-quality/evals/index.md)
+
+## Operations
+
+- [Context and Version Control SOP](50-operations/context-versioning-sop.md)
+- [Repository Split Execution Plan](50-operations/repo-split-execution-plan.md)
+- [GitHub Setup](50-operations/github-setup.md)
+- [External Publish Runbook](50-operations/external-publish-runbook.md)
+- [Completion Audit](50-operations/completion-audit.md)
 
 ## Durable Decisions
 
-- [ADR 0001: Provider-neutral embeddings](adr/0001-provider-neutral-embeddings.md)
-- [ADR 0002: Reviewed Jyotish knowledge retrieval](adr/0002-safe-knowledge-rag.md)
-- [ADR 0003: Extension-ready analysis model](adr/0003-extension-ready-analysis-model.md)
-- [ADR 0004: Model router and open-model validation](adr/0004-model-router-and-open-model-strategy.md)
-- [ADR 0005: Responsible prediction delivery](adr/0005-responsible-prediction-ux.md)
-- [ADR 0006: End-of-chat Manual memory review](adr/0006-end-of-chat-memory-review.md)
+- [ADR Index](60-decisions/adr/index.md)
+
+## Archive
+
+- [Source Materials Archive](90-archive/source-materials/index.md)
 
 ## Repository Split
 

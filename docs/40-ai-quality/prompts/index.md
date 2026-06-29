@@ -10,7 +10,7 @@ Rules:
 - Every prompt file must include `prompt_key`, `prompt_version`, and intended `model_route`.
 - Prompts are not the only safety layer. Hard safety rules also need independent evaluator and gateway checks.
 - Persona upgrades create a new version. Existing generated profiles should be marked `superseded` or regenerated through a tracked job.
-- Prompt changes should be reviewed through pull requests and tested against `evals/`.
+- Prompt changes should be reviewed through pull requests and tested against `docs/40-ai-quality/evals/`.
 
 Current prompt set:
 

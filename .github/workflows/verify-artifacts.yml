@@ -32,7 +32,9 @@ jobs:
           required = [
               "mkdocs.yml",
               "docs/index.md",
-              "docs/docs-site-guide.md",
+              "docs/00-start-here/knowledge-map.md",
+              "docs/00-start-here/docs-site-guide.md",
+              "docs/00-start-here/version-manifest.md",
               ".github/workflows/deploy-docs-pages.yml",
           ]
           for path in required:

@@ -6,9 +6,6 @@ on:
       - main
     paths:
       - "docs/**"
-      - "db/**"
-      - "prompts/**"
-      - "evals/**"
       - "mkdocs.yml"
       - ".github/workflows/deploy-docs-pages.yml"
   workflow_dispatch:

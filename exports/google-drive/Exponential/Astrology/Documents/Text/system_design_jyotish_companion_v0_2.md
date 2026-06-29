@@ -3,7 +3,7 @@
 Project: Exponential - Jyotish Companion  
 Status: Draft v0.2  
 Date: 2026-06-29  
-Companion PRD: `docs/prd_jyotish_companion_v0_2.md`  
+Companion PRD: `docs/10-product/prd-v0.2.md`  
 Source of truth: Git repository first; Drive/HTML/PDF are exports.
 
 ## 0. Scope of This Revision
@@ -149,8 +149,8 @@ Implementation:
 
 Use both:
 
-- Prompt-level behavior in `prompts/astrologer_persona/v0.2.md`.
-- Evaluator checks in `prompts/prediction_evaluator/v0.2.md` and `prediction_evaluations`.
+- Prompt-level behavior in `docs/40-ai-quality/prompts/astrologer-persona-v0.2.md`.
+- Evaluator checks in `docs/40-ai-quality/prompts/prediction-evaluator-v0.2.md` and `prediction_evaluations`.
 
 Why both:
 
@@ -211,7 +211,7 @@ This supports persona upgrades and future use-case-specific versions without mut
 
 ## 10. Evaluation Harness
 
-The initial eval baseline lives under `evals/`.
+The initial eval baseline lives under `docs/40-ai-quality/evals/`.
 
 Use it to validate:
 
@@ -226,7 +226,7 @@ Models can run in shadow mode before becoming active. User-facing prediction rou
 
 ## 11. Data Contracts
 
-The schema base is `db/schema_v0_2_base.sql`.
+The schema base is `docs/30-data-and-schema/schema-v0.2-base.sql`.
 
 Core tables added or emphasized in v0.2:
 

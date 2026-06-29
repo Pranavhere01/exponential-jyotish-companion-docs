@@ -353,10 +353,11 @@ The Git repository is the source of truth.
 
 Required folders:
 
-- `docs/` for PRD, system design, PM guides, and ADRs.
-- `db/` for schema and migrations.
-- `prompts/` for versioned prompts.
-- `evals/` for fixtures and rubrics.
+- `docs/10-product/` for PRD, product strategy, and PM guides.
+- `docs/20-architecture/` for system design and architecture.
+- `docs/30-data-and-schema/` for schema and migration/change specs.
+- `docs/40-ai-quality/` for versioned prompts, eval fixtures, and rubrics.
+- `docs/60-decisions/` for ADRs.
 - `.github/` for PR templates and review workflow.
 
 Google Drive structure:

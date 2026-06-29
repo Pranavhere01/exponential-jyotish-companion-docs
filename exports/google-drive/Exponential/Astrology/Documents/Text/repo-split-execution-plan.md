@@ -38,7 +38,7 @@ Exit criteria:
 Plan:
 
 - Ensure every durable product, architecture, schema, prompt, eval, SOP, and publishing artifact is in the docs repo.
-- Track durable artifacts in `docs/version-manifest.md`.
+- Track durable artifacts in `docs/00-start-here/version-manifest.md`.
 - Keep Drive exports as derived copies, not the source of truth.
 - Preserve raw schema, prompts, and eval fixtures because they are project knowledge, not app code.
 

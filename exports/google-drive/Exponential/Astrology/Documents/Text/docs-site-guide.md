@@ -9,11 +9,11 @@ This repository is the internal documentation and resources hub for Jyotish Comp
 
 ## How to add a new document
 
-1. Add a Markdown file under `docs/`.
+1. Add a Markdown file under the right `docs/` shelf.
 2. Use a clear lowercase filename, such as `memory-retrieval-plan.md`.
 3. Start with a title, status, date, and owner/context when useful.
-4. Link the new file from `docs/index.md` if it is a start-here or durable reference.
-5. If it is a durable artifact, add it to `docs/version-manifest.md`.
+4. Link the new file from the section index. Link it from `docs/index.md` only if it is a durable entry point.
+5. If it is a durable artifact, add it to [Version Manifest](version-manifest.md).
 6. If it needs a Drive export, copy it into `exports/google-drive/Exponential/Astrology/Documents/Text/`.
 7. Run `scripts/verify_artifacts.sh`.
 8. Commit on `dev`, then merge to `main` through a PR.
@@ -23,15 +23,15 @@ This repository is the internal documentation and resources hub for Jyotish Comp
 ```text
 docs/
   index.md                    # Site home
-  prd_*.md                    # Product requirements
-  system_design_*.md          # Architecture and system design
-  schema-*.md                 # Schema specs and implementation plans
-  adr/                        # Architecture decision records
-  sop/                        # Operating procedures
-prompts/                      # Versioned prompt artifacts
-evals/                        # Rubrics and fixtures
-db/                           # Canonical schema SQL
-exports/google-drive/         # Derived sharing/export package
+  00-start-here/              # Orientation, map, manifest, contribution guide
+  10-product/                 # Product strategy, PRD, PM-readable guides
+  20-architecture/            # System design and technical architecture
+  30-data-and-schema/         # Schema SQL, data model specs, migration/change specs
+  40-ai-quality/              # Prompts, eval rubrics, fixtures
+  50-operations/              # SOPs, repo setup, publishing, audits
+  60-decisions/               # ADRs and durable decisions
+  90-archive/                 # Original source inputs and provenance
+exports/google-drive/         # Derived sharing/export package, not source of truth
 ```
 
 ## Publishing
@@ -51,3 +51,4 @@ If private GitHub Pages is unavailable on the current GitHub plan, keep the repo
 - Use ADRs for durable architecture, safety, provider, schema, or model-behavior choices.
 - Prefer links over duplication.
 - Keep generated outputs versioned instead of overwritten in place.
+- Keep raw source inputs in `docs/90-archive/` and edit canonical docs elsewhere.

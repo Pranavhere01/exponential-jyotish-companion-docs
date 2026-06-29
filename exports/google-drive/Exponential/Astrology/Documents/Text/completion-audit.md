@@ -11,12 +11,12 @@ Status: complete locally.
 
 Evidence:
 
-- PRD v0.2 defines `R-MODEL-01` through `R-MODEL-07` in `docs/prd_jyotish_companion_v0_2.md`.
-- System Design v0.2 defines the model-router architecture in `docs/system_design_jyotish_companion_v0_2.md`.
-- Schema includes `model_catalog`, `model_routes`, `model_eval_runs`, and `model_invocations` in `db/schema_v0_2_base.sql`.
-- ADR 0004 records the model-router decision in `docs/adr/0004-model-router-and-open-model-strategy.md`.
-- Versioned prompt artifacts exist under `prompts/`.
-- Versioned eval artifacts exist under `evals/`.
+- PRD v0.2 defines `R-MODEL-01` through `R-MODEL-07` in `docs/10-product/prd-v0.2.md`.
+- System Design v0.2 defines the model-router architecture in `docs/20-architecture/system-design-v0.2.md`.
+- Schema includes `model_catalog`, `model_routes`, `model_eval_runs`, and `model_invocations` in `docs/30-data-and-schema/schema-v0.2-base.sql`.
+- ADR 0004 records the model-router decision in `docs/60-decisions/adr/0004-model-router-and-open-model-strategy.md`.
+- Versioned prompt artifacts exist under `docs/40-ai-quality/prompts/`.
+- Versioned eval artifacts exist under `docs/40-ai-quality/evals/`.
 
 ### 2. Move Manual memory questions to end-of-chat / CSAT
 
@@ -41,7 +41,7 @@ Evidence:
 - ADR 0005 records the two-layer approach: astrologer prompt plus evaluator.
 - Schema includes `prediction_evaluations` and delivery policy labels.
 - PM guide answers "Evaluator agent or system prompt?" with "Use both."
-- `prompts/astrologer_persona/v0.2.md` and `prompts/prediction_evaluator/v0.2.md` make this behavior version-controlled.
+- `docs/40-ai-quality/prompts/astrologer-persona-v0.2.md` and `docs/40-ai-quality/prompts/prediction-evaluator-v0.2.md` make this behavior version-controlled.
 
 ### 4. Keep knowledge reviewed but not positive-only
 
@@ -62,7 +62,7 @@ Evidence:
 
 - PRD v0.2 includes the open-source/open-weight Chinese model validation plan and candidate families: Qwen, DeepSeek, Kimi, GLM.
 - ADR 0004 records that these models are candidates behind the router, not a hard-coded product dependency.
-- `evals/rubrics/model_router_validation_v0.1.md` and `evals/fixtures/model_router_cases_v0.1.jsonl` seed the validation harness.
+- `docs/40-ai-quality/evals/model-router-validation-v0.1.md` and `docs/40-ai-quality/evals/model-router-cases-v0.1.jsonl` seed the validation harness.
 
 ### 6. Make marriage matching an example of generic future extensibility
 
@@ -81,8 +81,8 @@ Status: complete locally.
 
 Evidence:
 
-- `docs/prd_jyotish_companion_v0_2.md` is the enhanced PRD source.
-- `docs/system_design_jyotish_companion_v0_2.md` is the companion system-design source for the same decisions.
+- `docs/10-product/prd-v0.2.md` is the enhanced PRD source.
+- `docs/20-architecture/system-design-v0.2.md` is the companion system-design source for the same decisions.
 - `exports/google-drive/Exponential/Astrology/Documents/Text/prd_jyotish_companion_v0_2.md` is the Drive-ready text export.
 
 ### 8. Set up on GitHub
@@ -98,9 +98,9 @@ Evidence:
 - `.github/workflows/verify-artifacts.yml` exists and runs `scripts/verify_artifacts.sh`.
 - `.github/workflows/deploy-docs-pages.yml` exists to publish the MkDocs site from `main`.
 - `.gitignore` exists.
-- `docs/github-setup.md` documents the publish commands, private repo setup, and `main`/`dev` branch policy.
+- `docs/50-operations/github-setup.md` documents the publish commands, private repo setup, and `main`/`dev` branch policy.
 - `scripts/publish_to_github_after_auth.sh` creates the private repo if needed, pushes clean `main` plus working `dev`, and can invite a collaborator when a GitHub username is provided.
-- `docs/version-manifest.md` records current source and export artifact versions.
+- `docs/00-start-here/version-manifest.md` records current source and export artifact versions.
 - Local branch state: `main` is the stable baseline; `dev` is the working branch.
 
 Blocker:
@@ -149,9 +149,9 @@ Status: source-of-truth spec and implementation plan are complete locally; direc
 
 Evidence:
 
-- `docs/schema-v0.3-change-spec.md` records the v0.3 engineering change spec as a versioned artifact.
-- `docs/schema-v0.3-discovery-and-plan.md` records the discovery result, table mapping mismatch, blocked gates, ordered implementation plan, and draft PR description.
-- `docs/version-manifest.md` now tracks both v0.3 schema artifacts and their export copies.
+- `docs/30-data-and-schema/schema-v0.3-change-spec.md` records the v0.3 engineering change spec as a versioned artifact.
+- `docs/30-data-and-schema/schema-v0.3-discovery-and-plan.md` records the discovery result, table mapping mismatch, blocked gates, ordered implementation plan, and draft PR description.
+- `docs/00-start-here/version-manifest.md` now tracks both v0.3 schema artifacts and their export copies.
 - Export copies exist under `exports/google-drive/Exponential/Astrology/Documents/Text/`.
 - Local branch `dev` contains the v0.3 work, including commit `513b470 Add schema v0.3 discovery plan`.
 

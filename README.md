@@ -6,6 +6,19 @@ Version-controlled product, architecture, SOP, prompt, eval, and schema context 
 
 This repository is the canonical documentation home from day 1. Google Drive, PDFs, slides, and HTML exports may exist for sharing, but they are derived copies. Product decisions, schema changes, prompts, SOPs, and architecture notes should land here first so they can be reviewed, versioned, and indexed through MCP.
 
+## How this repo is organized
+
+The docs use a library-shelf structure so new material has an obvious home:
+
+- `docs/00-start-here/` - orientation, knowledge map, version manifest, contribution guide.
+- `docs/10-product/` - PM-facing product direction, PRD, first-principles guide.
+- `docs/20-architecture/` - system design and technical architecture.
+- `docs/30-data-and-schema/` - schema, data model, and migration/change specs.
+- `docs/40-ai-quality/` - prompts, evaluator behavior, rubrics, fixtures.
+- `docs/50-operations/` - SOPs, repo setup, publishing, audits, runbooks.
+- `docs/60-decisions/` - ADRs and durable decision history.
+- `docs/90-archive/` - raw source inputs preserved for provenance.
+
 ## Repository split
 
 - Documentation/resources repo: `exponential-jyotish-companion-docs`.
@@ -15,7 +28,7 @@ Both repositories use `main` as the stable branch and `dev` as the working branc
 
 ## Docs site
 
-This repo is MkDocs-ready. Add Markdown files under `docs/`, link durable entry points from `docs/index.md`, and merge to `main` to publish the hosted docs site.
+This repo is MkDocs-ready. Add Markdown files under the right `docs/` shelf, link durable entry points from `docs/index.md` or the relevant section index, and merge to `main` to publish the hosted docs site.
 
 ## Current baseline
 
@@ -30,24 +43,21 @@ This repo is MkDocs-ready. Add Markdown files under `docs/`, link durable entry 
 
 ## Key files
 
-- [Way forward](docs/01-way-forward.md)
-- [PRD v0.2](docs/prd_jyotish_companion_v0_2.md)
-- [System Design v0.2](docs/system_design_jyotish_companion_v0_2.md)
-- [PM first-principles guide](docs/pm_first_principles_guide.html)
-- [Completion audit](docs/completion-audit.md)
-- [External publish runbook](docs/external-publish-runbook.md)
+- [Knowledge map](docs/00-start-here/knowledge-map.md)
+- [Version manifest](docs/00-start-here/version-manifest.md)
+- [Docs site guide](docs/00-start-here/docs-site-guide.md)
+- [Way forward](docs/10-product/way-forward.md)
+- [PRD v0.2](docs/10-product/prd-v0.2.md)
+- [PM first-principles guide](docs/10-product/pm-first-principles-guide.md)
+- [System Design v0.2](docs/20-architecture/system-design-v0.2.md)
+- [Schema v0.2 base](docs/30-data-and-schema/schema-v0.2-base.sql)
+- [Schema v0.3 change spec](docs/30-data-and-schema/schema-v0.3-change-spec.md)
+- [Schema v0.3 discovery and plan](docs/30-data-and-schema/schema-v0.3-discovery-and-plan.md)
+- [Prompt artifacts](docs/40-ai-quality/prompts/index.md)
+- [Evaluation artifacts](docs/40-ai-quality/evals/index.md)
+- [Context/versioning SOP](docs/50-operations/context-versioning-sop.md)
+- [Completion audit](docs/50-operations/completion-audit.md)
+- [External publish runbook](docs/50-operations/external-publish-runbook.md)
+- [ADR index](docs/60-decisions/adr/index.md)
+- [Source materials archive](docs/90-archive/source-materials/index.md)
 - [Google Drive export package](exports/google-drive/README.md)
-- [Context/versioning SOP](docs/sop/context-versioning-sop.md)
-- [Version manifest](docs/version-manifest.md)
-- [Docs site guide](docs/docs-site-guide.md)
-- [Schema v0.2 base](db/schema_v0_2_base.sql)
-- [Schema v0.3 change spec](docs/schema-v0.3-change-spec.md)
-- [Schema v0.3 discovery and plan](docs/schema-v0.3-discovery-and-plan.md)
-- [Prompt artifacts](prompts/README.md)
-- [Evaluation artifacts](evals/README.md)
-- [ADR 0001: Provider-neutral embeddings](docs/adr/0001-provider-neutral-embeddings.md)
-- [ADR 0002: Safe Jyotish knowledge retrieval](docs/adr/0002-safe-knowledge-rag.md)
-- [ADR 0003: Extension-ready analysis model](docs/adr/0003-extension-ready-analysis-model.md)
-- [ADR 0004: Model router and open-model strategy](docs/adr/0004-model-router-and-open-model-strategy.md)
-- [ADR 0005: Responsible prediction UX](docs/adr/0005-responsible-prediction-ux.md)
-- [ADR 0006: End-of-chat memory review](docs/adr/0006-end-of-chat-memory-review.md)

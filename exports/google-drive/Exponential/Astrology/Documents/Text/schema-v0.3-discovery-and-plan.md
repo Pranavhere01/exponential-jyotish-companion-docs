@@ -3,7 +3,7 @@
 Status: blocked for direct migration in this repo  
 Date: 2026-06-29  
 Branch: `feat/schema-v0.3`  
-Source spec: `docs/schema-v0.3-change-spec.md`
+Source spec: `docs/30-data-and-schema/schema-v0.3-change-spec.md`
 
 ## Executive summary
 
@@ -20,14 +20,14 @@ Because the user's instruction says "if anything in the repo contradicts the spe
 - Application language: not present.
 - Migration tool: not present.
 - ORM/query builder: not present.
-- Canonical schema location: `db/schema_v0_2_base.sql`.
+- Canonical schema location: `docs/30-data-and-schema/schema-v0.2-base.sql`.
 - Existing schema style: raw PostgreSQL SQL using `CREATE TABLE IF NOT EXISTS`, guarded enum creation blocks, and explicit indexes.
 
 ### Tables named by the v0.3 spec
 
 | Spec table | Repo status | Notes |
 | --- | --- | --- |
-| `charts` | Present | In `db/schema_v0_2_base.sql`; stores immutable `chart_object`, `facts_sheet_text`, engine metadata, ayanamsa, house system, and lifecycle status. |
+| `charts` | Present | In `docs/30-data-and-schema/schema-v0.2-base.sql`; stores immutable `chart_object`, `facts_sheet_text`, engine metadata, ayanamsa, house system, and lifecycle status. |
 | `memories` | Not present | Closest table is `memory_facts`. v0.2 intentionally stores vectors separately in `text_embeddings` for provider neutrality. |
 | `messages` | Not present | The repo has `model_invocations` and prompt/eval artifacts, but no chat transcript table. |
 | `interpretive_profiles` | Present | Has chart/profile/model/prompt/persona status fields. |
@@ -190,7 +190,7 @@ CREATE INDEX idx_knowledge_chunks_chunk_tsv
 
 ### Summary
 
-- Added `docs/schema-v0.3-change-spec.md` as the source-of-truth v0.3 change spec.
+- Added `docs/30-data-and-schema/schema-v0.3-change-spec.md` as the source-of-truth v0.3 change spec.
 - Added this discovery and implementation plan to document the repo mismatch, blocked migration gates, and safe next steps.
 - Updated repo indexes and exports so the v0.3 work remains versioned and MCP-friendly.
 

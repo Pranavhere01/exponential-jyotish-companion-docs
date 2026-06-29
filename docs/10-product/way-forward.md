@@ -71,27 +71,21 @@ Suggested structure:
 
 ```text
 docs/
-  01-way-forward.md
-  adr/
-    0001-provider-neutral-embeddings.md
-    0002-safe-knowledge-rag.md
-    0003-extension-ready-analysis-model.md
-  sop/
-    context-versioning-sop.md
-db/
-  schema_v0_2_base.sql
-prompts/
-  astrologer_persona/
-evals/
-  fixtures/
-  rubrics/
+  00-start-here/
+  10-product/
+  20-architecture/
+  30-data-and-schema/
+  40-ai-quality/
+  50-operations/
+  60-decisions/
+  90-archive/
 ```
 
 ## Immediate next steps
 
 1. Put this repository in the Exponential shared GitHub organization/folder.
 2. Treat Markdown, SQL, JSON, prompts, and eval fixtures as source files.
-3. Use `docs/prd_jyotish_companion_v0_2.md` as the PRD source for the next revision.
+3. Use `docs/10-product/prd-v0.2.md` as the PRD source for the next revision.
 4. Use ADRs for decisions like provider, memory default, responsible prediction UX, RAG policy, and chart engine.
 5. Only export to Google Drive/HTML/PDF after a Git version is merged.
 
