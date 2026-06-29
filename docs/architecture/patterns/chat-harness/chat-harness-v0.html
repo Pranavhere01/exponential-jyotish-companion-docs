@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Multi-Turn Chat Harness — V0 Architecture</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --border: #30363d;
+    --text: #e6edf3;
+    --muted: #8b949e;
+    --accent: #58a6ff;
+    --green: #3fb950;
+    --orange: #d29922;
+    --purple: #bc8cff;
+    --red: #f85149;
+    --cyan: #39d2c0;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    padding: 40px 20px;
+  }
+  .container { max-width: 960px; margin: 0 auto; }
+  h1 { font-size: 2rem; font-weight: 700; margin-bottom: 0.25rem; }
+  h1 span { color: var(--accent); }
+  .subtitle { color: var(--muted); font-size: 1.05rem; margin-bottom: 2rem; }
+  h2 {
+    font-size: 1.35rem;
+    font-weight: 600;
+    margin-top: 2.5rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid var(--border);
+  }
+  h2 .emoji { margin-right: 8px; }
+  h3 { font-size: 1.1rem; font-weight: 600; margin-top: 1.5rem; margin-bottom: 0.5rem; color: var(--cyan); }
+  p, li { color: var(--text); margin-bottom: 0.5rem; }
+  ul, ol { padding-left: 1.5rem; margin-bottom: 1rem; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  .mermaid { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin: 1rem 0; overflow-x: auto; font-size: 13px; }
+  .mermaid svg { max-width: 100%; height: auto; }
+
+  .code-block {
+    background: #1a1e24;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 16px;
+    margin: 0.75rem 0;
+    overflow-x: auto;
+    font-family: 'JetBrains Mono', 'SF Mono', 'Fira Code', 'Consolas', monospace;
+    font-size: 13px;
+    line-height: 1.5;
+    tab-size: 2;
+  }
+  .code-block .comment { color: #8b949e; }
+  .code-block .keyword { color: #ff7b72; }
+  .code-block .string { color: #a5d6ff; }
+  .code-block .func { color: #d2a8ff; }
+  .code-block .cls { color: #ffa657; }
+  .code-block .num { color: #79c0ff; }
+  .code-block .var { color: #ffa657; }
+  .code-block .doc { color: #8b949e; font-style: italic; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+    font-size: 14px;
+  }
+  th, td {
+    border: 1px solid var(--border);
+    padding: 10px 12px;
+    text-align: left;
+    vertical-align: top;
+  }
+  th { background: var(--surface); font-weight: 600; color: var(--accent); }
+  tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+
+  .tag {
+    display: inline-block;
+    padding: 1px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-right: 4px;
+  }
+  .tag-green { background: rgba(63,185,80,0.15); color: var(--green); }
+  .tag-orange { background: rgba(210,153,34,0.15); color: var(--orange); }
+  .tag-purple { background: rgba(188,140,255,0.15); color: var(--purple); }
+  .tag-red { background: rgba(248,81,73,0.15); color: var(--red); }
+  .tag-cyan { background: rgba(57,210,192,0.15); color: var(--cyan); }
+  .tag-blue { background: rgba(88,166,255,0.15); color: var(--accent); }
+
+  .callout {
+    border-left: 4px solid var(--accent);
+    background: rgba(88,166,255,0.08);
+    padding: 12px 16px;
+    margin: 1rem 0;
+    border-radius: 0 6px 6px 0;
+    font-size: 14px;
+  }
+  .callout-warn { border-left-color: var(--orange); background: rgba(210,153,34,0.08); }
+  .callout-tip { border-left-color: var(--green); background: rgba(63,185,80,0.08); }
+
+  hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+
+  @media (max-width: 640px) {
+    body { padding: 20px 12px; }
+    h1 { font-size: 1.5rem; }
+    .code-block { font-size: 12px; padding: 12px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>Multi-Turn Chat <span>Harness</span></h1>
+<p class="subtitle">V0 skeletal architecture — reusable across products. Patterns adapted from AdvisorIntakeBE.</p>
+
+<!-- ================================================================ -->
+<h2>🔭 Architecture Overview</h2>
+
+<div class="mermaid">
+<pre>
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                            CLIENT LAYER (Pluggable)                          │
+│       Slack / Web UI / WhatsApp / API / CLI / MCP Client / Alexa            │
+└──────────────────────────────┬───────────────────────────────────────────────┘
+                               │ HTTP / SSE / WebSocket
+┌──────────────────────────────▼───────────────────────────────────────────────┐
+│                         CHAT ENTRY POINT (FastAPI)                          │
+│  POST /chat/message        │  GET /chat/stream/{session_id}               │
+│  POST /chat/session        │  POST /chat/feedback                         │
+└──────┬─────────────────────┴──────┬─────────────────────────────────────────┘
+       │                            │
+┌──────▼──────┐              ┌──────▼─────────────────────────────────────────┐
+│ Auth Gate   │              │         ORCHESTRATION LAYER                    │
+│ (API Key)   │              │                                                 │
+└──────┬──────┘              │  ┌──────────────────────┐  ┌─────────────────┐ │
+       │                     │  │  Context Assembler   │  │  Policy Engine  │ │
+       ▼                     │  │  (Write / Select /   │  │  (Deterministic │ │
+┌──────────────┐             │  │   Compress / Isolate)│  │   action router)│ │
+│ Rate Limit   │             │  └──────────────────────┘  └────────┬────────┘ │
+│ (Redis)      │             │                                      │         │
+└──────┬───────┘             │  ┌──────────────────────┐  ┌────────▼────────┐ │
+       │                     │  │  Memory Layer        │  │  Tool Executor  │ │
+       ▼                     │  │  Short-term +        │  │  MCP-compatible │ │
+┌──────────────┐             │  │  Long-term vector    │  │  + timeout      │ │
+│ Session Mgmt │             │  └──────────────────────┘  └─────────────────┘ │
+│ (CRUD +      │             │                                                 │
+│  state)      │             │  ┌──────────────────────────────────────────┐  │
+└──────────────┘             │  │         EVALUATION LAYER                │  │
+                             │  │  ┌──────────────────┐  ┌──────────────┐ │  │
+                             │  │  │ Eval Job Handler │  │ Trace Eval   │ │  │
+                             │  │  │ (SQS-triggered)  │  │ Service      │ │  │
+                             │  │  │ Completeness +   │  │ (API-trigger)│ │  │
+                             │  │  │ Correctness +    │  │ Correctness  │ │  │
+                             │  │  │ Goal Achievement │  │ + Completen. │ │  │
+                             │  │  └──────────────────┘  └──────────────┘ │  │
+                             │  │  ┌──────────────────┐  ┌──────────────┐ │  │
+                             │  │  │ RL Trace Eval    │  │ Ground Truth │ │  │
+                             │  │  │ (Trace classif.  │  │ Comparison   │ │  │
+                             │  │  │  + LLM feedback) │  │ (exact/cont- │ │  │
+                             │  │  └──────────────────┘  │ ains/regex)  │ │  │
+                             │  │                        └──────────────┘ │  │
+                             │  └──────────────────────────────────────────┘  │
+                             └───────────────────────────────────────────────┘
+                               │
+┌──────────────────────────────▼───────────────────────────────────────────────┐
+│                        PROVIDER LAYER (Hot-swappable)                       │
+│                                                                             │
+│  ModelProvider    │  VectorStore    │  ToolProvider   │  CacheProvider     │
+│  (Bedrock, OpenAI,│  (pgvector)     │  (MCP, built-in)│  (Redis semantic)  │
+│   Anthropic)      │                │                 │                    │
+└─────────────────────────────────────────────────────────────────────────────┘
+                               │
+┌──────────────────────────────▼───────────────────────────────────────────────┐
+│                          INFRASTRUCTURE LAYER                               │
+│                                                                             │
+│  PostgreSQL (sessions, messages, evaluations, scores)                      │
+│  Redis (rate limits, session state, semantic cache)                        │
+│  SQS (eval jobs, async processing)                                         │
+│  Langfuse (tracing, observability, score annotation)                       │
+│  Background Workers (eval job handler, session TTL, memory compaction)     │
+└─────────────────────────────────────────────────────────────────────────────┘
+</pre>
+</div>
+
+<hr>
+
+<!-- ================================================================ -->
+<h2>📦 Component Specifications</h2>
+
+<!-- ---- Session Manager ---- -->
+<h3>Session Manager</h3>
+<p>Manages chat session lifecycle and message persistence.</p>
+
+<div class="code-block">
+<pre><span class="keyword">@dataclass</span>
+<span class="keyword">class</span> <span class="cls">ChatSession</span>:
+    id: str
+    user_id: str
+    metadata: dict
+    status: str                    <span class="comment"># active | archived | expired</span>
+    created_at: datetime
+    last_active_at: datetime
+
+<span class="keyword">@dataclass</span>
+<span class="keyword">class</span> <span class="cls">Message</span>:
+    id: str
+    session_id: str
+    role: str                      <span class="comment"># user | assistant | system | tool</span>
+    content: str
+    tool_calls: list | <span class="keyword">None</span>
+    tool_results: list | <span class="keyword">None</span>
+    metadata: dict
+    created_at: datetime
+
+<span class="keyword">class</span> <span class="cls">SessionManager</span>:
+    <span class="keyword">async def</span> <span class="func">create_session</span>(user_id, metadata) -> ChatSession
+    <span class="keyword">async def</span> <span class="func">get_session</span>(session_id) -> ChatSession | <span class="keyword">None</span>
+    <span class="keyword">async def</span> <span class="func">append_message</span>(session_id, msg) -> <span class="keyword">None</span>
+    <span class="keyword">async def</span> <span class="func">get_messages</span>(session_id, limit=50, offset=0) -> list[Message]
+    <span class="keyword">async def</span> <span class="func">archive_session</span>(session_id) -> <span class="keyword">None</span></pre>
+</div>
+
+<div class="callout-tip callout"><strong>Storage:</strong> PostgreSQL primary (messages indexed by <code>(session_id, created_at)</code>). Redis for hot session state with TTL refresh.</div>
+
+<!-- ---- Context Assembler ---- -->
+<h3>Context Assembler</h3>
+<p>Write / Select / Compress / Isolate — prepares every LLM call.</p>
+
+<div class="code-block">
+<pre><span class="keyword">class</span> <span class="cls">ContextAssembler</span>:
+    <span class="keyword">async def</span> <span class="func">assemble</span>(self, session_id, user_msg) -> <span class="cls">AssembledContext</span>:
+        <span class="comment"># 1. WRITE — persist user message</span>
+        <span class="keyword">await</span> self.recorder.record_message(session_id, user_msg)
+
+        <span class="comment"># 2. SELECT — gather context</span>
+        recent = <span class="keyword">await</span> self.memory.short_term.get_recent(session_id, k=<span class="num">20</span>)
+        history_vec = <span class="keyword">await</span> self.memory.long_term.search(user_msg, top_k=<span class="num">5</span>)
+        rag_chunks = <span class="keyword">await</span> self.retriever.query(user_msg, top_k=<span class="num">3</span>)
+
+        <span class="comment"># 3. COMPRESS — fit within token budget</span>
+        budget = self._calc_token_budget(model_max=<span class="num">128_000</span>)
+        <span class="keyword">if</span> recent.tokens > budget.recent:
+            recent = <span class="keyword">await</span> self._summarize_older_turns(recent)
+
+        <span class="comment"># 4. ASSEMBLE — ordered segments</span>
+        <span class="keyword">return</span> <span class="cls">AssembledContext</span>(
+            system=self.system_prompt,
+            memory=history_vec,
+            summary=recent.summary,
+            recent=recent.verbatim_turns,
+            rag=rag_chunks,
+            tool_defs=self.tool_registry.definitions,
+            user_message=user_msg,
+            total_tokens=sum(s.tokens <span class="keyword">for</span> s _)
+        )</pre>
+</div>
+
+<p><strong>Default token budget (128k model):</strong></p>
+<table>
+  <tr><th>Segment</th><th>%</th><th>Tokens</th></tr>
+  <tr><td>System prompt</td><td>15%</td><td>~19,200</td></tr>
+  <tr><td>Tool definitions</td><td>10%</td><td>~12,800</td></tr>
+  <tr><td>Long-term memory</td><td>10%</td><td>~12,800</td></tr>
+  <tr><td>History summary</td><td>10%</td><td>~12,800</td></tr>
+  <tr><td>Recent verbatim turns</td><td>25%</td><td>~32,000</td></tr>
+  <tr><td>RAG context</td><td>20%</td><td>~25,600</td></tr>
+  <tr><td>User message</td><td>10%</td><td>~12,800</td></tr>
+</table>
+
+<!-- ---- Policy Engine ---- -->
+<h3>Policy Engine — Deterministic Action Router</h3>
+<p>
+  A state-machine that maps <strong>workflow state</strong> to the <strong>next deterministic action</strong>.
+  When the state is unambiguous, the LLM is bypassed entirely. When the engine returns <code>None</code>,
+  the LLM decides. Pattern adapted from <code>src/services/board_orchestrator/policy_engine.py</code>.
+</p>
+
+<div class="code-block">
+<pre><span class="keyword">def</span> <span class="func">evaluate_next_action</span>(
+    has_requirements: bool,
+    tools_selected: bool,
+    examples_checked: bool,
+    has_board_draft: bool,
+    has_knowledge: bool,
+    is_edit_mode: bool,
+    has_changes_requested: bool,
+    actions_this_turn: list[dict],
+    requirements_need_refinement: bool = <span class="keyword">False</span>,
+) -> dict | <span class="keyword">None</span>:
+    <span class="doc">"""
+    Returns a deterministic action decision or None (let LLM decide).
+    """</span>
+    done_actions = {a[<span class="string">'action'</span>] <span class="keyword">for</span> a <span class="keyword">in</span> actions_this_turn}
+
+    <span class="comment"># --- Refinement flow (board exists, user asked for changes) ---</span>
+    <span class="keyword">if</span> has_changes_requested <span class="keyword">and</span> has_board_draft:
+        <span class="keyword">if</span> <span class="string">'select_tools'</span> <span class="keyword">not in</span> done_actions:
+            <span class="keyword">return</span> _action(<span class="string">'select_tools'</span>, {}, <span class="string">'Re-selecting tools'</span>)
+        <span class="keyword">if</span> <span class="string">'select_tools'</span> <span class="keyword">in</span> done_actions <span class="keyword">and</span> <span class="string">'build_board'</span> <span class="keyword">not in</span> done_actions:
+            <span class="keyword">return</span> _action(<span class="string">'build_board'</span>, {}, <span class="string">'Applying changes to board'</span>)
+        <span class="keyword">if</span> <span class="string">'build_board'</span> <span class="keyword">in</span> done_actions <span class="keyword">and</span> <span class="keyword">not</span> has_knowledge:
+            <span class="keyword">return</span> _action(<span class="string">'build_knowledge'</span>, {}, <span class="string">'Rebuilding knowledge'</span>)
+        <span class="keyword">if</span> has_knowledge <span class="keyword">and</span> <span class="string">'complete'</span> <span class="keyword">not in</span> done_actions:
+            <span class="keyword">return</span> _action(<span class="string">'complete'</span>, {
+                <span class="string">'message'</span>: <span class="string">'Changes applied. Review the preview or tell me what else to change.'</span>
+            }, <span class="string">'Refinement complete'</span>)
+
+    <span class="comment"># --- First-turn creation pipeline ---</span>
+    <span class="keyword">if</span> <span class="keyword">not</span> has_board_draft:
+        <span class="keyword">if</span> <span class="keyword">not</span> has_requirements:
+            <span class="keyword">return</span> _action(<span class="string">'gather_requirements'</span>, {}, <span class="string">'No requirements yet'</span>)
+        <span class="keyword">if</span> has_requirements <span class="keyword">and</span> <span class="keyword">not</span> tools_selected:
+            <span class="keyword">return</span> _action(<span class="string">'select_tools'</span>, {}, <span class="string">'Requirements ready — selecting tools'</span>)
+        <span class="keyword">if</span> has_requirements <span class="keyword">and</span> tools_selected:
+            <span class="keyword">return</span> _action(<span class="string">'build_board'</span>, {}, <span class="string">'Tools selected — building board'</span>)
+
+    <span class="comment"># --- Post-build pipeline ---</span>
+    <span class="keyword">if</span> has_board_draft <span class="keyword">and</span> <span class="keyword">not</span> has_changes_requested:
+        <span class="keyword">if</span> <span class="keyword">not</span> has_knowledge:
+            <span class="keyword">return</span> _action(<span class="string">'build_knowledge'</span>, {}, <span class="string">'Generating knowledge section'</span>)
+        <span class="comment"># complete: return None so LLM writes the summary</span>
+
+    <span class="keyword">return</span> <span class="keyword">None</span>  <span class="comment"># Ambiguous — LLM decides</span>
+
+
+<span class="keyword">def</span> <span class="func">_action</span>(action, action_input, thought) -> dict:
+    <span class="keyword">return</span> {
+        <span class="string">'action'</span>: action,
+        <span class="string">'action_input'</span>: action_input,
+        <span class="string">'thought'</span>: thought,
+        <span class="string">'message_to_user'</span>: <span class="string">''</span>,
+        <span class="string">'_deterministic'</span>: <span class="keyword">True</span>,
+    }</pre>
+</div>
+
+<table>
+  <tr><th>Action</th><th>Triggered When</th><th>Effect</th></tr>
+  <tr><td><code>gather_requirements</code></td><td>No requirements extracted yet</td><td>Extract structured requirements from user message</td></tr>
+  <tr><td><code>select_tools</code></td><td>Requirements ready, no tools selected</td><td>Match requirements to available tools</td></tr>
+  <tr><td><code>build_board</code></td><td>Requirements + tools ready, no draft</td><td>Generate the board/composition</td></tr>
+  <tr><td><code>build_knowledge</code></td><td>Board draft exists, no knowledge section</td><td>Populate knowledge/references</td></tr>
+  <tr><td><code>complete</code></td><td>All prior steps done</td><td>Finalize and present to user</td></tr>
+</table>
+
+<div class="callout callout-tip">
+<strong>Why deterministic routing?</strong> The LLM is expensive, slow, and inconsistent for trivial state transitions. This pattern runs in ~1μs and guarantees the pipeline advances predictably. The LLM is only consulted for ambiguous states (e.g., what to say in the completion message).
+</div>
+
+<!-- ---- Memory Layer ---- -->
+<h3>Memory Layer</h3>
+
+<div class="code-block">
+<pre><span class="keyword">class</span> <span class="cls">ShortTermMemory</span>:
+    <span class="doc">"""Per-session. Redis + PG."""</span>
+    recent_messages: deque[<span class="cls">Message</span>]  <span class="comment"># Sliding window</span>
+    summary: str                       <span class="comment"># Auto-compacted</span>
+    active_tool_calls: dict            <span class="comment"># In-flight tracking</span>
+
+<span class="keyword">class</span> <span class="cls">LongTermMemory</span>:
+    <span class="doc">"""Cross-session. pgvector."""</span>
+    <span class="keyword">async def</span> <span class="func">retrieve</span>(query, user_id, top_k=<span class="num">5</span>) -> list[<span class="cls">MemoryFact</span>]:
+        <span class="keyword">return await</span> self.vector_store.similarity_search(
+            collection=<span class="string">f"user_memory:{user_id}"</span>,
+            query=query, k=top_k
+        )
+    <span class="keyword">async def</span> <span class="func">store</span>(fact) -> <span class="keyword">None</span>:
+        <span class="keyword">await</span> self.vector_store.upsert(fact)</pre>
+</div>
+
+<!-- ---- Evaluation System ---- -->
+<h3>Evaluation System</h3>
+<p>
+  Post-execution evaluation of every run/trace. Two entry points:
+  <strong>SQS-triggered eval job handler</strong> (async, after board run completes)
+  and <strong>API-triggered trace evaluation service</strong> (on-demand).
+</p>
+
+<div class="code-block">
+<pre><span class="comment"># evaluation/models.py — data models</span>
+<span class="keyword">@dataclass</span>
+<span class="keyword">class</span> <span class="cls">EvaluationScore</span>:
+    criterion: str           <span class="comment"># e.g. "all_tasks_executed", "schema_validation"</span>
+    passed: bool
+    score: float             <span class="comment"># 0.0 - 1.0</span>
+    expected: int | <span class="keyword">None</span>
+    actual: int | <span class="keyword">None</span>
+    details: str | dict
+
+<span class="keyword">@dataclass</span>
+<span class="keyword">class</span> <span class="cls">CompletenessResult</span>:
+    overall_passed: bool
+    overall_score: float
+    scores: list[<span class="cls">EvaluationScore</span>]   <span class="comment"># 4 deterministic checks</span>
+    execution_time_ms: float
+
+<span class="keyword">@dataclass</span>
+<span class="keyword">class</span> <span class="cls">CorrectnessResult</span>:
+    overall_passed: bool
+    overall_score: float
+    scores: list[<span class="cls">EvaluationScore</span>]   <span class="comment"># schema, LLM judge, errors, ground truth</span>
+    llm_evaluations: dict | <span class="keyword">None</span>
+    errors_found: list[dict]
+    execution_time_ms: float</pre>
+</div>
+
+<h4>CompletenessEvaluator (deterministic, no LLM)</h4>
+<div class="code-block">
+<pre><span class="keyword">class</span> <span class="cls">CompletenessEvaluator</span>:
+    <span class="keyword">def</span> <span class="func">evaluate</span>(self, trace_data, board, config) -> <span class="cls">CompletenessResult</span>:
+        <span class="comment"># All 4 checks run in parallel via ThreadPoolExecutor</span>
+        scores = [
+            self.check_all_tasks_executed(trace_data, board),
+            self.check_all_outputs_populated(trace_data, board),
+            self.check_run_completed(trace_data),
+            self.check_swimlanes_completed(trace_data, board),
+        ]
+        overall_passed = all(s.passed <span class="keyword">for</span> s <span class="keyword">in</span> scores)
+        overall_score = sum(s.score <span class="keyword">for</span> s <span class="keyword">in</span> scores) / len(scores)
+
+        <span class="keyword">return</span> <span class="cls">CompletenessResult</span>(
+            overall_passed=overall_passed,
+            overall_score=overall_score,
+            scores=scores,
+            execution_time_ms=execution_time
+        )</pre>
+</div>
+
+<h4>CorrectnessEvaluator (schema + optional LLM judge + errors + ground truth)</h4>
+<div class="code-block">
+<pre><span class="keyword">class</span> <span class="cls">CorrectnessEvaluator</span>:
+    <span class="keyword">def</span> <span class="func">evaluate</span>(self, trace_data, board, config) -> <span class="cls">CorrectnessResult</span>:
+        scores = []
+
+        <span class="comment"># 1. Schema validation (fast, deterministic)</span>
+        scores.append(self.validate_schemas(trace_data, board))
+
+        <span class="comment"># 2. LLM judge (optional, parallel batches)</span>
+        <span class="keyword">if</span> config.get(<span class="string">'run_llm_judge'</span>, <span class="keyword">True</span>):
+            llm_evals, llm_score = self.evaluate_with_llm_judge(...)
+            <span class="keyword">if</span> llm_score: scores.append(llm_score)
+
+        <span class="comment"># 3. Error detection (fast, deterministic)</span>
+        errors, error_score = self.detect_errors(trace_data)
+        scores.append(error_score)
+
+        <span class="comment"># 4. Ground truth comparison (optional)</span>
+        <span class="keyword">if</span> config.get(<span class="string">'expected_outputs'</span>):
+            gt_score = self.compare_ground_truth(trace_data, config[<span class="string">'expected_outputs'</span>])
+            scores.append(gt_score)
+
+        overall_score = sum(s.score <span class="keyword">for</span> s <span class="keyword">in</span> scores) / len(scores)
+        overall_passed = all(s.passed <span class="keyword">for</span> s <span class="keyword">in</span> scores)
+        <span class="keyword">return</span> <span class="cls">CorrectnessResult</span>(overall_passed, overall_score, scores, ...)</pre>
+</div>
+
+<h4>Ground Truth Comparison</h4>
+<div class="code-block">
+<pre><span class="keyword">def</span> <span class="func">compare_ground_truth</span>(self, trace_data, expected_outputs) -> <span class="cls">EvaluationScore</span>:
+    <span class="doc">"""Compare final outputs against expected ground truth."""</span>
+    final_outputs = trace_data.get(<span class="string">'output'</span>, {})
+    compared_fields = <span class="num">0</span>
+    matched_fields = <span class="num">0</span>
+
+    <span class="keyword">for</span> key, expected <span class="keyword">in</span> expected_outputs.items():
+        compared_fields += <span class="num">1</span>
+        actual = final_outputs.get(key)
+
+        <span class="keyword">if</span> isinstance(expected, dict):
+            <span class="keyword">if</span> <span class="string">'contains'</span> <span class="keyword">in</span> expected:       <span class="comment"># Substring match</span>
+                <span class="keyword">if</span> expected[<span class="string">'contains'</span>] <span class="keyword">in</span> str(actual):
+                    matched_fields += <span class="num">1</span>
+            <span class="keyword">elif</span> <span class="string">'regex'</span> <span class="keyword">in</span> expected:         <span class="comment"># Regex match</span>
+                <span class="keyword">if</span> re.search(expected[<span class="string">'regex'</span>], str(actual)):
+                    matched_fields += <span class="num">1</span>
+        <span class="keyword">else</span>:
+            <span class="keyword">if</span> actual == expected:                <span class="comment"># Exact match</span>
+                matched_fields += <span class="num">1</span>
+
+    score = matched_fields / compared_fields <span class="keyword">if</span> compared_fields else <span class="num">1.0</span>
+    <span class="keyword">return</span> <span class="cls">EvaluationScore</span>(
+        criterion=<span class="string">"ground_truth_match"</span>,
+        passed=matched_fields == compared_fields,
+        score=score,
+        details={<span class="string">"matched"</span>: matched_fields, <span class="string">"total"</span>: compared_fields}
+    )</pre>
+</div>
+
+<h4>Eval Job Handler (SQS Worker — 3 Scores Averaged)</h4>
+<div class="code-block">
+<pre><span class="comment"># Called after every board run. Runs 3 evaluations:</span>
+completeness_score = <span class="keyword">await</span> self.completeness.evaluate(trace_data, board, config)
+correctness_score  = <span class="keyword">await</span> self.correctness.evaluate(trace_data, board, config)
+goal_achievement   = <span class="keyword">await</span> self.goal_achievement.evaluate(trace_data, board, config)
+
+<span class="comment"># Average all three</span>
+evaluation.average_score = (completeness_score + correctness_score + goal_achievement) / <span class="num">3.0</span>
+
+<span class="comment"># Annotate Langfuse trace with all scores</span>
+<span class="keyword">await</span> self._annotate_langfuse_trace(trace_id, scores)</pre>
+</div>
+
+<h4>RL Trace Evaluator (Reward Function)</h4>
+<div class="code-block">
+<pre><span class="doc">"""
+Trace Evaluator Service — the Reward Function in the LLM-RL loop.
+Classifies board run traces into 3 categories and generates LLM semantic feedback.
+"""</span>
+
+<span class="comment"># Deterministic classification</span>
+classification = self._classify_trace(run)
+<span class="comment"># Returns: GOOD_COMPLETE | GOOD_PARTIAL | BAD_STRUCTURAL</span>
+
+<span class="comment"># LLM evaluation for semantic feedback (enriched with Langfuse data)</span>
+scores, feedback = self._llm_evaluate(board, run, classification, ...)
+
+<span class="comment"># Verdicts: pass/fail per dimension (structure, execution, completeness)</span>
+<span class="comment"># Scores annotated back to Langfuse via REST API</span></pre>
+</div>
+
+<table>
+  <tr><th>Score</th><th>Source</th><th>Range</th></tr>
+  <tr><td>Completeness</td><td>LLM + 4 deterministic checks</td><td>0.0–1.0</td></tr>
+  <tr><td>Correctness</td><td>LLM + schema + errors + ground truth</td><td>0.0–1.0</td></tr>
+  <tr><td>Goal Achievement</td><td>LLM (weighted: grounding, coverage, data utilization)</td><td>0.0–1.0</td></tr>
+  <tr><td>Average Score</td><td>(Completeness + Correctness + Goal) / 3</td><td>0.0–1.0</td></tr>
+  <tr><td>Ground Truth Match</td><td>Deterministic (exact/contains/regex)</td><td>0.0–1.0</td></tr>
+  <tr><td>RL Verdicts</td><td>LLM</td><td>pass/fail/unknown</td></tr>
+  <tr><td>Trace Classification</td><td>Deterministic</td><td>GOOD_COMPLETE / GOOD_PARTIAL / BAD_STRUCTURAL</td></tr>
+</table>
+
+<!-- ---- Tool Registry ---- -->
+<h3>Tool Registry</h3>
+<div class="code-block">
+<pre><span class="keyword">class</span> <span class="cls">ToolRegistry</span>:
+    tools: dict[str, <span class="cls">ToolDefinition</span>]
+
+    <span class="keyword">async def</span> <span class="func">execute</span>(self, name, params, idempotency_key) -> <span class="cls">ToolResult</span>:
+        cached = <span class="keyword">await</span> self.cache.get(idempotency_key)
+        <span class="keyword">if</span> cached:
+            <span class="keyword">return</span> cached
+
+        <span class="keyword">try</span>:
+            result = <span class="keyword">await</span> <span class="func">asyncio.wait_for</span>(
+                self._invoke(name, params), timeout=<span class="num">30.0</span>
+            )
+        <span class="keyword">except</span> <span class="cls">TimeoutError</span>:
+            self.circuit_breaker.record_failure(name)
+            result = <span class="cls">ToolResult</span>(status=<span class="string">"error"</span>, error=<span class="string">"timeout"</span>)
+
+        <span class="keyword">await</span> self.cache.set(idempotency_key, result, ttl=<span class="num">3600</span>)
+        <span class="keyword">return</span> result</pre>
+</div>
+
+<hr>
+
+<!-- ================================================================ -->
+<h2>🗄️ Data Model</h2>
+
+<div class="code-block">
+<pre><span class="comment">-- Chat sessions</span>
+CREATE TABLE chat_sessions (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id TEXT NOT NULL,
+    metadata JSONB DEFAULT '{}',
+    status TEXT DEFAULT 'active',
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    last_active_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+<span class="comment">-- Chat messages (append-only)</span>
+CREATE TABLE chat_messages (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    session_id UUID REFERENCES chat_sessions(id),
+    role TEXT NOT NULL,
+    content TEXT NOT NULL,
+    tool_calls JSONB,
+    tool_results JSONB,
+    metadata JSONB DEFAULT '{}',
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX idx_messages_session_time ON chat_messages(session_id, created_at);
+
+<span class="comment">-- Evaluation runs (one per board/run execution)</span>
+CREATE TABLE board_run_evaluations (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    run_id UUID NOT NULL REFERENCES kanban_board_runs(id) ON DELETE CASCADE,
+    user_id INTEGER NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    trace_id VARCHAR(255) NOT NULL,
+    board_id UUID REFERENCES kanban_boards(id) ON DELETE SET NULL,
+    board_name VARCHAR(255),
+    status VARCHAR(50),
+    average_score DECIMAL(5, 4),
+    latency_ms DECIMAL(12, 3),
+    metadata JSONB,
+    langfuse_url TEXT,
+    fetched_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(run_id)
+);
+
+<span class="comment">-- Individual eval scores (multiple per evaluation)</span>
+CREATE TABLE evaluation_scores (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    evaluation_id UUID NOT NULL REFERENCES board_run_evaluations(id) ON DELETE CASCADE,
+    name VARCHAR(255) NOT NULL,
+    value DECIMAL(5, 4) NOT NULL,
+    comment TEXT,
+    source VARCHAR(50) DEFAULT 'EVAL',
+    score_created_at TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+<span class="comment">-- RL trace evaluations (categorical pass/fail)</span>
+CREATE TABLE trace_evaluations (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    run_id UUID NOT NULL,
+    board_id UUID NOT NULL,
+    structure_verdict VARCHAR(20),
+    execution_verdict VARCHAR(20),
+    completeness_verdict VARCHAR(20),
+    classification VARCHAR(30),   <span class="comment">-- GOOD_COMPLETE | GOOD_PARTIAL | BAD_STRUCTURAL</span>
+    feedback TEXT,
+    langfuse_trace_id VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);</pre>
+</div>
+
+<hr>
+
+<!-- ================================================================ -->
+<h2>📁 Directory Structure</h2>
+
+<div class="code-block">
+<pre>harness/
+├── chat/
+│   ├── __init__.py
+│   ├── router.py              <span class="comment"># FastAPI routes: /chat/*</span>
+│   ├── session_manager.py     <span class="comment"># Session CRUD</span>
+│   ├── message_handler.py     <span class="comment"># Main orchestration loop</span>
+│   ├── context_assembler.py   <span class="comment"># Write/Select/Compress/Isolate</span>
+│   ├── memory.py              <span class="comment"># ShortTerm + LongTerm memory</span>
+│   ├── response_builder.py    <span class="comment"># SSE streaming</span>
+│   └── models.py              <span class="comment"># ChatSession, Message dataclasses</span>
+│
+├── policy/
+│   ├── __init__.py
+│   └── engine.py              <span class="comment"># Deterministic action router (state machine)</span>
+│
+├── evaluation/
+│   ├── __init__.py
+│   ├── models.py              <span class="comment"># EvaluationScore, CompletenessResult, etc.</span>
+│   ├── completeness_evaluator.py  <span class="comment"># 4 deterministic checks</span>
+│   ├── correctness_evaluator.py   <span class="comment"># Schema validation, LLM judge, errors, GT</span>
+│   ├── trace_evaluation_service.py <span class="comment"># Orchestrator: completeness + correctness</span>
+│   └── eval_job_handler.py    <span class="comment"># SQS-triggered: 3-score averaging + Langfuse</span>
+│
+├── rl/
+│   ├── __init__.py
+│   ├── trace_evaluator.py     <span class="comment"># Trace classification + LLM feedback</span>
+│   └── langfuse_trace_fetcher.py  <span class="comment"># Score annotation via Langfuse API</span>
+│
+├── providers/
+│   ├── __init__.py
+│   ├── model_provider.py      <span class="comment"># Abstract base class</span>
+│   ├── bedrock_provider.py
+│   ├── openai_provider.py
+│   └── cache_provider.py
+│
+├── tools/
+│   ├── __init__.py
+│   ├── registry.py            <span class="comment"># ToolRegistry with idempotency + timeout</span>
+│   └── builtin/
+│
+├── workers/
+│   ├── __init__.py
+│   ├── eval_worker.py         <span class="comment"># SQS consumer for eval jobs</span>
+│   ├── session_ttl.py         <span class="comment"># Expire stale sessions</span>
+│   └── memory_compaction.py   <span class="comment"># Compress old turns into summaries</span>
+│
+├── db/
+│   ├── models.py              <span class="comment"># SQLAlchemy async ORM</span>
+│   └── migrations/
+│
+├── config/
+│   ├── settings.py            <span class="comment"># Pydantic Settings (env-based)</span>
+│
+├── Dockerfile
+├── docker-compose.yml
+├── requirements.txt
+└── main.py                    <span class="comment"># FastAPI app entry point</span>
+</pre>
+</div>
+
+<hr>
+
+<!-- ================================================================ -->
+<h2>⚙️ Workers</h2>
+
+<table>
+  <tr><th>Worker</th><th>Trigger</th><th>Function</th></tr>
+  <tr>
+    <td><code>eval_worker.py</code></td>
+    <td>SQS message</td>
+    <td>Consumes eval job messages after board run completes. Runs Completeness + Correctness + Goal Achievement evals. Saves to DB + annotates Langfuse trace.</td>
+  </tr>
+  <tr>
+    <td><code>session_ttl.py</code></td>
+    <td>Cron (5 min)</td>
+    <td>Finds sessions with <code>last_active_at &lt; NOW() - TTL</code>, sets status to <code>expired</code>. Evicts stale Redis keys.</td>
+  </tr>
+  <tr>
+    <td><code>memory_compaction.py</code></td>
+    <td>Cron (daily)</td>
+    <td>For sessions exceeding N messages, compresses old turns into a summary (via LLM) and stores in long-term memory.</td>
+  </tr>
+</table>
+
+<h4>Worker Pattern</h4>
+<div class="code-block">
+<pre><span class="keyword">from</span> abc <span class="keyword">import</span> ABC, abstractmethod
+
+<span class="keyword">class</span> <span class="cls">BaseWorker</span>(ABC):
+    interval_seconds: int = <span class="num">300</span>
+
+    <span class="keyword">async def</span> <span class="func">run_forever</span>(self):
+        <span class="keyword">while</span> <span class="keyword">True</span>:
+            <span class="keyword">try</span>:
+                <span class="keyword">await</span> self.tick()
+            <span class="keyword">except</span> <span class="cls">Exception</span> <span class="keyword">as</span> e:
+                logger.error(<span class="string">f"tick failed: {e}"</span>)
+            <span class="keyword">await</span> asyncio.sleep(self.interval_seconds)
+
+    <span class="meta">@abstractmethod</span>
+    <span class="keyword">async def</span> <span class="func">tick</span>(self): ...</pre>
+</div>
+
+<hr>
+
+<!-- ================================================================ -->
+<h2>🐳 Infrastructure</h2>
+
+<div class="code-block">
+<pre><span class="comment"># docker-compose.yml</span>
+version: <span class="string">"3.9"</span>
+services:
+  api:
+    build: .
+    ports: [<span class="string">"8000:8000"</span>]
+    environment:
+      DATABASE_URL: <span class="string">"postgresql+asyncpg://user:pass@db:5432/harness"</span>
+      REDIS_URL: <span class="string">"redis://redis:6379"</span>
+      MODEL_PROVIDER: <span class="string">"openai"</span>
+      LANGFUSE_PUBLIC_KEY: ${LANGFUSE_PUBLIC_KEY}
+      LANGFUSE_SECRET_KEY: ${LANGFUSE_SECRET_KEY}
+    depends_on: [db, redis]
+
+  db:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
+      POSTGRES_DB: harness
+    volumes: [pgdata:/var/lib/postgresql/data]
+
+  redis:
+    image: redis:7-alpine
+
+volumes:
+  pgdata:</pre>
+</div>
+
+<h3>Key Environment Variables</h3>
+<table>
+  <tr><th>Variable</th><th>Default</th><th>Description</th></tr>
+  <tr><td><code>DATABASE_URL</code></td><td><code>postgresql+asyncpg://...</code></td><td>Async PG connection</td></tr>
+  <tr><td><code>REDIS_URL</code></td><td><code>redis://redis:6379</code></td><td>Redis connection</td></tr>
+  <tr><td><code>MODEL_PROVIDER</code></td><td><code>openai</code></td><td>Active provider key</td></tr>
+  <tr><td><code>MODEL_ID</code></td><td><code>gpt-4o</code></td><td>Model identifier</td></tr>
+  <tr><td><code>MAX_TOKENS</code></td><td><code>128000</code></td><td>Context assembly budget</td></tr>
+  <tr><td><code>SESSION_TTL_SECONDS</code></td><td><code>86400</code></td><td>Session expiry (24h)</td></tr>
+  <tr><td><code>LANGFUSE_PUBLIC_KEY</code></td><td>—</td><td>Langfuse trace observability</td></tr>
+  <tr><td><code>LANGFUSE_SECRET_KEY</code></td><td>—</td><td>Langfuse trace observability</td></tr>
+  <tr><td><code>LOG_LEVEL</code></td><td><code>INFO</code></td><td>Logging level</td></tr>
+</table>
+
+<hr>
+
+<!-- ================================================================ -->
+<h2>🛤️ V0 → V1 Graduation Path</h2>
+
+<table>
+  <tr><th>Layer</th><th>V0 (Harness)</th><th>V1 (Production)</th></tr>
+  <tr><td>Runtime</td><td>Single uvicorn process</td><td>Temporal / Airflow for durable multi-turn</td></tr>
+  <tr><td>Streaming</td><td>SSE only</td><td>SSE + WebSocket control plane</td></tr>
+  <tr><td>Policy</td><td>In-process Python state machine</td><td>Dedicated workflow engine (Temporal)</td></tr>
+  <tr><td>Vector Store</td><td>pgvector (embedded in PG)</td><td>Qdrant / Pinecone cluster</td></tr>
+  <tr><td>Memory</td><td>PostgreSQL + pgvector</td><td>Dedicated memory service (Redis + Qdrant)</td></tr>
+  <tr><td>Auth</td><td>API key header</td><td>Keycloak + OpenFGA</td></tr>
+  <tr><td>Evaluation</td><td>Post-run eval + Langfuse annotation</td><td>Real-time eval + continuous feedback + A/B testing</td></tr>
+  <tr><td>Ground Truth</td><td>Expected outputs (exact/contains/regex)</td><td>Human-annotated golden datasets + automated scoring</td></tr>
+  <tr><td>Cache</td><td>Redis (single instance)</td><td>Redis cluster + CDN cache</td></tr>
+  <tr><td>Monitoring</td><td>Print-based + Langfuse</td><td>OpenTelemetry + Grafana + Sentry</td></tr>
+  <tr><td>Deployment</td><td>Docker Compose (single host)</td><td>Kubernetes + ArgoCD</td></tr>
+  <tr><td>Workers</td><td>asyncio background tasks</td><td>Temporal / Celery with retry + DLQ</td></tr>
+</table>
+
+<hr>
+
+<!-- ================================================================ -->
+<h2>🚀 Quick-Start</h2>
+
+<div class="code-block">
+<pre><span class="comment"># 1. Start infrastructure</span>
+docker compose up -d
+
+<span class="comment"># 2. Run migrations</span>
+docker compose exec api alembic upgrade head
+
+<span class="comment"># 3. Create a session</span>
+curl -X POST http://localhost:8000/chat/session \
+  -H <span class="string">"Authorization: Bearer sk-test-key"</span> \
+  -H <span class="string">"Content-Type: application/json"</span> \
+  -d <span class="string">'{"user_id": "user_123", "metadata": {}}'</span>
+
+<span class="comment"># {"session_id": "abc-123", "status": "active"}</span>
+
+<span class="comment"># 4. Send a message (streaming)</span>
+curl -N -X POST http://localhost:8000/chat/message \
+  -H <span class="string">"Authorization: Bearer sk-test-key"</span> \
+  -H <span class="string">"Content-Type: application/json"</span> \
+  -d <span class="string">'{"session_id": "abc-123", "content": "What documents do I need to apply?"}'</span>
+
+<span class="comment"># SSE stream: event: token / data: {"token": "You'll", "idx": 0}</span>
+<span class="comment"># ... event: done / data: {"message_id": "msg-456", "usage": {...}}</span>
+
+<span class="comment"># 5. Evaluate the trace</span>
+curl -X POST http://localhost:8000/api/eval/trace/&lt;trace_id&gt;/evaluate \
+  -H <span class="string">"Authorization: Bearer sk-test-key"</span> \
+  -H <span class="string">"Content-Type: application/json"</span> \
+  -d <span class="string">'{"expected_outputs": {"status": "completed"}}'</span></pre>
+</div>
+
+<hr>
+
+<p style="text-align:center;color:var(--muted);font-size:13px;">
+  Multi-Turn Chat Harness — V0 Architecture &bull; Adapted from AdvisorIntakeBE patterns
+</p>
+
+</div>
+</body>
+</html>

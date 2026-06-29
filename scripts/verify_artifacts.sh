@@ -2,6 +2,7 @@
 set -euo pipefail
 
 python3 -m html.parser docs/product/guides/pm-first-principles-guide.html
+python3 -m html.parser docs/architecture/patterns/chat-harness/chat-harness-v0.html
 python3 -m html.parser exports/google-drive/Exponential/Astrology/Documents/Html/pm_first_principles_guide.html
 python3 -m html.parser docs/archive/source-materials/original-html/jyotish_companion_data_architecture.html
 python3 -m html.parser docs/archive/source-materials/original-html/jyotish_companion_prd.html
@@ -19,6 +20,9 @@ test -f docs/handbook/contribution-guide.md
 test -f docs/handbook/version-manifest.md
 test -f docs/product/index.md
 test -f docs/architecture/index.md
+test -f docs/architecture/patterns/index.md
+test -f docs/architecture/patterns/chat-harness/README.md
+test -f docs/architecture/patterns/chat-harness/chat-harness-v0.html
 test -f docs/engineering/index.md
 test -f docs/engineering/data-model/index.md
 test -f docs/engineering/data-model/schema-v0.2-base.md
@@ -124,6 +128,8 @@ rg -n "site_name: Exponential Jyotish Companion Docs|docs_dir: docs" mkdocs.yml 
 rg -n "Add Or Change A Document|Quality Bar|docs-as-code" docs/handbook/contribution-guide.md >/dev/null
 rg -n "First Read Path|Placement Guide|Current Source Of Truth" docs/handbook/knowledge-map.md >/dev/null
 rg -n "Information Architecture|Enterprise Rules|Naming Standard|Review Standard" docs/handbook/knowledge-architecture.md >/dev/null
+rg -n "Multi-Turn Chat Harness|End-To-End Flow|Recommended Jyotish Companion Mapping" docs/architecture/patterns/chat-harness/README.md >/dev/null
+rg -n "architecture/patterns/chat-harness/README.md|Multi-Turn Chat Harness" mkdocs.yml docs/architecture/index.md docs/handbook/knowledge-map.md docs/handbook/version-manifest.md >/dev/null
 rg -n "handbook|product|architecture|engineering|ai|governance|operations|archive" README.md docs/handbook/knowledge-map.md mkdocs.yml >/dev/null
 if rg -n "00-start-here|10-product|20-architecture|30-data-and-schema|40-ai-quality|50-operations|60-decisions|90-archive|docs/ai/evals|docs/governance/adr" README.md docs mkdocs.yml --glob '!docs/archive/source-materials/**'; then
   echo "Found retired folder taxonomy or stale docs path." >&2

@@ -40,6 +40,9 @@ nav:
       - architecture/index.md
       - System:
           - System Design v0.2: architecture/system/system-design-v0.2.md
+      - Patterns:
+          - architecture/patterns/index.md
+          - Multi-Turn Chat Harness v0: architecture/patterns/chat-harness/README.md
   - Engineering:
       - engineering/index.md
       - Data Model:
