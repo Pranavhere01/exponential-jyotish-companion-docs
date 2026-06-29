@@ -8,16 +8,16 @@ This repository is the canonical documentation home from day 1. Google Drive, PD
 
 ## How this repo is organized
 
-The docs use a library-shelf structure so new material has an obvious home:
+The docs use enterprise knowledge domains so new material has an obvious owner and lifecycle:
 
-- `docs/00-start-here/` - orientation, knowledge map, version manifest, contribution guide.
-- `docs/10-product/` - PM-facing product direction, PRD, first-principles guide.
-- `docs/20-architecture/` - system design and technical architecture.
-- `docs/30-data-and-schema/` - schema, data model, and migration/change specs.
-- `docs/40-ai-quality/` - prompts, evaluator behavior, rubrics, fixtures.
-- `docs/50-operations/` - SOPs, repo setup, publishing, audits, runbooks.
-- `docs/60-decisions/` - ADRs and durable decision history.
-- `docs/90-archive/` - raw source inputs preserved for provenance.
+- `docs/handbook/` - orientation, knowledge map, version manifest, contribution guide.
+- `docs/product/` - PM-facing product direction, PRD, first-principles guide.
+- `docs/architecture/` - system design and technical architecture.
+- `docs/engineering/data-model/` - schema, data model, and migration/change specs.
+- `docs/ai/` - prompts, evaluator behavior, rubrics, fixtures.
+- `docs/operations/` - SOPs, repo setup, publishing, audits, runbooks.
+- `docs/governance/` - ADRs and durable decision history.
+- `docs/archive/` - raw source inputs preserved for provenance.
 
 ## Repository split
 
@@ -43,21 +43,22 @@ This repo is MkDocs-ready. Add Markdown files under the right `docs/` shelf, lin
 
 ## Key files
 
-- [Knowledge map](docs/00-start-here/knowledge-map.md)
-- [Version manifest](docs/00-start-here/version-manifest.md)
-- [Docs site guide](docs/00-start-here/docs-site-guide.md)
-- [Way forward](docs/10-product/way-forward.md)
-- [PRD v0.2](docs/10-product/prd-v0.2.md)
-- [PM first-principles guide](docs/10-product/pm-first-principles-guide.md)
-- [System Design v0.2](docs/20-architecture/system-design-v0.2.md)
-- [Schema v0.2 base](docs/30-data-and-schema/schema-v0.2-base.sql)
-- [Schema v0.3 change spec](docs/30-data-and-schema/schema-v0.3-change-spec.md)
-- [Schema v0.3 discovery and plan](docs/30-data-and-schema/schema-v0.3-discovery-and-plan.md)
-- [Prompt artifacts](docs/40-ai-quality/prompts/index.md)
-- [Evaluation artifacts](docs/40-ai-quality/evals/index.md)
-- [Context/versioning SOP](docs/50-operations/context-versioning-sop.md)
-- [Completion audit](docs/50-operations/completion-audit.md)
-- [External publish runbook](docs/50-operations/external-publish-runbook.md)
-- [ADR index](docs/60-decisions/adr/index.md)
-- [Source materials archive](docs/90-archive/source-materials/index.md)
+- [Knowledge map](docs/handbook/knowledge-map.md)
+- [Version manifest](docs/handbook/version-manifest.md)
+- [Knowledge architecture](docs/handbook/knowledge-architecture.md)
+- [Contribution guide](docs/handbook/contribution-guide.md)
+- [Way forward](docs/product/strategy/way-forward.md)
+- [PRD v0.2](docs/product/requirements/prd-v0.2.md)
+- [PM first-principles guide](docs/product/guides/pm-first-principles-guide.md)
+- [System Design v0.2](docs/architecture/system/system-design-v0.2.md)
+- [Schema v0.2 base](docs/engineering/data-model/schema-v0.2-base.sql)
+- [Schema v0.3 change spec](docs/engineering/data-model/schema-v0.3-change-spec.md)
+- [Schema v0.3 discovery and plan](docs/engineering/data-model/schema-v0.3-discovery-and-plan.md)
+- [Prompt artifacts](docs/ai/prompts/index.md)
+- [Evaluation artifacts](docs/ai/evaluation/index.md)
+- [Context/versioning SOP](docs/governance/standards/context-versioning-sop.md)
+- [Completion audit](docs/operations/audits/completion-audit.md)
+- [External publish runbook](docs/operations/publishing/external-publish-runbook.md)
+- [ADR index](docs/governance/decisions/adr/index.md)
+- [Source materials archive](docs/archive/source-materials/index.md)
 - [Google Drive export package](exports/google-drive/README.md)

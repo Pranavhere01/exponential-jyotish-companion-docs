@@ -1,0 +1,1076 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PM Guide: Jyotish Companion Technical Decisions From First Principles</title>
+  <style>
+    :root {
+      --bg: #f7f7f2;
+      --paper: #ffffff;
+      --ink: #1f2430;
+      --muted: #5b6474;
+      --line: #d9dddf;
+      --blue: #22577a;
+      --green: #2f6f4e;
+      --amber: #966a12;
+      --red: #9a3c3c;
+      --teal: #2a7f7f;
+      --lav: #655a9f;
+      --soft-blue: #e8f1f5;
+      --soft-green: #e9f4ec;
+      --soft-amber: #fff3d8;
+      --soft-red: #faeaea;
+      --shadow: 0 12px 36px rgba(31, 36, 48, 0.10);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background:
+        linear-gradient(90deg, rgba(34, 87, 122, 0.06) 0, rgba(34, 87, 122, 0.06) 1px, transparent 1px),
+        linear-gradient(180deg, rgba(47, 111, 78, 0.05) 0, rgba(47, 111, 78, 0.05) 1px, transparent 1px),
+        var(--bg);
+      background-size: 48px 48px;
+      line-height: 1.55;
+      letter-spacing: 0;
+    }
+
+    a {
+      color: var(--blue);
+      text-decoration-thickness: 1px;
+      text-underline-offset: 3px;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      border-bottom: 1px solid var(--line);
+      background: rgba(247, 247, 242, 0.94);
+      backdrop-filter: blur(10px);
+    }
+
+    .topbar-inner {
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 12px 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 780;
+      color: var(--ink);
+      white-space: nowrap;
+    }
+
+    .mark {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      border: 1px solid #1f2430;
+      display: grid;
+      place-items: center;
+      font-size: 14px;
+      background: var(--paper);
+      box-shadow: 3px 3px 0 #d7e7db;
+    }
+
+    nav {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    nav a {
+      font-size: 13px;
+      color: var(--muted);
+      text-decoration: none;
+      padding: 4px 0;
+    }
+
+    nav a:hover {
+      color: var(--ink);
+    }
+
+    header {
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 72px 22px 42px;
+      display: grid;
+      grid-template-columns: minmax(0, 1.08fr) minmax(320px, 0.72fr);
+      gap: 42px;
+      align-items: center;
+    }
+
+    .eyebrow {
+      margin: 0 0 12px;
+      font-size: 13px;
+      font-weight: 780;
+      color: var(--green);
+      text-transform: uppercase;
+      letter-spacing: 0;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 68px;
+      line-height: 0.96;
+      letter-spacing: 0;
+      max-width: 780px;
+    }
+
+    .lead {
+      margin: 22px 0 0;
+      font-size: 20px;
+      color: var(--muted);
+      max-width: 700px;
+    }
+
+    .hero-visual {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      padding: 20px;
+    }
+
+    .decision-map {
+      display: grid;
+      gap: 12px;
+    }
+
+    .map-row {
+      display: grid;
+      grid-template-columns: 46px minmax(0, 1fr);
+      gap: 12px;
+      align-items: stretch;
+    }
+
+    .map-num {
+      border-radius: 8px;
+      background: #1f2430;
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      min-height: 46px;
+    }
+
+    .map-card {
+      border: 1px solid var(--line);
+      border-left: 5px solid var(--blue);
+      border-radius: 8px;
+      padding: 12px 14px;
+      background: #fbfcfd;
+    }
+
+    .map-card.green {
+      border-left-color: var(--green);
+    }
+
+    .map-card.amber {
+      border-left-color: var(--amber);
+    }
+
+    .map-title {
+      font-weight: 800;
+      margin: 0;
+    }
+
+    .map-text {
+      margin: 2px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    main {
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 10px 22px 80px;
+    }
+
+    section {
+      margin-top: 34px;
+      padding: 34px 0;
+      border-top: 1px solid var(--line);
+    }
+
+    h2 {
+      margin: 0 0 16px;
+      font-size: 40px;
+      line-height: 1.08;
+      letter-spacing: 0;
+    }
+
+    h3 {
+      margin: 0 0 8px;
+      font-size: 19px;
+      letter-spacing: 0;
+    }
+
+    p {
+      margin: 0 0 14px;
+    }
+
+    .section-lead {
+      color: var(--muted);
+      font-size: 18px;
+      max-width: 840px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+      margin-top: 20px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+      margin-top: 20px;
+    }
+
+    .card {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: 0 6px 20px rgba(31, 36, 48, 0.06);
+      padding: 20px;
+    }
+
+    .card.blue {
+      background: var(--soft-blue);
+    }
+
+    .card.green {
+      background: var(--soft-green);
+    }
+
+    .card.amber {
+      background: var(--soft-amber);
+    }
+
+    .card.red {
+      background: var(--soft-red);
+    }
+
+    .label {
+      display: inline-block;
+      margin-bottom: 10px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0;
+    }
+
+    .plain-list {
+      margin: 12px 0 0;
+      padding-left: 20px;
+    }
+
+    .plain-list li {
+      margin: 8px 0;
+    }
+
+    .answer {
+      border-left: 5px solid var(--green);
+      background: #f4faf6;
+      border-radius: 8px;
+      padding: 18px 20px;
+      margin-top: 18px;
+    }
+
+    .answer strong {
+      color: var(--green);
+    }
+
+    .warning {
+      border-left: 5px solid var(--red);
+      background: var(--soft-red);
+      border-radius: 8px;
+      padding: 18px 20px;
+      margin-top: 18px;
+    }
+
+    .diagram {
+      margin-top: 22px;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--paper);
+    }
+
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(120px, 1fr));
+      gap: 12px;
+      align-items: stretch;
+    }
+
+    .flow.three {
+      grid-template-columns: repeat(3, minmax(150px, 1fr));
+    }
+
+    .flow-step {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+      background: #fbfcfd;
+      min-height: 104px;
+      position: relative;
+    }
+
+    .flow-step:not(:last-child)::after {
+      content: ">";
+      position: absolute;
+      right: -10px;
+      top: 42%;
+      color: var(--muted);
+      font-weight: 800;
+    }
+
+    .flow-step b {
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .flow-step span {
+      display: block;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .matrix {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 18px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .matrix th,
+    .matrix td {
+      padding: 13px 14px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .matrix th {
+      background: #eef2f0;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0;
+    }
+
+    .matrix tr:last-child td {
+      border-bottom: 0;
+    }
+
+    code {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      font-size: 0.94em;
+      background: rgba(31, 36, 48, 0.07);
+      padding: 2px 5px;
+      border-radius: 5px;
+    }
+
+    .source-list {
+      margin: 14px 0 0;
+      padding-left: 20px;
+      color: var(--muted);
+    }
+
+    .source-list li {
+      margin: 8px 0;
+    }
+
+    .small {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .toc {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 22px;
+    }
+
+    .toc a {
+      display: block;
+      text-decoration: none;
+      color: var(--ink);
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+      min-height: 74px;
+    }
+
+    .toc a span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    @media (max-width: 900px) {
+      header {
+        grid-template-columns: 1fr;
+        padding-top: 44px;
+      }
+
+      h1 {
+        font-size: 50px;
+      }
+
+      h2 {
+        font-size: 34px;
+      }
+
+      .grid-2,
+      .grid-3,
+      .toc,
+      .flow,
+      .flow.three {
+        grid-template-columns: 1fr;
+      }
+
+      .flow-step:not(:last-child)::after {
+        content: "v";
+        right: 50%;
+        top: auto;
+        bottom: -18px;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .topbar-inner {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      nav {
+        justify-content: flex-start;
+      }
+
+      header {
+        padding-top: 34px;
+      }
+
+      h1 {
+        font-size: 40px;
+      }
+
+      h2 {
+        font-size: 28px;
+      }
+
+      .lead {
+        font-size: 18px;
+      }
+    }
+
+    @media print {
+      body {
+        background: #fff;
+      }
+
+      .topbar {
+        position: static;
+      }
+
+      .card,
+      .diagram,
+      .hero-visual {
+        box-shadow: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="brand"><span class="mark">JC</span><span>Jyotish Companion PM Guide</span></div>
+      <nav aria-label="Document navigation">
+        <a href="#summary">Summary</a>
+        <a href="#embedding">Embeddings</a>
+        <a href="#router">Model router</a>
+        <a href="#rag">Prediction UX</a>
+        <a href="#future">Future-proofing</a>
+        <a href="#versioning">Versioning</a>
+      </nav>
+    </div>
+  </div>
+
+  <header>
+    <div>
+      <p class="eyebrow">PM-first explanation from first principles</p>
+      <h1>What are we really deciding?</h1>
+      <p class="lead">This guide explains the confusing technical points in plain language, then turns them into product decisions you can safely steer.</p>
+      <div class="toc" aria-label="Quick links">
+        <a href="#embedding"><span>Question 1</span>Why is `vector(1536)` a problem?</a>
+        <a href="#rag"><span>Question 2</span>Why is the knowledge base risky?</a>
+        <a href="#router"><span>Question 3</span>Can we plug and play models?</a>
+        <a href="#future"><span>Question 4</span>How do we support future features?</a>
+      </div>
+    </div>
+    <aside class="hero-visual" aria-label="Decision map">
+      <div class="decision-map">
+        <div class="map-row">
+          <div class="map-num">1</div>
+          <div class="map-card">
+            <p class="map-title">Do not hard-code the embedder</p>
+            <p class="map-text">Provider is open, so the schema must stay provider-neutral.</p>
+          </div>
+        </div>
+        <div class="map-row">
+          <div class="map-num">2</div>
+          <div class="map-card green">
+            <p class="map-title">Manual memory is the default</p>
+            <p class="map-text">The product suggests memories, but the user approves them.</p>
+          </div>
+        </div>
+        <div class="map-row">
+          <div class="map-num">3</div>
+          <div class="map-card amber">
+            <p class="map-title">Review knowledge before use</p>
+            <p class="map-text">Negative material is allowed; unsafe delivery is repaired.</p>
+          </div>
+        </div>
+        <div class="map-row">
+          <div class="map-num">4</div>
+          <div class="map-card">
+            <p class="map-title">Build the extension base</p>
+            <p class="map-text">Marriage matching is one future analysis, not the whole data model.</p>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </header>
+
+  <main>
+    <section id="summary">
+      <h2>The short answer</h2>
+      <p class="section-lead">The system design is broadly fine. The surgical fix is to stop making hidden vendor and feature assumptions in the database.</p>
+
+      <div class="grid-3">
+        <article class="card blue">
+          <span class="label">Keep</span>
+          <h3>Two kinds of intelligence</h3>
+          <p>The chart math must be deterministic. The AI should interpret, explain, personalize, and converse. It should not invent chart facts.</p>
+        </article>
+        <article class="card green">
+          <span class="label">Change</span>
+          <h3>Provider assumptions</h3>
+          <p>Do not bake OpenAI-shaped embeddings into the schema while the provider choice is still open.</p>
+        </article>
+        <article class="card amber">
+          <span class="label">Add</span>
+          <h3>An extensible analysis layer</h3>
+          <p>Use a generic analysis model so later products can support matching, muhurta, family charts, or pivots without a rewrite.</p>
+        </article>
+      </div>
+
+      <div class="answer">
+        <strong>Recommended baseline:</strong> memory default is Manual with end-of-chat review; costing remains business-owned; predictions improve through deterministic engines, reviewed doctrine, evaluator checks, and versioned analysis runs; docs live in Git from day 1.
+      </div>
+    </section>
+
+    <section id="embedding">
+      <h2>1. Embeddings, explained without engineering jargon</h2>
+      <p class="section-lead">An embedding is a machine-readable fingerprint of text. It helps the system find related memories or reference material later.</p>
+
+      <div class="grid-2">
+        <article class="card">
+          <span class="label">Analogy</span>
+          <h3>Embedding = a barcode for meaning</h3>
+          <p>If the user says, "I am anxious about changing jobs," the system turns that sentence into a list of numbers. Later, when the user asks about career, the system can find that memory because the number-pattern is similar.</p>
+        </article>
+        <article class="card">
+          <span class="label">Why size matters</span>
+          <h3>The number list has a fixed length</h3>
+          <p>Some embedding models produce 1536 numbers. Some produce 1024. Some allow other sizes. The database search index has to know which size it is indexing.</p>
+        </article>
+      </div>
+
+      <div class="warning">
+        <strong>The issue:</strong> The PRD says the provider is undecided, but the schema quietly assumed a 1536-number embedding shape. That is a hidden technical decision.
+      </div>
+
+      <table class="matrix" aria-label="Embedding decision table">
+        <thead>
+          <tr>
+            <th>PM question</th>
+            <th>Plain answer</th>
+            <th>Decision</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Does this mean we cannot use Claude?</td>
+            <td>No. Claude can be the chat model, while embeddings come from a different provider.</td>
+            <td>Separate "chat model" from "embedding model" in the architecture.</td>
+          </tr>
+          <tr>
+            <td>Why not just pick 1536 and move on?</td>
+            <td>Because that would make the database depend on a vendor before the vendor decision is made.</td>
+            <td>Keep embeddings in a separate table with model metadata.</td>
+          </tr>
+          <tr>
+            <td>Will this slow us down?</td>
+            <td>A little more structure now prevents a painful migration later.</td>
+            <td>Add the fast pgvector index after D5 is decided.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="diagram" aria-label="Provider-neutral embedding flow">
+        <div class="flow three">
+          <div class="flow-step">
+            <b>Memory text</b>
+            <span>"I am changing jobs"</span>
+          </div>
+          <div class="flow-step">
+            <b>Embedding provider</b>
+            <span>OpenAI, Voyage, Gemini, Cohere, or another choice</span>
+          </div>
+          <div class="flow-step">
+            <b>text_embeddings</b>
+            <span>Stores vector plus provider, model, and dimension</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="answer">
+        <strong>What to tell engineering:</strong> D5 is open. Do not put `embedding vector(1536)` directly on `memories` or `jyotish_knowledge`. Use `model_catalog` plus `text_embeddings` instead.
+      </div>
+    </section>
+
+    <section id="memory">
+      <h2>2. Manual memory default, without chat friction</h2>
+      <p class="section-lead">Manual memory means the system can notice useful facts, but the user chooses what becomes long-term memory. To avoid interrupting the live chat, ask memory questions at the end during CSAT/session review.</p>
+
+      <div class="diagram" aria-label="Manual memory flow">
+        <div class="flow">
+          <div class="flow-step">
+            <b>User says something</b>
+            <span>"I am preparing for a promotion"</span>
+          </div>
+          <div class="flow-step">
+            <b>System queues a candidate</b>
+            <span>It does not interrupt the conversation</span>
+          </div>
+          <div class="flow-step">
+            <b>End-of-chat review</b>
+            <span>CSAT plus memory suggestions</span>
+          </div>
+          <div class="flow-step">
+            <b>Memory is stored</b>
+            <span>Structured fact plus searchable embedding</span>
+          </div>
+          <div class="flow-step">
+            <b>Future answers improve</b>
+            <span>Advice can reflect remembered context</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <article class="card green">
+          <span class="label">PM-friendly position</span>
+          <h3>Manual is a strong default</h3>
+          <p>It is privacy-respecting and still useful. The best UX is to collect candidates silently and ask at the end, when the user is already reviewing the session.</p>
+        </article>
+        <article class="card amber">
+          <span class="label">Metric correction</span>
+          <h3>Do not measure "opt-in" naively</h3>
+          <p>If Manual is the default, "Manual or Auto opt-in rate" becomes confusing. Better metrics are candidate acceptance rate, memory saves per active user, and Manual retained after onboarding.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="router">
+      <h2>3. Model router, from first principles</h2>
+      <p class="section-lead">A model router is like an air-traffic controller for AI calls. The product asks for a job, and the router decides which model should do it.</p>
+
+      <div class="grid-2">
+        <article class="card green">
+          <span class="label">Answer</span>
+          <h3>Yes, build the router</h3>
+          <p>This is the right way to support OpenAI, Claude, Qwen, DeepSeek, Kimi, GLM, local models, hosted models, and different embedding providers without rewriting the product each time.</p>
+        </article>
+        <article class="card">
+          <span class="label">PM translation</span>
+          <h3>One product, many model choices</h3>
+          <p>The astrologer model, memory extractor, evaluator, and embedding model can all be different. We choose by quality, latency, cost, privacy, and licensing.</p>
+        </article>
+      </div>
+
+      <table class="matrix" aria-label="Model routing jobs">
+        <thead>
+          <tr>
+            <th>Job</th>
+            <th>What the router can choose</th>
+            <th>What we measure</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Main astrologer</td>
+            <td>Best reasoning/persona model</td>
+            <td>Groundedness, tone, latency, cost</td>
+          </tr>
+          <tr>
+            <td>Memory extraction</td>
+            <td>Cheaper structured-output model</td>
+            <td>Precision, recall, user acceptance</td>
+          </tr>
+          <tr>
+            <td>Prediction evaluator</td>
+            <td>Fast reviewer model</td>
+            <td>Unsafe framing caught, false positives</td>
+          </tr>
+          <tr>
+            <td>Embeddings</td>
+            <td>Separate embedding model</td>
+            <td>Retrieval quality and dimension/index fit</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="answer">
+        <strong>Open-source Chinese model plan:</strong> valid direction, but run it through evals first. Treat Qwen, DeepSeek, Kimi, GLM, and successors as candidates behind the router, not as a schema-level commitment.
+      </div>
+    </section>
+
+    <section id="rag">
+      <h2>4. RAG, negativity, and prediction UX</h2>
+      <p class="section-lead">RAG means the AI looks up relevant source material before answering. The point is not to remove hard material. The point is to make sure hard material is grounded, reviewed, and delivered responsibly.</p>
+
+      <div class="grid-2">
+        <article class="card red">
+          <span class="label">Bad version</span>
+          <h3>Raw text goes straight to the astrologer</h3>
+          <ul class="plain-list">
+            <li>Classical text is dumped into search.</li>
+            <li>The model retrieves alarming statements.</li>
+            <li>The guardrail has to catch the problem at the end.</li>
+          </ul>
+        </article>
+        <article class="card green">
+          <span class="label">Better version</span>
+          <h3>Knowledge is reviewed before use</h3>
+          <ul class="plain-list">
+            <li>Sources are stored with provenance.</li>
+            <li>Chunks get topic, confidence, and delivery-risk labels.</li>
+            <li>Reviewed negative chunks can be used when relevant.</li>
+          </ul>
+        </article>
+      </div>
+
+      <div class="diagram" aria-label="Safe RAG pipeline">
+        <div class="flow">
+          <div class="flow-step">
+            <b>Raw source</b>
+            <span>Book, report, expert note</span>
+          </div>
+          <div class="flow-step">
+            <b>Chunk</b>
+            <span>Break into reviewable pieces</span>
+          </div>
+          <div class="flow-step">
+            <b>Review</b>
+            <span>Label fatalistic, medical, financial, safe, etc.</span>
+          </div>
+          <div class="flow-step">
+            <b>Set delivery policy</b>
+            <span>Normal, caution, transform, internal-only, or blocked</span>
+          </div>
+          <div class="flow-step">
+            <b>Answer</b>
+            <span>Still passes output guardrails</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="answer">
+        <strong>Answer to "we will find a way to better manufacture predictions":</strong> yes, through deterministic chart engines, reviewed doctrine, repeatable evals, and versioned analysis outputs. The LLM can explain hard readings, but it should not freestyle ungrounded predictions.
+      </div>
+
+      <div class="answer">
+        <strong>Evaluator agent or system prompt?</strong> Use both. The prompt teaches the astrologer how to speak; the evaluator checks whether the answer actually did it. This is better UX because the user gets a natural answer, while the safety/review layer works in the background.
+      </div>
+    </section>
+
+    <section id="costing">
+      <h2>5. Costing: what PM owns vs what engineering must track</h2>
+      <p class="section-lead">It is fine for business/product to own pricing and cost decisions. Engineering still needs the instrumentation so those decisions are based on facts.</p>
+
+      <table class="matrix" aria-label="Costing responsibility table">
+        <thead>
+          <tr>
+            <th>Question</th>
+            <th>Owner</th>
+            <th>What must be recorded</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>How much should users pay?</td>
+            <td>Business and product</td>
+            <td>Plan tiers, subscriptions, one-off purchases, free limits.</td>
+          </tr>
+          <tr>
+            <td>Which model is worth the cost?</td>
+            <td>Product plus engineering</td>
+            <td>Provider, model, token use, latency, quality score, safety outcome.</td>
+          </tr>
+          <tr>
+            <td>Where is cost leaking?</td>
+            <td>Engineering instrumentation</td>
+            <td>Per-message cost, cache hit rate, retries, fallback usage, feature area.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="answer">
+        <strong>PM takeaway:</strong> "We will take care of costing" is acceptable as a business decision. The product still needs cost telemetry from day 1 so you can actually take care of it.
+      </div>
+    </section>
+
+    <section id="future">
+      <h2>6. How to support marriage matching and other future features</h2>
+      <p class="section-lead">The key is not to build marriage matching too early. The key is to make the base able to support any future analysis.</p>
+
+      <div class="grid-2">
+        <article class="card">
+          <span class="label">Narrow approach</span>
+          <h3>Add a marriage table now</h3>
+          <p>This works for one future feature, but it bakes one use case into the foundation before the product has learned enough.</p>
+        </article>
+        <article class="card green">
+          <span class="label">Recommended approach</span>
+          <h3>Add a generic analysis layer</h3>
+          <p>Each future analysis has a type, inputs, deterministic result, optional AI narrative, versions, and linked subjects.</p>
+        </article>
+      </div>
+
+      <table class="matrix" aria-label="Future feature mapping">
+        <thead>
+          <tr>
+            <th>Future feature</th>
+            <th>What it becomes in the base model</th>
+            <th>Why this stays flexible</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Marriage matching</td>
+            <td><code>analysis_type = compatibility</code>, two subjects, deterministic match result.</td>
+            <td>It can support Ashtakoot, Dashakoot, Manglik compatibility, or a future method.</td>
+          </tr>
+          <tr>
+            <td>Family charts</td>
+            <td>Multiple <code>birth_profiles</code> linked to one account.</td>
+            <td>The account can hold self, partner, child, parent, or other profiles.</td>
+          </tr>
+          <tr>
+            <td>Muhurta</td>
+            <td><code>analysis_type = muhurta</code>, one or more charts plus proposed date windows.</td>
+            <td>Same table can store deterministic result and narrative explanation.</td>
+          </tr>
+          <tr>
+            <td>Persona upgrade</td>
+            <td>New <code>persona_version</code> and regenerated profile marked active.</td>
+            <td>Old outputs are superseded, not silently overwritten.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="answer">
+        <strong>PM takeaway:</strong> marriage matching is a useful example, but the product base should support "any analysis involving one or more subjects." That keeps us pivot-friendly.
+      </div>
+    </section>
+
+    <section id="versioning">
+      <h2>7. Why GitHub is better than Google Drive for this</h2>
+      <p class="section-lead">Drive is good for sharing finished documents. Git is better for preserving the actual decision history.</p>
+
+      <div class="grid-3">
+        <article class="card">
+          <span class="label">History</span>
+          <h3>Who changed what?</h3>
+          <p>Git keeps the exact revision history. You can see what changed, when, and why.</p>
+        </article>
+        <article class="card">
+          <span class="label">Review</span>
+          <h3>Discuss the diff</h3>
+          <p>Instead of arguing inside a document, reviewers comment on the exact changed lines.</p>
+        </article>
+        <article class="card">
+          <span class="label">MCP</span>
+          <h3>Machine-readable context</h3>
+          <p>Markdown, SQL, JSON, prompts, and eval files are easy for tools and agents to index.</p>
+        </article>
+      </div>
+
+      <div class="diagram" aria-label="Documentation workflow">
+        <div class="flow">
+          <div class="flow-step">
+            <b>Write source</b>
+            <span>Markdown, SQL, prompt files</span>
+          </div>
+          <div class="flow-step">
+            <b>Open PR</b>
+            <span>Review the diff</span>
+          </div>
+          <div class="flow-step">
+            <b>Merge</b>
+            <span>Decision becomes durable</span>
+          </div>
+          <div class="flow-step">
+            <b>Export</b>
+            <span>HTML, PDF, Drive copy</span>
+          </div>
+          <div class="flow-step">
+            <b>Index</b>
+            <span>MCP/tools read the canonical files</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="answer">
+        <strong>Operating rule:</strong> GitHub is the source of truth. Drive can hold exports, but not the only copy of a decision.
+      </div>
+    </section>
+
+    <section id="schema">
+      <h2>8. The schema changes in one PM-readable table</h2>
+      <p class="section-lead">You do not need to understand every SQL line. You do need to know what each table protects.</p>
+
+      <table class="matrix" aria-label="Schema explanation table">
+        <thead>
+          <tr>
+            <th>Table or idea</th>
+            <th>What it means</th>
+            <th>Why it exists</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>model_catalog</code></td>
+            <td>A registry of AI models and embedding models.</td>
+            <td>Prevents hidden vendor assumptions.</td>
+          </tr>
+          <tr>
+            <td><code>text_embeddings</code></td>
+            <td>Stores searchable numeric fingerprints separately from memories and knowledge.</td>
+            <td>Lets us switch embedding providers later.</td>
+          </tr>
+          <tr>
+            <td><code>model_routes</code></td>
+            <td>Stores which model should do which job.</td>
+            <td>Lets us test open-source Chinese models without hard-wiring the product to one model.</td>
+          </tr>
+          <tr>
+            <td><code>memory_candidates</code></td>
+            <td>Stores proposed memories until end-of-chat review.</td>
+            <td>Keeps chat smooth while preserving user consent.</td>
+          </tr>
+          <tr>
+            <td><code>knowledge_sources</code> and <code>knowledge_chunks</code></td>
+            <td>Stores raw Jyotish material and reviewable chunks with delivery policy.</td>
+            <td>Allows serious readings without unreviewed raw text or harmful framing.</td>
+          </tr>
+          <tr>
+            <td><code>birth_profiles</code></td>
+            <td>People or subjects connected to a user account.</td>
+            <td>Supports self now and match/family subjects later.</td>
+          </tr>
+          <tr>
+            <td><code>analysis_runs</code></td>
+            <td>A versioned record of one computed analysis.</td>
+            <td>Supports compatibility, muhurta, profile regeneration, and pivots.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="decisions">
+      <h2>9. Decision checklist for you</h2>
+      <p class="section-lead">These are the PM-level calls to confirm before engineering treats the base as final.</p>
+
+      <div class="grid-2">
+        <article class="card green">
+          <span class="label">Confirm now</span>
+          <h3>Safe defaults</h3>
+          <ul class="plain-list">
+            <li>Memory default is Manual.</li>
+            <li>Memory prompts happen at end-of-chat/CSAT, not during live chat.</li>
+            <li>D5 provider decision remains open.</li>
+            <li>Negative Jyotish material is allowed when reviewed and responsibly delivered.</li>
+            <li>A model router is required.</li>
+            <li>Git repository is the source of truth from day 1.</li>
+          </ul>
+        </article>
+        <article class="card amber">
+          <span class="label">Defer cleanly</span>
+          <h3>Future decisions</h3>
+          <ul class="plain-list">
+            <li>Which embedding provider to use.</li>
+            <li>Which chart engine to use at scale.</li>
+            <li>Which compatibility methods to support.</li>
+            <li>Which analyses become paid products.</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section id="sources">
+      <h2>Sources and citations</h2>
+      <p class="section-lead">These are the documents and references this guide is based on.</p>
+
+      <ul class="source-list">
+        <li>Internal critique identifying issue #2 and #4: <code>/Users/pranavkumar/.codex/attachments/b64ee66f-11ac-49cb-ac03-aecd5bd75af5/pasted-text.txt</code></li>
+        <li>PRD v0.1: <code>/Users/pranavkumar/.codex/attachments/751a13e0-1e5e-4ee9-b262-d1c98fd8d60a/pasted-text.txt</code></li>
+        <li>System Design v0.1: <code>/Users/pranavkumar/.codex/attachments/04ed8601-1db6-4807-9e9b-fbc36ae610fc/pasted-text.txt</code></li>
+        <li>System Design v0.2: <a href="../../architecture/system/system-design-v0.2.md">versioned companion architecture doc</a>.</li>
+        <li>Data architecture draft: <code>/Users/pranavkumar/Downloads/jyotish_companion_data_architecture.html</code></li>
+        <li>Provider note: <a href="https://docs.anthropic.com/en/docs/build-with-claude/embeddings">Anthropic embeddings docs</a>.</li>
+        <li>Embedding model dimension note: <a href="https://docs.voyageai.com/docs/embeddings">Voyage AI embeddings docs</a>.</li>
+        <li>Vector database note: <a href="https://github.com/pgvector/pgvector">pgvector documentation</a>.</li>
+        <li>Version-control note: <a href="https://docs.github.com/en/repositories/creating-and-managing-repositories/about-repositories">GitHub repository documentation</a>.</li>
+      </ul>
+
+      <p class="small">Created as a PM-facing companion to the versioned repo docs: <a href="../strategy/way-forward.md">Way Forward</a>, <a href="../../architecture/system/system-design-v0.2.md">System Design v0.2</a>, <a href="../../governance/standards/context-versioning-sop.md">Context SOP</a>, and <a href="../../engineering/data-model/schema-v0.2-base.sql">Schema v0.2 Base</a>.</p>
+    </section>
+  </main>
+</body>
+</html>

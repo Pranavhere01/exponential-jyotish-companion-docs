@@ -1,48 +1,27 @@
-# Exponential Jyotish Companion
+# Exponential Jyotish Companion Documentation
 
-This is the internal documentation and resource hub for Jyotish Companion.
+This is the public documentation hub for Jyotish Companion. Git is the source of truth; Drive, HTML, PDFs, and hosted pages are derived reading layers.
 
-Git is the source of truth. Google Drive, exported HTML, and hosted pages are reading layers that derive from this repository.
+## Executive Entry Points
 
-## Start Here
+- [Documentation Handbook](handbook/index.md)
+- [Knowledge Architecture](handbook/knowledge-architecture.md)
+- [Version Manifest](handbook/version-manifest.md)
+- [Product Way Forward](product/strategy/way-forward.md)
+- [PRD v0.2](product/requirements/prd-v0.2.md)
+- [System Design v0.2](architecture/system/system-design-v0.2.md)
 
-- [Knowledge Map](00-start-here/knowledge-map.md)
-- [Docs Site Guide](00-start-here/docs-site-guide.md)
-- [Version Manifest](00-start-here/version-manifest.md)
+## Core Domains
 
-## Product And Strategy
-
-- [Way Forward](10-product/way-forward.md)
-- [PRD v0.2](10-product/prd-v0.2.md)
-- [PM First-Principles Guide](10-product/pm-first-principles-guide.md)
-
-## Architecture And Data
-
-- [System Design v0.2](20-architecture/system-design-v0.2.md)
-- [Schema v0.2 Base](30-data-and-schema/schema-v0.2-base.sql)
-- [Schema v0.3 Change Spec](30-data-and-schema/schema-v0.3-change-spec.md)
-- [Schema v0.3 Discovery and Plan](30-data-and-schema/schema-v0.3-discovery-and-plan.md)
-
-## AI Quality
-
-- [Prompt Artifacts](40-ai-quality/prompts/index.md)
-- [Evaluation Artifacts](40-ai-quality/evals/index.md)
-
-## Operations
-
-- [Context and Version Control SOP](50-operations/context-versioning-sop.md)
-- [Repository Split Execution Plan](50-operations/repo-split-execution-plan.md)
-- [GitHub Setup](50-operations/github-setup.md)
-- [External Publish Runbook](50-operations/external-publish-runbook.md)
-- [Completion Audit](50-operations/completion-audit.md)
-
-## Durable Decisions
-
-- [ADR Index](60-decisions/adr/index.md)
-
-## Archive
-
-- [Source Materials Archive](90-archive/source-materials/index.md)
+| Domain | Purpose | Primary audience |
+| --- | --- | --- |
+| [Product](product/index.md) | Product strategy, requirements, and PM-readable guides | PM, founders, design, stakeholders |
+| [Architecture](architecture/index.md) | System design, boundaries, principles, runtime flows | Engineering, product, AI quality |
+| [Engineering](engineering/index.md) | Data model, schema, implementation-facing specs | Engineering |
+| [AI](ai/index.md) | Prompts, model behavior, evaluation, quality gates | AI quality, engineering, product |
+| [Governance](governance/index.md) | ADRs, standards, source-of-truth policies | Everyone making durable decisions |
+| [Operations](operations/index.md) | Runbooks, repo management, publishing, audits | PM, engineering, operations |
+| [Archive](archive/index.md) | Original inputs and provenance | Future auditors and maintainers |
 
 ## Repository Split
 
