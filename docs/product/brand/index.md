@@ -8,7 +8,11 @@ This section holds early brand identity exploration for Jyotish Companion.
 
 ## Current Artifacts
 
-- [Logo Exploration v0.1](logo-exploration-v0.1.html)
+- [Logo Exploration v0.2](logo-exploration-v0.2.html)
+
+## Superseded Artifacts
+
+- [Logo Exploration v0.1](logo-exploration-v0.1.html) - superseded because it leaned too heavily on generic AI/cosmic logo tropes and did not carry enough product-specific character.
 
 ## Direction
 
@@ -16,11 +20,11 @@ Jyotish Companion should feel like a private observatory for self-knowledge: pre
 
 The brand should avoid fear-selling, generic horoscope visual clutter, and cheap occult cues. The strongest route is a restrained logo system built around a few ownable signals:
 
-- kundali diamond / chart geometry;
 - jyoti, or guiding light;
-- orbit, timing, and cosmic rhythm;
-- lotus or mandala geometry for Vedic calm;
-- modern AI precision through clean linework and digital accents.
+- North Indian kundali structure;
+- dasha timing and brass-instrument precision;
+- palm-leaf / manuscript cues for reviewed knowledge;
+- sutra / bead cues for consent-based memory and companionship.
 
 ## Naming Note
 

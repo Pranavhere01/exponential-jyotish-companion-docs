@@ -77,13 +77,28 @@ artifacts:
   - id: brand:logo-exploration:v0.1
     type: brand_exploration
     scope: project_knowledge
-    status: draft
+    status: superseded
     owner: product
     version: v0.1
     path: docs/product/brand/logo-exploration-v0.1.html
     relations:
       extends:
         - prd:v0.2
+      informs:
+        - architecture:system-design:v0.2
+
+  - id: brand:logo-exploration:v0.2
+    type: brand_exploration
+    scope: project_knowledge
+    status: draft
+    owner: product
+    version: v0.2
+    path: docs/product/brand/logo-exploration-v0.2.html
+    relations:
+      extends:
+        - prd:v0.2
+      supersedes:
+        - brand:logo-exploration:v0.1
       informs:
         - architecture:system-design:v0.2
 

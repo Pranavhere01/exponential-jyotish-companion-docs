@@ -1,0 +1,567 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Jyotish Companion Logo Exploration v0.2</title>
+  <style>
+    :root {
+      --ink: #101417;
+      --night: #08111f;
+      --blue-black: #0c1726;
+      --paper: #f5ecd7;
+      --paper-deep: #e8dcc0;
+      --brass: #b98739;
+      --brass-light: #dfbd72;
+      --copper: #a65335;
+      --teal: #1d7b7c;
+      --sindoor: #a43c2b;
+      --muted: #6c6559;
+      --line: rgba(16, 20, 23, 0.14);
+      --line-light: rgba(245, 236, 215, 0.16);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.5;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.32;
+      background-image:
+        linear-gradient(rgba(16, 20, 23, 0.045) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(16, 20, 23, 0.035) 1px, transparent 1px);
+      background-size: 26px 26px, 26px 26px;
+      mask-image: linear-gradient(to bottom, #000, transparent 70%);
+    }
+
+    .page {
+      position: relative;
+      width: min(1180px, calc(100% - 40px));
+      margin: 0 auto;
+      padding: 46px 0 74px;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.12fr) minmax(300px, 0.88fr);
+      gap: 30px;
+      align-items: end;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 34px;
+    }
+
+    .eyebrow {
+      color: var(--copper);
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin-top: 0;
+    }
+
+    h1 {
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(2.6rem, 5.4vw, 5.8rem);
+      line-height: 0.94;
+      letter-spacing: 0;
+      font-weight: 500;
+      margin-bottom: 20px;
+    }
+
+    h2 {
+      font-size: 1.32rem;
+      letter-spacing: 0;
+      margin-bottom: 14px;
+    }
+
+    h3 {
+      color: var(--copper);
+      font-size: 0.96rem;
+      letter-spacing: 0;
+      margin-bottom: 8px;
+    }
+
+    .lede {
+      font-size: 1.08rem;
+      max-width: 790px;
+      color: #2f342f;
+    }
+
+    .panel {
+      border: 1px solid var(--line);
+      background: rgba(255, 252, 242, 0.58);
+      border-radius: 8px;
+      padding: 20px;
+    }
+
+    .night-panel {
+      background: var(--night);
+      color: var(--paper);
+      border-color: transparent;
+    }
+
+    .night-panel h2,
+    .night-panel h3 {
+      color: var(--brass-light);
+    }
+
+    .note,
+    li {
+      color: var(--muted);
+    }
+
+    .night-panel .note,
+    .night-panel li {
+      color: rgba(245, 236, 215, 0.75);
+    }
+
+    .story-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin: 28px 0;
+    }
+
+    .story-grid .panel {
+      min-height: 155px;
+    }
+
+    .principles {
+      display: grid;
+      grid-template-columns: minmax(0, 0.78fr) minmax(0, 1.22fr);
+      gap: 18px;
+      margin: 28px 0 34px;
+    }
+
+    ul {
+      margin: 0;
+      padding-left: 18px;
+    }
+
+    li + li {
+      margin-top: 7px;
+    }
+
+    .recommendations {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .recommendations .panel {
+      padding: 15px;
+      min-height: 124px;
+    }
+
+    .board-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 24px;
+      align-items: end;
+      border-top: 1px solid var(--line);
+      padding-top: 28px;
+      margin-top: 30px;
+      margin-bottom: 18px;
+    }
+
+    .board-head p {
+      margin-bottom: 0;
+      max-width: 520px;
+    }
+
+    .logo-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .card {
+      background: rgba(255, 252, 242, 0.78);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+      min-width: 0;
+    }
+
+    .mark {
+      aspect-ratio: 1.42 / 1;
+      display: grid;
+      place-items: center;
+      padding: 10px;
+      background: #fbf6e8;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .mark.dark {
+      background: var(--blue-black);
+    }
+
+    svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .card-body {
+      padding: 14px 15px 15px;
+    }
+
+    .meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: baseline;
+      margin-bottom: 7px;
+    }
+
+    .meta strong {
+      font-size: 0.95rem;
+      color: var(--ink);
+    }
+
+    .meta span {
+      white-space: nowrap;
+      color: var(--muted);
+      font-size: 0.76rem;
+    }
+
+    .card p {
+      color: var(--muted);
+      margin: 0;
+      font-size: 0.84rem;
+    }
+
+    .footer-note {
+      margin-top: 24px;
+      color: var(--muted);
+      font-size: 0.9rem;
+      max-width: 840px;
+    }
+
+    @media (max-width: 980px) {
+      .hero,
+      .principles {
+        grid-template-columns: 1fr;
+      }
+
+      .story-grid,
+      .recommendations {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .logo-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 640px) {
+      .page {
+        width: min(100% - 24px, 1180px);
+        padding-top: 28px;
+      }
+
+      .story-grid,
+      .recommendations,
+      .logo-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .board-head {
+        display: block;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="hero">
+      <div>
+        <div class="eyebrow">Rebuilt from product truth · v0.2</div>
+        <h1>A trusted jyoti, not another horoscope badge.</h1>
+        <p class="lede">
+          Jyotish Companion is a private AI astrologer that keeps chart math deterministic and interpretation humane. The brand should feel like a careful Vedic advisor with a modern instrument: precise, calm, old-world, and personal enough to be a daily companion.
+        </p>
+      </div>
+      <aside class="panel night-panel">
+        <h2>What changed</h2>
+        <p class="note">
+          This version removes generic zodiac glyphs, glowing app-store mandalas, random stars, and ornamental AI polish. The new system uses more specific cues: jyoti, North Indian kundali structure, palm-leaf manuscripts, dasha timing, memory beads, temple thresholds, and brass-instrument geometry.
+        </p>
+      </aside>
+    </section>
+
+    <section class="story-grid">
+      <div class="panel">
+        <h3>Product promise</h3>
+        <p class="note">Chart facts are computed, not guessed. The logo should therefore feel measured and architected, not floaty.</p>
+      </div>
+      <div class="panel">
+        <h3>User feeling</h3>
+        <p class="note">A seeker should feel privately guided, not sold to. Warmth matters as much as mystique.</p>
+      </div>
+      <div class="panel">
+        <h3>Premium cue</h3>
+        <p class="note">Think brass, ink, sandalwood paper, and observatory tools instead of neon spirituality.</p>
+      </div>
+      <div class="panel">
+        <h3>Ownable idea</h3>
+        <p class="note">The strongest territory is the jyoti inside the kundali: insight held inside structure.</p>
+      </div>
+    </section>
+
+    <section class="principles">
+      <div class="panel">
+        <h2>Reject list</h2>
+        <ul>
+          <li>No zodiac-symbol soup.</li>
+          <li>No generic lotus-plus-circuit clip art.</li>
+          <li>No excessive glow pretending to be premium.</li>
+          <li>No “fortune teller” tone.</li>
+          <li>No fear-selling symbols or doom cues.</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h2>New design brief</h2>
+        <ul>
+          <li>Anchor every mark in one product truth: computed chart, humane guide, consent memory, timing, or reviewed knowledge.</li>
+          <li>Design each concept as a system: app mark, wordmark, report seal, and tiny UI glyph should all be possible.</li>
+          <li>Favor slightly imperfect, editorial, brass-and-ink character over shiny synthetic geometry.</li>
+          <li>Use Vedic signals with restraint: kundali, jyoti, sutra, temple threshold, dasha cycle, manuscript.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section>
+      <h2>Shortlist</h2>
+      <div class="recommendations">
+        <div class="panel">
+          <h3>01 Jyoti In Kundali</h3>
+          <p class="note">Best core app mark. Simple, meaningful, and hard to confuse with a generic astrology icon.</p>
+        </div>
+        <div class="panel">
+          <h3>07 Palm Leaf Oracle</h3>
+          <p class="note">Most characterful. Feels old-world and Indian without becoming religious decoration.</p>
+        </div>
+        <div class="panel">
+          <h3>13 Dasha Timepiece</h3>
+          <p class="note">Best for the product’s timing intelligence and prediction UX.</p>
+        </div>
+        <div class="panel">
+          <h3>19 Companion Sutra</h3>
+          <p class="note">Best memory/relationship symbol: a thread that remembers only what the user approves.</p>
+        </div>
+        <div class="panel">
+          <h3>25 Temple Threshold</h3>
+          <p class="note">Most premium and calm. Strong for reports, paid analyses, and serious guidance.</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="board-head">
+        <div>
+          <h2>30 rebuilt logo directions</h2>
+          <p class="note">Ten character-led families, each with three variants: icon, wordmark, and seal/report route.</p>
+        </div>
+        <p class="note">Palette: ink, sandalwood paper, aged brass, copper, peacock teal, deep night.</p>
+      </div>
+      <div id="logo-grid" class="logo-grid"></div>
+    </section>
+
+    <p class="footer-note">
+      These are exploration vectors, not final trademark artwork. The next pass should choose one family, draw it by hand, test one-color usage, app-icon legibility, favicon legibility, and a wordmark in both “Jyotish Companion” and any final naming alternative.
+    </p>
+  </main>
+
+  <script>
+    const palettes = {
+      paper: { bg: "#fbf6e8", ink: "#11161a", soft: "#e8dcc0", brass: "#a9782e", brass2: "#d8b66a", copper: "#9f4b31", teal: "#1d7b7c" },
+      night: { bg: "#0c1726", ink: "#f5ecd7", soft: "#203046", brass: "#dfbd72", brass2: "#a9782e", copper: "#d0845d", teal: "#6bd0c6" },
+      clay: { bg: "#efe2c6", ink: "#172025", soft: "#decaa4", brass: "#9c6d2d", brass2: "#c79a52", copper: "#a43c2b", teal: "#236f72" }
+    };
+
+    const families = [
+      ["Jyoti In Kundali", "jyoti", "The guiding light held by deterministic chart structure."],
+      ["North Chart House", "chart", "A stricter North Indian kundali grid, reduced for recognition."],
+      ["Palm Leaf Oracle", "leaf", "Old-world knowledge, source provenance, and reviewed doctrine."],
+      ["Brass Observatory", "observatory", "An instrument for timing rather than mystical decoration."],
+      ["Dasha Timepiece", "timepiece", "Periods, cycles, and prediction delivered without fatalism."],
+      ["Memory Bead", "bead", "Consent-based memory as a remembered thread, not surveillance."],
+      ["Companion Sutra", "sutra", "Two paths, one conversation, a personal advisor relationship."],
+      ["Yantra Window", "yantra", "Sacred geometry stripped down to an ownable interface icon."],
+      ["Temple Threshold", "threshold", "A private doorway into reflection, not public fortune-telling."],
+      ["Exponential Jyotish", "exponential", "The parent venture signal: insight that expands from one chart."]
+    ];
+
+    const variants = [
+      ["Icon", "app icon / favicon"],
+      ["Wordmark", "web header / report cover"],
+      ["Seal", "paid report / trust badge"]
+    ];
+
+    const line = (p, attrs = "") => `fill="none" stroke="${p.ink}" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" ${attrs}`;
+    const brass = (p, attrs = "") => `fill="none" stroke="${p.brass}" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" ${attrs}`;
+    const thin = (p, attrs = "") => `fill="none" stroke="${p.brass2}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ${attrs}`;
+
+    function baseSvg(p, dark, content) {
+      return `
+        <svg viewBox="0 0 320 225" xmlns="http://www.w3.org/2000/svg" role="img" aria-hidden="true">
+          <rect width="320" height="225" rx="18" fill="${p.bg}"/>
+          <path d="M25 24 H295 M25 201 H295" stroke="${dark ? "rgba(245,236,215,.12)" : "rgba(17,22,26,.10)"}" stroke-width="1"/>
+          ${content}
+        </svg>
+      `;
+    }
+
+    function kundali(p, x, y, s = 1) {
+      return `<g transform="translate(${x} ${y}) scale(${s})">
+        <path d="M0 -58 L58 0 L0 58 L-58 0 Z" ${brass(p)}/>
+        <path d="M-58 0 L0 -58 L58 0 L0 58 Z M-29 -29 L29 29 M29 -29 L-29 29" ${thin(p)}/>
+      </g>`;
+    }
+
+    function diya(p, x, y, s = 1) {
+      return `<g transform="translate(${x} ${y}) scale(${s})">
+        <path d="M-34 18 C-18 35 18 35 34 18 C12 25 -12 25 -34 18Z" fill="${p.brass}"/>
+        <path d="M0 -38 C21 -15 18 8 0 24 C-17 6 -18 -15 0 -38Z" fill="${p.copper}"/>
+        <path d="M0 -24 C10 -10 9 3 0 13 C-8 2 -8 -11 0 -24Z" fill="${p.brass2}"/>
+      </g>`;
+    }
+
+    function word(name, p, y = 144) {
+      return `<text x="160" y="${y}" text-anchor="middle" fill="${p.ink}" font-family="Georgia, serif" font-size="28">Jyotish Companion</text>
+        <text x="160" y="${y + 24}" text-anchor="middle" fill="${p.brass}" font-family="Inter, sans-serif" font-size="10" font-weight="700">CHART-GROUNDED GUIDANCE</text>`;
+    }
+
+    function sealText(p) {
+      return `<text x="160" y="181" text-anchor="middle" fill="${p.ink}" font-family="Inter, sans-serif" font-size="10" font-weight="800">JYOTISH COMPANION</text>`;
+    }
+
+    function draw(type, variant, p) {
+      if (type === "jyoti") {
+        if (variant === 0) return `${kundali(p,160,96,.88)}${diya(p,160,100,.72)}`;
+        if (variant === 1) return `${diya(p,80,91,.72)}<path d="M128 92 H254" ${thin(p)}/>${word("Jyotish Companion",p,128)}`;
+        return `<circle cx="160" cy="94" r="72" ${brass(p)}/>${kundali(p,160,94,.62)}${diya(p,160,97,.52)}${sealText(p)}`;
+      }
+
+      if (type === "chart") {
+        const grid = `${kundali(p,160,100,1)}<circle cx="160" cy="100" r="9" fill="${p.teal}"/>`;
+        if (variant === 0) return grid;
+        if (variant === 1) return `${kundali(p,82,91,.56)}<text x="133" y="100" fill="${p.ink}" font-family="Georgia, serif" font-size="31">Jyotish</text><text x="133" y="128" fill="${p.brass}" font-family="Georgia, serif" font-size="27">Companion</text>`;
+        return `<rect x="86" y="37" width="148" height="132" rx="8" ${brass(p)}/>${kundali(p,160,103,.74)}${sealText(p)}`;
+      }
+
+      if (type === "leaf") {
+        const leaf = `<path d="M72 92 C108 54 210 54 248 92 C208 130 112 130 72 92Z" fill="${p.soft}" stroke="${p.brass}" stroke-width="4"/><path d="M94 92 H226 M116 78 H205 M116 106 H205" ${thin(p)}/><circle cx="160" cy="92" r="8" fill="${p.copper}"/>`;
+        if (variant === 0) return leaf;
+        if (variant === 1) return `${leaf}<text x="160" y="160" text-anchor="middle" fill="${p.ink}" font-family="Georgia, serif" font-size="29">Jyotish Companion</text>`;
+        return `<circle cx="160" cy="96" r="72" ${thin(p)}/>${leaf}${sealText(p)}`;
+      }
+
+      if (type === "observatory") {
+        const scope = `<path d="M78 142 C108 66 211 60 246 139" ${brass(p)}/><path d="M101 139 H222" ${line(p)}/><circle cx="160" cy="102" r="19" fill="${p.teal}"/><path d="M160 42 V162" ${thin(p)}/>`;
+        if (variant === 0) return scope;
+        if (variant === 1) return `<g transform="translate(-30 0)">${scope}</g><text x="210" y="96" text-anchor="middle" fill="${p.ink}" font-family="Georgia, serif" font-size="27">Jyotish</text><text x="210" y="124" text-anchor="middle" fill="${p.brass}" font-family="Georgia, serif" font-size="24">Companion</text>`;
+        return `<circle cx="160" cy="100" r="74" ${brass(p)}/>${scope}${sealText(p)}`;
+      }
+
+      if (type === "timepiece") {
+        const clock = `<circle cx="160" cy="99" r="70" ${brass(p)}/>${[0,45,90,135,180,225,270,315].map(a => {
+          const r = a * Math.PI / 180;
+          return `<circle cx="${160 + Math.cos(r) * 54}" cy="${99 + Math.sin(r) * 54}" r="3.5" fill="${p.brass2}"/>`;
+        }).join("")}<path d="M160 99 L160 54 M160 99 L200 119" ${line(p)}/><circle cx="160" cy="99" r="9" fill="${p.copper}"/>`;
+        if (variant === 0) return clock;
+        if (variant === 1) return `${clock}<text x="160" y="190" text-anchor="middle" fill="${p.ink}" font-family="Georgia, serif" font-size="28">Dasha, calmly read</text>`;
+        return `<rect x="82" y="32" width="156" height="151" rx="78" ${thin(p)}/>${clock}${sealText(p)}`;
+      }
+
+      if (type === "bead") {
+        const beads = `<path d="M69 126 C108 62 210 62 251 126" ${brass(p)}/>${[76,104,135,168,199,230].map((x, i) => `<circle cx="${x}" cy="${[124,91,72,72,91,124][i]}" r="${i === 2 || i === 3 ? 8 : 6}" fill="${i % 2 ? p.teal : p.brass2}"/>`).join("")}<path d="M129 132 C148 151 174 151 193 132" ${line(p)}/>`;
+        if (variant === 0) return beads;
+        if (variant === 1) return `${beads}<text x="160" y="178" text-anchor="middle" fill="${p.ink}" font-family="Georgia, serif" font-size="25">Memory with consent</text>`;
+        return `<circle cx="160" cy="100" r="74" ${thin(p)}/>${beads}${sealText(p)}`;
+      }
+
+      if (type === "sutra") {
+        const sutra = `<path d="M62 130 C104 56 134 60 160 106 C186 60 216 56 258 130" ${brass(p)}/><path d="M88 134 C118 113 137 111 160 132 C183 111 202 113 232 134" ${line(p)}/><circle cx="160" cy="106" r="10" fill="${p.copper}"/>`;
+        if (variant === 0) return sutra;
+        if (variant === 1) return `${sutra}<text x="160" y="178" text-anchor="middle" fill="${p.ink}" font-family="Georgia, serif" font-size="28">Companion Sutra</text>`;
+        return `<path d="M80 41 H240 V168 H80 Z" ${thin(p)}/>${sutra}${sealText(p)}`;
+      }
+
+      if (type === "yantra") {
+        const yantra = `<rect x="95" y="38" width="130" height="130" rx="2" ${brass(p)}/><circle cx="160" cy="103" r="49" ${thin(p)}/><path d="M160 61 L202 134 H118 Z M160 146 L118 74 H202 Z" ${line(p)}/><circle cx="160" cy="103" r="8" fill="${p.teal}"/>`;
+        if (variant === 0) return yantra;
+        if (variant === 1) return `<g transform="translate(-42 0)">${yantra}</g><text x="215" y="93" text-anchor="middle" fill="${p.ink}" font-family="Georgia, serif" font-size="30">Jyotish</text><text x="215" y="123" text-anchor="middle" fill="${p.brass}" font-family="Georgia, serif" font-size="25">Companion</text>`;
+        return `<circle cx="160" cy="103" r="80" ${thin(p)}/>${yantra}${sealText(p)}`;
+      }
+
+      if (type === "threshold") {
+        const door = `<path d="M104 160 V95 C104 58 130 37 160 37 C190 37 216 58 216 95 V160" ${brass(p)}/><path d="M123 160 V98 C123 72 139 57 160 57 C181 57 197 72 197 98 V160" ${thin(p)}/>${diya(p,160,122,.48)}<path d="M86 160 H234" ${line(p)}/>`;
+        if (variant === 0) return door;
+        if (variant === 1) return `${door}<text x="160" y="195" text-anchor="middle" fill="${p.ink}" font-family="Georgia, serif" font-size="24">Enter with clarity</text>`;
+        return `<rect x="76" y="31" width="168" height="152" rx="8" ${thin(p)}/>${door}${sealText(p)}`;
+      }
+
+      const exp = `<path d="M88 146 C126 120 142 93 160 50 C178 93 194 120 232 146" ${brass(p)}/><path d="M88 146 C126 166 194 166 232 146" ${line(p)}/>${kundali(p,160,104,.46)}<circle cx="160" cy="104" r="6" fill="${p.teal}"/>`;
+      if (variant === 0) return exp;
+      if (variant === 1) return `${exp}<text x="160" y="190" text-anchor="middle" fill="${p.ink}" font-family="Georgia, serif" font-size="26">Exponential Jyotish</text>`;
+      return `<circle cx="160" cy="101" r="76" ${thin(p)}/>${exp}${sealText(p)}`;
+    }
+
+    const cards = [];
+    families.forEach((family, familyIndex) => {
+      variants.forEach((variant, variantIndex) => {
+        const palette = variantIndex === 0 ? "paper" : variantIndex === 1 ? "clay" : "night";
+        cards.push({
+          title: `${family[0]} · ${variant[0]}`,
+          type: family[1],
+          variant: variantIndex,
+          use: variant[1],
+          rationale: family[2],
+          palette
+        });
+      });
+    });
+
+    const grid = document.querySelector("#logo-grid");
+    cards.forEach((card, index) => {
+      const p = palettes[card.palette];
+      const dark = card.palette === "night";
+      const number = String(index + 1).padStart(2, "0");
+      const article = document.createElement("article");
+      article.className = "card";
+      article.innerHTML = `
+        <div class="mark ${dark ? "dark" : ""}">
+          ${baseSvg(p, dark, draw(card.type, card.variant, p))}
+        </div>
+        <div class="card-body">
+          <div class="meta"><strong>${number}. ${card.title}</strong><span>${card.use}</span></div>
+          <p>${card.rationale}</p>
+        </div>
+      `;
+      grid.appendChild(article);
+    });
+  </script>
+</body>
+</html>

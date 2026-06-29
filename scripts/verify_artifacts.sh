@@ -3,6 +3,7 @@ set -euo pipefail
 
 python3 -m html.parser docs/product/guides/pm-first-principles-guide.html
 python3 -m html.parser docs/product/brand/logo-exploration-v0.1.html
+python3 -m html.parser docs/product/brand/logo-exploration-v0.2.html
 python3 -m html.parser docs/architecture/patterns/chat-harness/chat-harness-v0.html
 python3 -m html.parser exports/google-drive/Exponential/Astrology/Documents/Html/pm_first_principles_guide.html
 python3 -m html.parser docs/archive/source-materials/original-html/jyotish_companion_data_architecture.html
@@ -26,6 +27,7 @@ test -f docs/handbook/version-manifest.md
 test -f docs/product/index.md
 test -f docs/product/brand/index.md
 test -f docs/product/brand/logo-exploration-v0.1.html
+test -f docs/product/brand/logo-exploration-v0.2.html
 test -f docs/architecture/index.md
 test -f docs/architecture/patterns/index.md
 test -f docs/architecture/patterns/context-graph-knowledge-system/README.md
@@ -130,6 +132,7 @@ artifact_ids = {artifact["id"] for artifact in data["artifacts"]}
 required = {
     "prd:v0.2",
     "brand:logo-exploration:v0.1",
+    "brand:logo-exploration:v0.2",
     "pattern:context-graph-knowledge-system:v0.1",
     "domain-knowledge:jyotish:index:v0.1",
     "skill:jyotish-docs-entry:v0.1",
@@ -162,8 +165,9 @@ rg -n "site_name: Exponential Jyotish Companion Docs|docs_dir: docs" mkdocs.yml 
 rg -n "Add Or Change A Document|Quality Bar|docs-as-code" docs/handbook/contribution-guide.md >/dev/null
 rg -n "First Read Path|Placement Guide|Current Source Of Truth" docs/handbook/knowledge-map.md >/dev/null
 rg -n "Information Architecture|Enterprise Rules|Naming Standard|Review Standard" docs/handbook/knowledge-architecture.md >/dev/null
-rg -n "Brand And Logo Exploration|Logo Exploration v0.1" docs/product/index.md docs/product/brand/index.md docs/handbook/version-manifest.md mkdocs.yml >/dev/null
-rg -n "30 logo directions|Jyotish Companion|D2C logo principles|Research anchors" docs/product/brand/logo-exploration-v0.1.html >/dev/null
+rg -n "Brand And Logo Exploration|Logo Exploration v0.2" docs/product/index.md docs/product/brand/index.md docs/handbook/version-manifest.md mkdocs.yml >/dev/null
+rg -n "superseded|logo-exploration-v0.2.html|Logo Exploration v0.2" docs/product/brand/logo-exploration-v0.1.html >/dev/null
+rg -n "Rebuilt from product truth|trusted jyoti|Reject list|30 rebuilt logo directions" docs/product/brand/logo-exploration-v0.2.html >/dev/null
 rg -n "Required Fields|Relationship Rules|runtime_user_context" docs/handbook/metadata-standard.md >/dev/null
 rg -n "registry_version: v0.1|prd:v0.2|pattern:context-graph-knowledge-system:v0.1|skill:jyotish-docs-entry:v0.1" docs/handbook/artifact-registry.yaml >/dev/null
 rg -n "implemented_by|implements_policy|governed_by|Runtime Edge Label Examples" docs/handbook/relation-types.md >/dev/null
