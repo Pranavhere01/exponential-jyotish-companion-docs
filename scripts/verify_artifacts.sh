@@ -2,6 +2,7 @@
 set -euo pipefail
 
 python3 -m html.parser docs/product/guides/pm-first-principles-guide.html
+python3 -m html.parser docs/product/onboarding/onboarding-auth-flow-v0.1.html
 python3 -m html.parser docs/product/brand/logo-exploration-v0.1.html
 python3 -m html.parser docs/product/brand/logo-exploration-v0.2.html
 python3 -m html.parser docs/architecture/patterns/chat-harness/chat-harness-v0.html
@@ -25,7 +26,10 @@ test -f docs/handbook/relation-types.md
 test -f docs/handbook/contribution-guide.md
 test -f docs/handbook/version-manifest.md
 test -f docs/product/index.md
+test -f docs/product/onboarding/README.md
+test -f docs/product/onboarding/onboarding-auth-flow-v0.1.html
 test -f docs/product/brand/index.md
+test -f docs/product/brand/assets/jyotish-companion-logo-reference.png
 test -f docs/product/brand/logo-exploration-v0.1.html
 test -f docs/product/brand/logo-exploration-v0.2.html
 test -f docs/architecture/index.md
@@ -133,6 +137,7 @@ required = {
     "prd:v0.2",
     "brand:logo-exploration:v0.1",
     "brand:logo-exploration:v0.2",
+    "product:onboarding-auth-flow:v0.1",
     "pattern:context-graph-knowledge-system:v0.1",
     "domain-knowledge:jyotish:index:v0.1",
     "skill:jyotish-docs-entry:v0.1",
@@ -166,6 +171,8 @@ rg -n "Add Or Change A Document|Quality Bar|docs-as-code" docs/handbook/contribu
 rg -n "First Read Path|Placement Guide|Current Source Of Truth" docs/handbook/knowledge-map.md >/dev/null
 rg -n "Information Architecture|Enterprise Rules|Naming Standard|Review Standard" docs/handbook/knowledge-architecture.md >/dev/null
 rg -n "Brand And Logo Exploration|Logo Exploration v0.2" docs/product/index.md docs/product/brand/index.md docs/handbook/version-manifest.md mkdocs.yml >/dev/null
+rg -n "Onboarding And Auth Mockups|Onboarding Auth Flow v0.1" docs/product/index.md docs/product/onboarding/README.md docs/handbook/version-manifest.md mkdocs.yml >/dev/null
+rg -n "Your chart is computed first|Memory stays manual by default|Create my chart|Start chart-grounded chat" docs/product/onboarding/onboarding-auth-flow-v0.1.html >/dev/null
 rg -n "superseded|logo-exploration-v0.2.html|Logo Exploration v0.2" docs/product/brand/logo-exploration-v0.1.html >/dev/null
 rg -n "Rebuilt from product truth|trusted jyoti|Reject list|30 rebuilt logo directions" docs/product/brand/logo-exploration-v0.2.html >/dev/null
 rg -n "Required Fields|Relationship Rules|runtime_user_context" docs/handbook/metadata-standard.md >/dev/null

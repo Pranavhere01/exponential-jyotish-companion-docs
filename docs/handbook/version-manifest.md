@@ -15,6 +15,7 @@ Update it whenever a durable document, prompt, schema, eval, or export version c
 | Artifact Registry | v0.1 | `docs/handbook/artifact-registry.yaml` | n/a |
 | Relation Types | v0.1 | `docs/handbook/relation-types.md` | n/a |
 | PRD | v0.2 | `docs/product/requirements/prd-v0.2.md` | `exports/google-drive/Exponential/Astrology/Documents/Text/prd_jyotish_companion_v0_2.md` |
+| Onboarding Auth Flow Mockup | v0.1 | `docs/product/onboarding/onboarding-auth-flow-v0.1.html` | n/a |
 | Brand And Logo Exploration | v0.2 | `docs/product/brand/logo-exploration-v0.2.html` | n/a |
 | System Design | v0.2 | `docs/architecture/system/system-design-v0.2.md` | `exports/google-drive/Exponential/Astrology/Documents/Text/system_design_jyotish_companion_v0_2.md` |
 | Context Graph And Knowledge System Pattern | v0.1 | `docs/architecture/patterns/context-graph-knowledge-system/README.md` | n/a |

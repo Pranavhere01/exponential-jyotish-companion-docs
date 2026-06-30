@@ -1,0 +1,759 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Jyotish Companion Onboarding Mockup v0.1</title>
+  <style>
+    :root {
+      --night: #050610;
+      --surface: #111528;
+      --surface-2: #181d34;
+      --gold: #f6c95b;
+      --gold-deep: #b98739;
+      --violet: #8c6cff;
+      --text: #e9edf7;
+      --muted: #8e96aa;
+      --line: rgba(233, 237, 247, 0.14);
+      --field: rgba(255, 255, 255, 0.075);
+      --shadow: 0 24px 80px rgba(0, 0, 0, 0.38);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 28px;
+      background:
+        radial-gradient(circle at 50% 0%, rgba(140, 108, 255, 0.22), transparent 32%),
+        radial-gradient(circle at 10% 80%, rgba(246, 201, 91, 0.12), transparent 26%),
+        var(--night);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    .phone {
+      width: min(390px, 100%);
+      min-height: 844px;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(246, 201, 91, 0.22);
+      border-radius: 42px;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.055), transparent 22%),
+        radial-gradient(circle at 50% 13%, rgba(246, 201, 91, 0.13), transparent 34%),
+        var(--surface);
+      box-shadow: var(--shadow);
+    }
+
+    .phone::before {
+      content: "";
+      position: absolute;
+      inset: 12px;
+      pointer-events: none;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 32px;
+    }
+
+    .status {
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      color: rgba(233, 237, 247, 0.82);
+      font-size: 13px;
+      font-weight: 700;
+      position: relative;
+      z-index: 2;
+    }
+
+    .status-icons {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .signal,
+    .battery {
+      display: block;
+      border: 1.5px solid currentColor;
+    }
+
+    .signal {
+      width: 18px;
+      height: 10px;
+      border-top: 0;
+      border-left: 0;
+      transform: skewX(-12deg);
+      opacity: 0.8;
+    }
+
+    .battery {
+      width: 22px;
+      height: 10px;
+      border-radius: 3px;
+      position: relative;
+    }
+
+    .battery::after {
+      content: "";
+      position: absolute;
+      right: -4px;
+      top: 2px;
+      width: 2px;
+      height: 4px;
+      border-radius: 1px;
+      background: currentColor;
+    }
+
+    .screen {
+      display: none;
+      min-height: 800px;
+      padding: 20px 24px 30px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .screen.active {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .center {
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      gap: 26px;
+    }
+
+    .logo {
+      width: 154px;
+      height: 154px;
+      border-radius: 34px;
+      border: 1px solid rgba(246, 201, 91, 0.25);
+      object-fit: cover;
+      box-shadow: 0 18px 48px rgba(0, 0, 0, 0.34), 0 0 42px rgba(246, 201, 91, 0.12);
+    }
+
+    .mini-logo {
+      width: 54px;
+      height: 54px;
+      border-radius: 16px;
+      object-fit: cover;
+      border: 1px solid rgba(246, 201, 91, 0.22);
+    }
+
+    .brand-lockup {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .eyebrow {
+      margin: 0;
+      color: var(--gold);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    h1,
+    h2,
+    p {
+      margin: 0;
+    }
+
+    h1 {
+      max-width: 310px;
+      font-size: 32px;
+      line-height: 36px;
+      letter-spacing: 0;
+      font-weight: 800;
+    }
+
+    h2 {
+      font-size: 26px;
+      line-height: 31px;
+      letter-spacing: 0;
+      font-weight: 800;
+    }
+
+    .lede {
+      max-width: 298px;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 23px;
+    }
+
+    .actions {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 4px;
+    }
+
+    .button {
+      width: 100%;
+      min-height: 54px;
+      border: 0;
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      cursor: pointer;
+      color: var(--night);
+      background: var(--gold);
+      font-weight: 800;
+      box-shadow: 0 12px 28px rgba(246, 201, 91, 0.18);
+    }
+
+    .button.secondary {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--line);
+      box-shadow: none;
+    }
+
+    .button.ghost {
+      color: var(--text);
+      background: transparent;
+      border: 1px solid var(--line);
+      box-shadow: none;
+    }
+
+    .icon-slot {
+      width: 22px;
+      height: 22px;
+      flex: 0 0 22px;
+      display: grid;
+      place-items: center;
+    }
+
+    .auth-head,
+    .birth-head,
+    .home-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 34px;
+    }
+
+    .back {
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      padding: 0;
+    }
+
+    .form {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-top: 28px;
+    }
+
+    label {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 18px;
+      font-weight: 700;
+    }
+
+    input {
+      width: 100%;
+      height: 54px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      color: var(--text);
+      background: var(--field);
+      padding: 0 16px;
+      outline: none;
+    }
+
+    input:focus {
+      border-color: rgba(246, 201, 91, 0.78);
+      box-shadow: 0 0 0 4px rgba(246, 201, 91, 0.11);
+    }
+
+    .or {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 18px 0 4px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .or::before,
+    .or::after {
+      content: "";
+      height: 1px;
+      flex: 1;
+      background: var(--line);
+    }
+
+    .top-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      min-height: 28px;
+      margin-bottom: 34px;
+    }
+
+    .text-action {
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 800;
+      cursor: pointer;
+      padding: 0;
+    }
+
+    .text-action.next {
+      color: var(--gold);
+    }
+
+    .slide-stage {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 34px;
+      text-align: center;
+      padding-bottom: 42px;
+    }
+
+    .illustration {
+      width: 226px;
+      height: 226px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 50% 50%, rgba(246, 201, 91, 0.18), transparent 46%),
+        rgba(255, 255, 255, 0.045);
+      border: 1px solid rgba(246, 201, 91, 0.14);
+    }
+
+    .illustration svg {
+      width: 168px;
+      height: 168px;
+    }
+
+    .progress-wrap {
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      padding: 0 4px;
+      align-items: center;
+    }
+
+    .progress-part {
+      height: 8px;
+      border-radius: 999px;
+      background-image: radial-gradient(circle, rgba(233, 237, 247, 0.42) 2px, transparent 2.5px);
+      background-size: 10px 8px;
+      background-repeat: repeat-x;
+      background-position: left center;
+      border: 1px solid rgba(233, 237, 247, 0.08);
+      overflow: hidden;
+    }
+
+    .progress-part.active {
+      background: linear-gradient(90deg, var(--gold), rgba(246, 201, 91, 0.3));
+      border-color: rgba(246, 201, 91, 0.38);
+    }
+
+    .birth-card,
+    .home-panel {
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.055);
+      padding: 18px;
+    }
+
+    .birth-grid {
+      display: flex;
+      gap: 12px;
+    }
+
+    .birth-grid label {
+      flex: 1;
+    }
+
+    .hint {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 20px;
+      margin-top: 14px;
+    }
+
+    .home-panel {
+      margin-top: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .chart-preview {
+      height: 190px;
+      border-radius: 22px;
+      display: grid;
+      place-items: center;
+      background:
+        radial-gradient(circle at 50% 50%, rgba(246, 201, 91, 0.14), transparent 34%),
+        rgba(0, 0, 0, 0.18);
+      border: 1px solid rgba(246, 201, 91, 0.16);
+    }
+
+    .home-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 14px 0;
+      border-top: 1px solid var(--line);
+    }
+
+    .home-row:first-of-type {
+      border-top: 0;
+    }
+
+    .home-row strong {
+      display: block;
+      font-size: 15px;
+      line-height: 20px;
+    }
+
+    .home-row span {
+      display: block;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 19px;
+      margin-top: 3px;
+    }
+
+    .pill {
+      flex: 0 0 auto;
+      border-radius: 999px;
+      color: var(--gold);
+      background: rgba(246, 201, 91, 0.12);
+      border: 1px solid rgba(246, 201, 91, 0.18);
+      padding: 7px 10px;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .footnote {
+      margin-top: auto;
+      color: rgba(142, 150, 170, 0.9);
+      font-size: 12px;
+      line-height: 18px;
+      text-align: center;
+    }
+
+    @media (max-width: 430px) {
+      body {
+        padding: 0;
+        background: var(--surface);
+      }
+
+      .phone {
+        width: 100%;
+        min-height: 100vh;
+        border: 0;
+        border-radius: 0;
+      }
+
+      .phone::before {
+        display: none;
+      }
+
+      .screen {
+        min-height: calc(100vh - 44px);
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="phone" aria-label="Jyotish Companion mobile onboarding mockup">
+    <div class="status" aria-hidden="true">
+      <span>9:41</span>
+      <span class="status-icons"><span class="signal"></span><span class="battery"></span></span>
+    </div>
+
+    <section class="screen active center" data-screen="welcome">
+      <div class="brand-lockup">
+        <p class="eyebrow">Jyotish Companion</p>
+        <h1>Your private astrologer, grounded in your chart.</h1>
+      </div>
+      <button class="button" data-go="auth">Create Account</button>
+      <img class="logo" src="../brand/assets/jyotish-companion-logo-reference.png" alt="Jyotish Companion logo">
+      <button class="button secondary" data-go="auth">Login</button>
+      <p class="footnote">Built around deterministic chart computation, manual memory, and responsible guidance.</p>
+    </section>
+
+    <section class="screen" data-screen="auth">
+      <div class="auth-head">
+        <button class="back" data-go="welcome">Back</button>
+        <img class="mini-logo" src="../brand/assets/jyotish-companion-logo-reference.png" alt="">
+      </div>
+      <p class="eyebrow">Account</p>
+      <h2>Create your companion space</h2>
+      <p class="lede" style="margin-top: 12px;">Use one login for your chart, readings, reports, and saved memories.</p>
+      <div class="form">
+        <label>Email/Phone Number
+          <input type="text" inputmode="email" autocomplete="email" placeholder="name@example.com">
+        </label>
+        <label>Password
+          <input type="password" autocomplete="current-password" placeholder="Enter password">
+        </label>
+        <button class="button" data-auth-next>Continue</button>
+      </div>
+      <div class="or">or</div>
+      <div class="actions">
+        <button class="button ghost" data-auth-next>
+          <span class="icon-slot" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none">
+              <path d="M21.5 12.2c0-.74-.07-1.45-.2-2.12H12v4.02h5.32a4.55 4.55 0 0 1-1.97 2.98v2.48h3.2c1.88-1.73 2.95-4.27 2.95-7.36Z" fill="#4285F4"/>
+              <path d="M12 22c2.68 0 4.92-.88 6.56-2.44l-3.2-2.48c-.9.6-2.04.95-3.36.95-2.58 0-4.77-1.74-5.55-4.08H3.14v2.56A9.9 9.9 0 0 0 12 22Z" fill="#34A853"/>
+              <path d="M6.45 13.95A5.92 5.92 0 0 1 6.14 12c0-.68.11-1.34.31-1.95V7.49H3.14A9.9 9.9 0 0 0 2.1 12c0 1.62.38 3.15 1.04 4.51l3.31-2.56Z" fill="#FBBC05"/>
+              <path d="M12 5.97c1.46 0 2.77.5 3.8 1.49l2.84-2.84C16.92 3.01 14.68 2 12 2a9.9 9.9 0 0 0-8.86 5.49l3.31 2.56C7.23 7.71 9.42 5.97 12 5.97Z" fill="#EA4335"/>
+            </svg>
+          </span>
+          Continue with Google
+        </button>
+        <button class="button ghost" data-auth-next>
+          <span class="icon-slot" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+              <path d="M16.94 12.79c-.03-2.6 2.13-3.86 2.23-3.92-1.22-1.78-3.11-2.02-3.77-2.05-1.59-.17-3.13.95-3.94.95-.83 0-2.08-.93-3.44-.9-1.74.03-3.37 1.04-4.26 2.62-1.84 3.2-.47 7.9 1.3 10.49.89 1.27 1.93 2.69 3.28 2.64 1.33-.05 1.82-.85 3.42-.85 1.58 0 2.04.85 3.43.82 1.42-.02 2.32-1.28 3.18-2.56 1.03-1.47 1.44-2.92 1.46-3-.03-.01-2.85-1.09-2.89-4.24ZM14.36 5.13c.72-.9 1.22-2.12 1.08-3.35-1.04.05-2.34.72-3.09 1.6-.67.78-1.27 2.05-1.11 3.24 1.17.09 2.37-.59 3.12-1.49Z"/>
+            </svg>
+          </span>
+          Continue with Apple
+        </button>
+      </div>
+    </section>
+
+    <section class="screen" data-screen="intro">
+      <div class="top-nav">
+        <button class="text-action" data-skip-intro>Skip</button>
+        <button class="text-action next" data-next-slide>Next</button>
+      </div>
+      <div class="slide-stage">
+        <div class="illustration" id="slide-art"></div>
+        <div>
+          <p class="eyebrow" id="slide-kicker">Grounded</p>
+          <h2 id="slide-title">Your chart is computed first.</h2>
+          <p class="lede" id="slide-body" style="margin: 14px auto 0;">The astrologer can interpret chart facts, but it cannot invent them.</p>
+        </div>
+      </div>
+      <div class="progress-wrap" aria-label="Onboarding progress">
+        <span class="progress-part active"></span>
+        <span class="progress-part"></span>
+        <span class="progress-part"></span>
+        <span class="progress-part"></span>
+      </div>
+    </section>
+
+    <section class="screen" data-screen="birth">
+      <div class="birth-head">
+        <div>
+          <p class="eyebrow">Birth Details</p>
+          <h2 style="margin-top: 8px;">Create your first chart</h2>
+        </div>
+        <img class="mini-logo" src="../brand/assets/jyotish-companion-logo-reference.png" alt="">
+      </div>
+      <p class="lede">These details let the system compute your Vedic chart before the astrologer starts interpreting.</p>
+      <div class="birth-card" style="margin-top: 24px;">
+        <div class="form" style="margin-top: 0;">
+          <label>Name
+            <input type="text" autocomplete="name" placeholder="Your name">
+          </label>
+          <div class="birth-grid">
+            <label>Birth Date
+              <input type="date">
+            </label>
+            <label>Birth Time
+              <input type="time">
+            </label>
+          </div>
+          <label>Place of Birth
+            <input type="text" placeholder="City, Country">
+          </label>
+          <button class="button" data-go="home">Create my chart</button>
+        </div>
+        <p class="hint">Mock behavior: this CTA redirects to the main homepage preview. Production should compute chart facts server-side first.</p>
+      </div>
+    </section>
+
+    <section class="screen" data-screen="home">
+      <div class="home-head">
+        <div>
+          <p class="eyebrow">Home</p>
+          <h2 style="margin-top: 8px;">Your chart is ready</h2>
+        </div>
+        <img class="mini-logo" src="../brand/assets/jyotish-companion-logo-reference.png" alt="">
+      </div>
+      <div class="home-panel">
+        <div class="chart-preview" aria-label="Chart preview">
+          <svg viewBox="0 0 180 180" width="150" height="150" fill="none" aria-hidden="true">
+            <circle cx="90" cy="90" r="70" stroke="rgba(246,201,91,.72)" stroke-width="2"/>
+            <path d="M90 18 162 90 90 162 18 90 90 18Z" stroke="#F6C95B" stroke-width="4"/>
+            <path d="M54 90C66 58 114 58 126 90C114 122 66 122 54 90Z" stroke="rgba(233,237,247,.78)" stroke-width="2"/>
+            <path d="M90 42 138 90 90 138 42 90 90 42Z" stroke="rgba(246,201,91,.52)" stroke-width="2"/>
+            <circle cx="90" cy="90" r="7" fill="#F6C95B"/>
+          </svg>
+        </div>
+        <div class="home-row">
+          <div>
+            <strong>Chart Facts Sheet</strong>
+            <span>Computed before interpretation.</span>
+          </div>
+          <span class="pill">Ready</span>
+        </div>
+        <div class="home-row">
+          <div>
+            <strong>Interpretive Profile</strong>
+            <span>Generated from chart version and persona version.</span>
+          </div>
+          <span class="pill">Queued</span>
+        </div>
+        <button class="button">Start chart-grounded chat</button>
+        <button class="button secondary" data-reset-intro>Reset intro demo</button>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const screens = [...document.querySelectorAll("[data-screen]")];
+    const progressParts = [...document.querySelectorAll(".progress-part")];
+    const introSeenKey = "jyotish_companion_intro_seen_v0_1";
+    let slideIndex = 0;
+
+    const illustrations = {
+      chart: '<svg viewBox="0 0 180 180" fill="none" aria-hidden="true"><circle cx="90" cy="90" r="72" stroke="rgba(246,201,91,.72)" stroke-width="2"/><path d="M90 18 162 90 90 162 18 90 90 18Z" stroke="#F6C95B" stroke-width="4"/><path d="M90 42 138 90 90 138 42 90 90 42Z" stroke="rgba(233,237,247,.72)" stroke-width="2"/><circle cx="90" cy="90" r="8" fill="#F6C95B"/></svg>',
+      context: '<svg viewBox="0 0 180 180" fill="none" aria-hidden="true"><path d="M38 104C52 76 70 62 92 62C118 62 128 84 148 74" stroke="#F6C95B" stroke-width="5" stroke-linecap="round"/><circle cx="46" cy="111" r="13" fill="#8C6CFF"/><circle cx="92" cy="62" r="16" fill="#F6C95B"/><circle cx="144" cy="74" r="12" fill="#E9EDF7"/><path d="M50 136H130" stroke="rgba(233,237,247,.46)" stroke-width="2" stroke-linecap="round"/><path d="M64 150H116" stroke="rgba(233,237,247,.32)" stroke-width="2" stroke-linecap="round"/></svg>',
+      guidance: '<svg viewBox="0 0 180 180" fill="none" aria-hidden="true"><path d="M90 24 146 48V88C146 124 124 148 90 160C56 148 34 124 34 88V48L90 24Z" stroke="#F6C95B" stroke-width="4"/><path d="M62 94 82 114 122 70" stroke="#E9EDF7" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><path d="M52 45 90 29 128 45" stroke="rgba(140,108,255,.78)" stroke-width="3" stroke-linecap="round"/></svg>',
+      memory: '<svg viewBox="0 0 180 180" fill="none" aria-hidden="true"><path d="M54 54H126C134.8 54 142 61.2 142 70V126C142 134.8 134.8 142 126 142H54C45.2 142 38 134.8 38 126V70C38 61.2 45.2 54 54 54Z" stroke="#F6C95B" stroke-width="4"/><path d="M62 78H118" stroke="#E9EDF7" stroke-width="4" stroke-linecap="round"/><path d="M62 98H106" stroke="rgba(233,237,247,.62)" stroke-width="4" stroke-linecap="round"/><path d="M62 118H96" stroke="rgba(233,237,247,.42)" stroke-width="4" stroke-linecap="round"/><circle cx="130" cy="130" r="20" fill="#8C6CFF"/><path d="M121 130 127 136 140 122" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+    };
+
+    const slides = [
+      {
+        kicker: "Grounded",
+        title: "Your chart is computed first.",
+        body: "The astrologer can interpret chart facts, but it cannot invent them.",
+        art: illustrations.chart
+      },
+      {
+        kicker: "Personal",
+        title: "Ask with context, not generic prompts.",
+        body: "Answers can use chart facts, time periods, relevant memories, and recent conversation.",
+        art: illustrations.context
+      },
+      {
+        kicker: "Responsible",
+        title: "Hard guidance without fear.",
+        body: "Difficult readings are framed as tendencies, risks, and care points, never doom.",
+        art: illustrations.guidance
+      },
+      {
+        kicker: "In your hands",
+        title: "Memory stays manual by default.",
+        body: "At the end of a chat, you choose which proposed memories to save, edit, or discard.",
+        art: illustrations.memory
+      }
+    ];
+
+    function showScreen(name) {
+      screens.forEach((screen) => {
+        screen.classList.toggle("active", screen.dataset.screen === name);
+      });
+    }
+
+    function renderSlide() {
+      const slide = slides[slideIndex];
+      document.getElementById("slide-kicker").textContent = slide.kicker;
+      document.getElementById("slide-title").textContent = slide.title;
+      document.getElementById("slide-body").textContent = slide.body;
+      document.getElementById("slide-art").innerHTML = slide.art;
+      progressParts.forEach((part, index) => {
+        part.classList.toggle("active", index <= slideIndex);
+      });
+      document.querySelector("[data-next-slide]").textContent = slideIndex === slides.length - 1 ? "Finish" : "Next";
+    }
+
+    function completeIntro() {
+      localStorage.setItem(introSeenKey, "true");
+      showScreen("birth");
+    }
+
+    document.addEventListener("click", (event) => {
+      const go = event.target.closest("[data-go]");
+      const authNext = event.target.closest("[data-auth-next]");
+
+      if (go) {
+        showScreen(go.dataset.go);
+      }
+
+      if (authNext) {
+        if (localStorage.getItem(introSeenKey) === "true") {
+          showScreen("birth");
+        } else {
+          slideIndex = 0;
+          renderSlide();
+          showScreen("intro");
+        }
+      }
+
+      if (event.target.closest("[data-next-slide]")) {
+        if (slideIndex === slides.length - 1) {
+          completeIntro();
+        } else {
+          slideIndex += 1;
+          renderSlide();
+        }
+      }
+
+      if (event.target.closest("[data-skip-intro]")) {
+        completeIntro();
+      }
+
+      if (event.target.closest("[data-reset-intro]")) {
+        localStorage.removeItem(introSeenKey);
+        slideIndex = 0;
+        renderSlide();
+        showScreen("welcome");
+      }
+    });
+
+    renderSlide();
+  </script>
+</body>
+</html>

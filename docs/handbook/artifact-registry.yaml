@@ -102,6 +102,21 @@ artifacts:
       informs:
         - architecture:system-design:v0.2
 
+  - id: product:onboarding-auth-flow:v0.1
+    type: product_mockup
+    scope: project_knowledge
+    status: draft
+    owner: product
+    version: v0.1
+    path: docs/product/onboarding/onboarding-auth-flow-v0.1.html
+    relations:
+      extends:
+        - prd:v0.2
+      constrained_by:
+        - adr:0005
+        - adr:0006
+        - brand:logo-exploration:v0.2
+
   - id: architecture:system-design:v0.2
     type: architecture
     scope: project_knowledge

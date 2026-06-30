@@ -37,6 +37,9 @@ nav:
           - Way Forward: product/strategy/way-forward.md
       - Requirements:
           - PRD v0.2: product/requirements/prd-v0.2.md
+      - Onboarding:
+          - Overview: product/onboarding/README.md
+          - Onboarding Auth Flow v0.1: product/onboarding/onboarding-auth-flow-v0.1.html
       - Guides:
           - PM First-Principles Guide: product/guides/pm-first-principles-guide.md
       - Brand:
